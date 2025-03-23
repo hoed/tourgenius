@@ -4,32 +4,32 @@ import { Calendar, DollarSign, FileText, Map, Settings, Users } from 'lucide-rea
 
 const features = [
   {
-    icon: <Calendar className="h-10 w-10 text-blue-300" />,
+    icon: <Calendar className="h-10 w-10 text-blue-800" />,
     title: 'Pembuat Rencana Perjalanan Cerdas',
     description: 'Rencanakan aktivitas harian dengan mudah menggunakan antarmuka tarik-dan-lepas. Sesuaikan setiap aspek tur Anda.'
   },
   {
-    icon: <Map className="h-10 w-10 text-blue-300" />,
+    icon: <Map className="h-10 w-10 text-blue-800" />,
     title: 'Manajemen Destinasi',
     description: 'Tambahkan atraksi, aktivitas, dan tempat menarik dengan informasi detail dan harga.'
   },
   {
-    icon: <Users className="h-10 w-10 text-blue-300" />,
+    icon: <Users className="h-10 w-10 text-blue-800" />,
     title: 'Penugasan Pemandu Wisata',
     description: 'Pilih dari pemandu yang berkualifikasi berdasarkan keahlian, bahasa, dan ketersediaan.'
   },
   {
-    icon: <DollarSign className="h-10 w-10 text-blue-300" />,
+    icon: <DollarSign className="h-10 w-10 text-blue-800" />,
     title: 'Kalkulasi Harga Otomatis',
     description: 'Pembaruan biaya secara real-time saat Anda membuat rencana perjalanan, dengan rincian lengkap untuk semua komponen.'
   },
   {
-    icon: <FileText className="h-10 w-10 text-blue-300" />,
+    icon: <FileText className="h-10 w-10 text-blue-800" />,
     title: 'Faktur Profesional',
     description: 'Buat faktur bermerek dan terperinci yang dapat dikirim langsung ke klien dengan opsi pembayaran.'
   },
   {
-    icon: <Settings className="h-10 w-10 text-blue-300" />,
+    icon: <Settings className="h-10 w-10 text-blue-800" />,
     title: 'Opsi Penyesuaian',
     description: 'Sesuaikan makanan, akomodasi, dan transportasi untuk memenuhi preferensi dan anggaran klien tertentu.'
   }
@@ -40,10 +40,10 @@ const Features = () => {
     <section id="features" className="py-24 bg-gradient-to-b from-blue-950 to-black relative overflow-hidden">
       <div className="container mx-auto px-6 relative z-10">
         <div className="text-center max-w-3xl mx-auto mb-16">
-          <h2 className="text-3xl lg:text-4xl font-bold bg-gradient-to-r from-blue-300 via-purple-300 to-cyan-300 bg-clip-text text-transparent mb-8">
+          <h2 className="text-3xl lg:text-4xl font-bold bg-gradient-to-r from-blue-700 via-purple-900 to-cyan-300 bg-clip-text text-transparent mb-8">
             Fitur Canggih untuk Profesional Tur
           </h2>
-          <p className="text-blue-100 leading-relaxed">
+          <p className="text-blue-900 leading-relaxed">
             Semua alat yang Anda butuhkan untuk menciptakan pengalaman perjalanan luar biasa bagi klien Anda
           </p>
         </div>
