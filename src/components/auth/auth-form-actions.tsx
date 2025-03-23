@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Button } from '@/components/ui/button';
 
@@ -13,21 +12,21 @@ const AuthFormActions = ({ isSignUp, loading, toggleAuthMode }: AuthFormActionsP
     <>
       <Button 
         type="submit" 
-        className="w-full bg-gradient-to-r from-batik-gold to-primary hover:opacity-90 text-batik-dark font-semibold" 
+        className="w-full bg-blue-900 text-white hover:bg-blue-800 font-semibold" 
         disabled={loading}
       >
-        {loading ? 'Processing...' : isSignUp ? 'Create Account' : 'Log In'}
+        {loading ? 'Memproses...' : isSignUp ? 'Buat Akun' : 'Masuk'}
       </Button>
 
       <div className="text-center mt-4">
-        <p className="text-sm text-gray-400">
-          {isSignUp ? 'Already have an account?' : 'Don\'t have an account?'}
+        <p className="text-sm text-white">
+          {isSignUp ? 'Sudah punya akun?' : 'Belum punya akun?'}
           <button
             type="button"
             onClick={toggleAuthMode}
-            className="ml-1 text-batik-gold hover:underline focus:outline-none"
+            className="ml-1 text-blue-300 hover:underline focus:outline-none"
           >
-            {isSignUp ? 'Log In' : 'Sign Up'}
+            {isSignUp ? 'Masuk' : 'Daftar'}
           </button>
         </p>
       </div>

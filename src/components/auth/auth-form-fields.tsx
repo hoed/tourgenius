@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -26,42 +25,42 @@ const AuthFormFields = ({
     <>
       {isSignUp && (
         <div className="space-y-2">
-          <Label htmlFor="name" className="text-gray-200">Full Name</Label>
+          <Label htmlFor="name" className="text-white">Nama Lengkap</Label>
           <Input
             id="name"
             name="name"
             type="text"
             value={formData.name}
             onChange={handleChange}
-            placeholder="Enter your name"
+            placeholder="Masukkan nama Anda"
             required={isSignUp}
             disabled={loading}
-            className="w-full bg-batik-dark/50 border-batik-gray/50 text-white placeholder:text-gray-400"
+            className="w-full bg-white border-blue-400/50 text-black placeholder:text-gray-500"
           />
         </div>
       )}
 
       <div className="space-y-2">
-        <Label htmlFor="email" className="text-gray-200">Email</Label>
+        <Label htmlFor="email" className="text-white">Email</Label>
         <Input
           id="email"
           name="email"
           type="email"
           value={formData.email}
           onChange={handleChange}
-          placeholder="Enter your email"
+          placeholder="Masukkan email Anda"
           required
           disabled={loading}
-          className="w-full bg-batik-dark/50 border-batik-gray/50 text-white placeholder:text-gray-400"
+          className="w-full bg-white border-blue-400/50 text-black placeholder:text-gray-500"
         />
       </div>
 
       <div className="space-y-2">
         <div className="flex justify-between items-center">
-          <Label htmlFor="password" className="text-gray-200">Password</Label>
+          <Label htmlFor="password" className="text-white">Kata Sandi</Label>
           {!isSignUp && (
-            <a href="#" className="text-sm text-primary hover:underline">
-              Forgot password?
+            <a href="#" className="text-sm text-blue-300 hover:underline">
+              Lupa kata sandi?
             </a>
           )}
         </div>
@@ -71,10 +70,10 @@ const AuthFormFields = ({
           type="password"
           value={formData.password}
           onChange={handleChange}
-          placeholder="Enter your password"
+          placeholder="Masukkan kata sandi Anda"
           required
           disabled={loading}
-          className="w-full bg-batik-dark/50 border-batik-gray/50 text-white placeholder:text-gray-400"
+          className="w-full bg-white border-blue-400/50 text-black placeholder:text-gray-500"
         />
       </div>
     </>

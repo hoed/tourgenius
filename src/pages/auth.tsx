@@ -73,8 +73,8 @@ const Auth = () => {
 
       <main className="flex-1 flex items-center justify-center p-6">
         <div className="container mx-auto max-w-md">
-          <div className="bg-white p-6 rounded-xl border border-blue-400/20 shadow-md">
-            <h1 className="text-2xl font-bold text-blue-900 mb-6 text-center">Selamat Datang di TourGenius</h1>
+          <div className="bg-blue-950 p-6 rounded-xl border border-blue-400/20 shadow-md">
+            <h1 className="text-2xl font-bold text-white mb-6 text-center">Selamat Datang di TourGenius</h1>
             
             <Button
               onClick={handleGoogleLogin}
@@ -89,7 +89,7 @@ const Auth = () => {
                 <div className="w-full border-t border-blue-400/50"></div>
               </div>
               <div className="relative flex justify-center text-sm">
-                <span className="px-2 bg-white text-blue-900">Atau lanjutkan dengan email</span>
+                <span className="px-2 bg-blue-950 text-white">Atau lanjutkan dengan email</span>
               </div>
             </div>
 

@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { toast } from 'sonner';
@@ -6,7 +5,6 @@ import GlassCard from '../ui/glass-card';
 import AuthFormHeader from './auth-form-header';
 import AuthFormFields from './auth-form-fields';
 import AuthFormActions from './auth-form-actions';
-
 import { AuthFormData, signUpUser, signInUser, createAndSignInTestAccount } from './auth-utils';
 
 const AuthForm = () => {
@@ -21,7 +19,7 @@ const AuthForm = () => {
   });
   
   const [loading, setLoading] = useState(false);
-  const [debugMode, setDebugMode] = useState(true); // Set debug mode to true by default for easier testing
+  const [debugMode, setDebugMode] = useState(true);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -34,10 +32,8 @@ const AuthForm = () => {
     
     try {
       if (isSignUp) {
-        // Sign up the user
         await signUpUser(formData);
       } else {
-        // Log in the user
         await signInUser(formData.email, formData.password);
         navigate('/dashboard');
       }
@@ -53,21 +49,19 @@ const AuthForm = () => {
     setIsSignUp(!isSignUp);
   };
 
-  // Quick login with test account
   const handleTestAccount = async () => {
     setLoading(true);
     try {
       await createAndSignInTestAccount();
       navigate('/dashboard');
     } catch (error: any) {
-      // Error is already handled in the utility function
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <GlassCard className="w-full max-w-md mx-auto bg-batik-dark/40 backdrop-blur-xl border-batik-gray/30">
+    <GlassCard className="w-full max-w-md mx-auto bg-blue-950 backdrop-blur-xl border border-blue-400/20">
       <AuthFormHeader isSignUp={isSignUp} />
 
       <form onSubmit={handleSubmit} className="space-y-5">
@@ -84,8 +78,6 @@ const AuthForm = () => {
           toggleAuthMode={toggleAuthMode} 
         />
       </form>
-
-
     </GlassCard>
   );
 };
