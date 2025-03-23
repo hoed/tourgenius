@@ -35,7 +35,7 @@ const AuthFormFields = ({
             placeholder="Masukkan nama Anda"
             required={isSignUp}
             disabled={loading}
-            className="w-full bg-white border-blue-400/50 text-black placeholder:text-gray-500"
+            className="w-full bg-blue border-blue-400/50 text-black placeholder:text-gray-500"
           />
         </div>
       )}
