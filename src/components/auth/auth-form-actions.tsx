@@ -19,7 +19,7 @@ const AuthFormActions = ({ isSignUp, loading, toggleAuthMode }: AuthFormActionsP
       </Button>
 
       <div className="text-center mt-4">
-        <p className="text-sm text-white">
+        <p className="text-sm text-blue">
           {isSignUp ? 'Sudah punya akun?' : 'Belum punya akun?'}
           <button
             type="button"
