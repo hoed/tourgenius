@@ -50,13 +50,13 @@ const Hero = () => {
               <GlassCard className="animate-float bg-blue-950/30 backdrop-blur-sm border border-blue-400/20">
                 <div className="flex flex-col items-center p-2 text-center">
                   <div className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-700 bg-clip-text text-transparent">2,500+</div>
-                  <p className="text-sm text-blue-300">Tur Dibuat</p>
+                  <p className="text-sm text-blue-700">Tur Dibuat</p>
                 </div>
               </GlassCard>
               <GlassCard className="animate-float animation-delay-150 bg-blue-950/30 backdrop-blur-sm border border-blue-400/20">
                 <div className="flex flex-col items-center p-2 text-center">
-                  <div className="text-4xl font-bold bg-gradient-to-r from-blue-300 to-purple-300 bg-clip-text text-transparent">98%</div>
-                  <p className="text-sm text-blue-300">Kepuasan Pelanggan</p>
+                  <div className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-700 bg-clip-text text-transparent">98%</div>
+                  <p className="text-sm text-blue-700">Kepuasan Pelanggan</p>
                 </div>
               </GlassCard>
             </div>
