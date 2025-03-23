@@ -49,7 +49,7 @@ const Hero = () => {
             <div className="grid grid-cols-2 gap-4 mt-4">
               <GlassCard className="animate-float bg-blue-950/30 backdrop-blur-sm border border-blue-400/20">
                 <div className="flex flex-col items-center p-2 text-center">
-                  <div className="text-4xl font-bold bg-gradient-to-r from-blue-300 to-purple-300 bg-clip-text text-transparent">2,500+</div>
+                  <div className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-700 bg-clip-text text-transparent">2,500+</div>
                   <p className="text-sm text-blue-300">Tur Dibuat</p>
                 </div>
               </GlassCard>
