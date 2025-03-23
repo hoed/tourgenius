@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Link } from 'react-router-dom';
@@ -14,7 +13,6 @@ const Auth = () => {
   const [initialCheckDone, setInitialCheckDone] = useState(false);
 
   useEffect(() => {
-    // Set up auth state change listener first
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, session) => {
         if (session?.user && initialCheckDone) {
@@ -25,7 +23,6 @@ const Auth = () => {
       }
     );
 
-    // Then check for existing session
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (session?.user) {
         navigate('/dashboard');
@@ -56,18 +53,18 @@ const Auth = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-100">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-amber-400"></div>
+      <div className="min-h-screen flex items-center justify-center bg-white">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-900"></div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-100 flex flex-col">
-      <header className="bg-white p-6 shadow-md">
+    <div className="min-h-screen bg-white flex flex-col">
+      <header className="bg-white p-6 shadow-md border-b border-blue-400/20">
         <div className="container mx-auto flex items-center justify-between">
           <Link to="/" className="flex items-center space-x-2">
-            <span className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-amber-400 via-yellow-300 to-amber-400 animate-gradient">
+            <span className="text-2xl font-bold bg-gradient-to-r from-blue-300 via-purple-300 to-cyan-300 bg-clip-text text-transparent">
               TourGenius
             </span>
           </Link>
@@ -76,23 +73,23 @@ const Auth = () => {
 
       <main className="flex-1 flex items-center justify-center p-6">
         <div className="container mx-auto max-w-md">
-          <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-md">
-            <h1 className="text-2xl font-bold text-amber-700 mb-6 text-center">Welcome to TourGenius</h1>
+          <div className="bg-white p-6 rounded-xl border border-blue-400/20 shadow-md">
+            <h1 className="text-2xl font-bold text-blue-900 mb-6 text-center">Selamat Datang di TourGenius</h1>
             
             <Button
               onClick={handleGoogleLogin}
-              className="w-full mb-4 bg-white border border-gray-300 text-gray-900 hover:bg-gray-50 transition-all duration-300 flex items-center justify-center gap-2"
+              className="w-full mb-4 bg-white border border-blue-400/50 text-blue-900 hover:bg-blue-50 transition-all duration-300 flex items-center justify-center gap-2"
             >
               <FcGoogle size={20} />
-              Sign in with Google
+              Masuk dengan Google
             </Button>
 
             <div className="relative my-6">
               <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-gray-300"></div>
+                <div className="w-full border-t border-blue-400/50"></div>
               </div>
               <div className="relative flex justify-center text-sm">
-                <span className="px-2 bg-white text-gray-600">Or continue with email</span>
+                <span className="px-2 bg-white text-blue-900">Atau lanjutkan dengan email</span>
               </div>
             </div>
 
@@ -101,8 +98,8 @@ const Auth = () => {
         </div>
       </main>
 
-      <footer className="p-6 text-center text-sm text-gray-600">
-        <p>© {new Date().getFullYear()} TourGenius. All rights reserved.</p>
+      <footer className="p-6 text-center text-sm text-blue-900">
+        <p>© {new Date().getFullYear()} TourGenius. Semua hak dilindungi.</p>
       </footer>
     </div>
   );
