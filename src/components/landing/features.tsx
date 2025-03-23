@@ -4,32 +4,32 @@ import { Calendar, DollarSign, FileText, Map, Settings, Users } from 'lucide-rea
 
 const features = [
   {
-    icon: <Calendar className="h-10 w-10 text-blue-300" />,
+    icon: <Calendar className="h-10 w-10 text-blue-900" />,
     title: 'Pembuat Rencana Perjalanan Cerdas',
     description: 'Rencanakan aktivitas harian dengan mudah menggunakan antarmuka tarik-dan-lepas. Sesuaikan setiap aspek tur Anda.'
   },
   {
-    icon: <Map className="h-10 w-10 text-blue-300" />,
+    icon: <Map className="h-10 w-10 text-blue-900" />,
     title: 'Manajemen Destinasi',
     description: 'Tambahkan atraksi, aktivitas, dan tempat menarik dengan informasi detail dan harga.'
   },
   {
-    icon: <Users className="h-10 w-10 text-blue-300" />,
+    icon: <Users className="h-10 w-10 text-blue-900" />,
     title: 'Penugasan Pemandu Wisata',
     description: 'Pilih dari pemandu yang berkualifikasi berdasarkan keahlian, bahasa, dan ketersediaan.'
   },
   {
-    icon: <DollarSign className="h-10 w-10 text-blue-300" />,
+    icon: <DollarSign className="h-10 w-10 text-blue-900" />,
     title: 'Kalkulasi Harga Otomatis',
     description: 'Pembaruan biaya secara real-time saat Anda membuat rencana perjalanan, dengan rincian lengkap untuk semua komponen.'
   },
   {
-    icon: <FileText className="h-10 w-10 text-blue-300" />,
+    icon: <FileText className="h-10 w-10 text-blue-900" />,
     title: 'Faktur Profesional',
     description: 'Buat faktur bermerek dan terperinci yang dapat dikirim langsung ke klien dengan opsi pembayaran.'
   },
   {
-    icon: <Settings className="h-10 w-10 text-blue-300" />,
+    icon: <Settings className="h-10 w-10 text-blue-900" />,
     title: 'Opsi Penyesuaian',
     description: 'Sesuaikan makanan, akomodasi, dan transportasi untuk memenuhi preferensi dan anggaran klien tertentu.'
   }
@@ -55,7 +55,7 @@ const Features = () => {
               className="flex flex-col items-start h-full bg-blue-950/30 backdrop-blur-sm border border-blue-400/20 transition-all duration-300"
               hoverEffect={true}
             >
-              <div className="mb-4 p-3 bg-blue-900/20 rounded-lg">
+              <div className="mb-4 p-3 bg-white rounded-lg">
                 {feature.icon}
               </div>
               <h3 className="text-xl font-semibold mb-2 text-blue-900">
