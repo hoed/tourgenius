@@ -4,32 +4,32 @@ import { Calendar, DollarSign, FileText, Map, Settings, Users } from 'lucide-rea
 
 const features = [
   {
-    icon: <Calendar className="h-10 w-10 text-blue-800" />,
+    icon: <Calendar className="h-10 w-10 text-blue-300" />,
     title: 'Pembuat Rencana Perjalanan Cerdas',
     description: 'Rencanakan aktivitas harian dengan mudah menggunakan antarmuka tarik-dan-lepas. Sesuaikan setiap aspek tur Anda.'
   },
   {
-    icon: <Map className="h-10 w-10 text-blue-800" />,
+    icon: <Map className="h-10 w-10 text-blue-300" />,
     title: 'Manajemen Destinasi',
     description: 'Tambahkan atraksi, aktivitas, dan tempat menarik dengan informasi detail dan harga.'
   },
   {
-    icon: <Users className="h-10 w-10 text-blue-800" />,
+    icon: <Users className="h-10 w-10 text-blue-300" />,
     title: 'Penugasan Pemandu Wisata',
     description: 'Pilih dari pemandu yang berkualifikasi berdasarkan keahlian, bahasa, dan ketersediaan.'
   },
   {
-    icon: <DollarSign className="h-10 w-10 text-blue-800" />,
+    icon: <DollarSign className="h-10 w-10 text-blue-300" />,
     title: 'Kalkulasi Harga Otomatis',
     description: 'Pembaruan biaya secara real-time saat Anda membuat rencana perjalanan, dengan rincian lengkap untuk semua komponen.'
   },
   {
-    icon: <FileText className="h-10 w-10 text-blue-800" />,
+    icon: <FileText className="h-10 w-10 text-blue-300" />,
     title: 'Faktur Profesional',
     description: 'Buat faktur bermerek dan terperinci yang dapat dikirim langsung ke klien dengan opsi pembayaran.'
   },
   {
-    icon: <Settings className="h-10 w-10 text-blue-800" />,
+    icon: <Settings className="h-10 w-10 text-blue-300" />,
     title: 'Opsi Penyesuaian',
     description: 'Sesuaikan makanan, akomodasi, dan transportasi untuk memenuhi preferensi dan anggaran klien tertentu.'
   }
@@ -37,10 +37,10 @@ const features = [
 
 const Features = () => {
   return (
-    <section id="features" className="py-24 bg-gradient-to-b from-blue-950 to-black relative overflow-hidden">
+    <section id="features" className="py-24 bg-white relative overflow-hidden">
       <div className="container mx-auto px-6 relative z-10">
         <div className="text-center max-w-3xl mx-auto mb-16">
-          <h2 className="text-3xl lg:text-4xl font-bold bg-gradient-to-r from-blue-700 via-purple-900 to-cyan-300 bg-clip-text text-transparent mb-8">
+          <h2 className="text-3xl lg:text-4xl font-bold bg-gradient-to-r from-blue-300 via-purple-300 to-cyan-300 bg-clip-text text-transparent mb-8">
             Fitur Canggih untuk Profesional Tur
           </h2>
           <p className="text-blue-900 leading-relaxed">
@@ -58,10 +58,10 @@ const Features = () => {
               <div className="mb-4 p-3 bg-blue-900/20 rounded-lg">
                 {feature.icon}
               </div>
-              <h3 className="text-xl font-semibold mb-2 bg-gradient-to-r from-blue-300 to-purple-300 bg-clip-text text-transparent">
+              <h3 className="text-xl font-semibold mb-2 text-blue-900">
                 {feature.title}
               </h3>
-              <p className="text-blue-200">{feature.description}</p>
+              <p className="text-blue-900">{feature.description}</p>
             </GlassCard>
           ))}
         </div>
