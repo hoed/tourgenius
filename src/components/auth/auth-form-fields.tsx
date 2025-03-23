@@ -25,7 +25,7 @@ const AuthFormFields = ({
     <>
       {isSignUp && (
         <div className="space-y-2">
-          <Label htmlFor="name" className="text-white">Nama Lengkap</Label>
+          <Label htmlFor="name" className="text-blue">Nama Lengkap</Label>
           <Input
             id="name"
             name="name"
@@ -41,7 +41,7 @@ const AuthFormFields = ({
       )}
 
       <div className="space-y-2">
-        <Label htmlFor="email" className="text-white">Email</Label>
+        <Label htmlFor="email" className="text-blue">Email</Label>
         <Input
           id="email"
           name="email"
@@ -57,7 +57,7 @@ const AuthFormFields = ({
 
       <div className="space-y-2">
         <div className="flex justify-between items-center">
-          <Label htmlFor="password" className="text-white">Kata Sandi</Label>
+          <Label htmlFor="password" className="text-blue">Kata Sandi</Label>
           {!isSignUp && (
             <a href="#" className="text-sm text-blue-300 hover:underline">
               Lupa kata sandi?
