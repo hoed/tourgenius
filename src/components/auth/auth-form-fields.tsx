@@ -59,7 +59,7 @@ const AuthFormFields = ({
         <div className="flex justify-between items-center">
           <Label htmlFor="password" className="text-blue">Kata Sandi</Label>
           {!isSignUp && (
-            <a href="#" className="text-sm text-blue-300 hover:underline">
+            <a href="#" className="text-sm text-blue-900 hover:underline">
               Lupa kata sandi?
             </a>
           )}
