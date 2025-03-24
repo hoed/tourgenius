@@ -1,7 +1,7 @@
-
 import { format } from 'date-fns';
 import { supabase } from '@/integrations/supabase/client';
 import { TourItinerary, TourGuide } from '@/lib/types';
+import { NavigateFunction } from 'react-router-dom'; // Add this import
 import { toast } from 'sonner';
 
 // Function to format currency in Rupiah
@@ -20,63 +20,46 @@ export const formatDateForGoogleCalendar = (date: string) => {
   return formattedDate;
 };
 
-// Function to save to Google Calendar
+// Function to save to Google Calendar (unchanged)
 export const saveToGoogleCalendar = (itinerary: TourItinerary) => {
   if (!itinerary || !itinerary.days || itinerary.days.length === 0) {
     toast.error('No itinerary data to save to calendar');
     return;
   }
 
-  // Find the first and last day to determine event duration
   const startDate = itinerary.start_date || new Date().toISOString();
   const endDate = itinerary.days.length > 1 
     ? new Date(new Date(startDate).setDate(new Date(startDate).getDate() + itinerary.days.length - 1)).toISOString()
     : startDate;
 
-  // Create summary of the itinerary
   const title = encodeURIComponent(`Tour Itinerary: ${itinerary.name}`);
   let details = encodeURIComponent(`${itinerary.name}\n\nItinerary Details:\n`);
 
   itinerary.days.forEach((day, index) => {
     details += encodeURIComponent(`Day ${index + 1}:\n`);
-    
-    // Add destinations
     if (day.destinations && day.destinations.length > 0) {
       details += encodeURIComponent(`Destinations: ${day.destinations.map(d => d.name).join(', ')}\n`);
     }
-    
-    // Add hotel
     if (day.hotel) {
       details += encodeURIComponent(`Hotel: ${day.hotel.name}\n`);
     }
-    
-    // Add meals
     if (day.meals && day.meals.length > 0) {
       const meals = day.meals.map(meal => {
-        if (typeof meal === 'string') {
-          return meal;
-        } else if (meal && typeof meal === 'object' && 'type' in meal) {
-          return meal.type;
-        }
+        if (typeof meal === 'string') return meal;
+        else if (meal && typeof meal === 'object' && 'type' in meal) return meal.type;
         return '';
       }).filter(Boolean);
-      
       if (meals.length > 0) {
         details += encodeURIComponent(`Meals: ${meals.join(', ')}\n`);
       }
     }
-    
     details += encodeURIComponent('\n');
   });
 
-  // Format dates for Google Calendar
   const formattedStartDate = formatDateForGoogleCalendar(startDate);
   const formattedEndDate = formatDateForGoogleCalendar(endDate);
 
-  // Create Google Calendar URL
   const googleCalendarUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}&dates=${formattedStartDate}/${formattedEndDate}&details=${details}`;
-
-  // Open in a new tab
   window.open(googleCalendarUrl, '_blank');
 };
 
@@ -84,123 +67,120 @@ export const saveToGoogleCalendar = (itinerary: TourItinerary) => {
 export const saveItineraryToSupabase = async (
   itinerary: TourItinerary, 
   selectedDate: Date | undefined, 
-  navigate: any
+  navigate: NavigateFunction // Use proper type
 ) => {
   try {
+    // Validate required fields
+    if (!itinerary.name.trim()) {
+      toast.error('Itinerary name is required');
+      return;
+    }
+    if (itinerary.numberOfPeople <= 0) {
+      toast.error('Number of people must be greater than 0');
+      return;
+    }
+    if (!selectedDate) {
+      toast.error('Start date is required');
+      return;
+    }
+
     // Get current user
-    const { data: { session } } = await supabase.auth.getSession();
-    
-    if (!session?.user) {
+    const { data: { session }, error: authError } = await supabase.auth.getSession();
+    if (authError || !session?.user) {
       toast.error('You must be logged in to save an itinerary');
       navigate('/auth');
       return;
     }
 
-    // Calculate the total price considering number of people
     const totalPrice = calculateTotalPrice(itinerary);
 
-    // Format data for DB
+    // Format data for DB, including timestamps
     const itineraryData = {
+      id: itinerary.id && itinerary.id.length > 10 ? itinerary.id : undefined, // Only include id if valid
       user_id: session.user.id,
-      name: itinerary.name,
-      start_date: selectedDate ? selectedDate.toISOString() : null,
+      name: itinerary.name.trim(),
+      start_date: selectedDate.toISOString(),
       number_of_people: itinerary.numberOfPeople,
       days: JSON.stringify(itinerary.days),
       tour_guides: JSON.stringify(itinerary.tourGuides),
-      total_price: totalPrice
+      total_price: totalPrice,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
     };
-    
-    // Fixed: Initialize error as undefined instead of null
-    let error = undefined;
-    
+
     if (itinerary.id && itinerary.id.length > 10) {
       // Update existing itinerary
-      const response = await supabase
+      const { data, error } = await supabase
         .from('itineraries')
         .update(itineraryData)
         .eq('id', itinerary.id)
-        .eq('user_id', session.user.id);
-      
-      error = response.error;
-      
+        .eq('user_id', session.user.id)
+        .select()
+        .single();
+
       if (error) {
         console.error('Error updating itinerary:', error);
-        toast.error('Failed to update itinerary');
+        toast.error(`Failed to update itinerary: ${error.message}`);
         return;
       }
-      
+
       toast.success('Itinerary updated successfully!');
+      navigate(`/dashboard/itinerary/${data.id}`);
     } else {
-      // Save new itinerary
-      const response = await supabase
+      // Save new itinerary and retrieve the inserted data
+      const { data, error } = await supabase
         .from('itineraries')
-        .insert([itineraryData]);
-      
-      error = response.error;
-      
+        .insert([itineraryData])
+        .select()
+        .single();
+
       if (error) {
         console.error('Error saving new itinerary:', error);
-        toast.error('Failed to save itinerary');
+        toast.error(`Failed to save itinerary: ${error.message}`);
         return;
       }
-      
+
       toast.success('Itinerary saved successfully!');
+      navigate(`/dashboard/itinerary/${data.id}`);
     }
     
-    // Redirect to dashboard
-    navigate('/dashboard');
-    
   } catch (error) {
-    console.error('Error in saveItineraryToSupabase:', error);
-    toast.error('An error occurred while saving the itinerary');
+    console.error('Unexpected error in saveItineraryToSupabase:', error);
+    toast.error(`An unexpected error occurred: ${error instanceof Error ? error.message : 'Unknown error'}`);
   }
 };
 
-// Function to calculate total price considering number of people
+// Function to calculate total price (unchanged)
 export const calculateTotalPrice = (itinerary: TourItinerary): number => {
-  if (!itinerary || !itinerary.days || itinerary.days.length === 0) {
-    return 0;
-  }
+  if (!itinerary || !itinerary.days || itinerary.days.length === 0) return 0;
 
   const numPeople = itinerary.numberOfPeople || 1;
 
-  // Calculate destinations total (one-time cost per person)
   const destinationsTotal = itinerary.days.reduce((sum, day) => {
     return sum + day.destinations.reduce((daySum, dest) => 
       daySum + dest.pricePerPerson * numPeople, 0);
   }, 0);
 
-  // Calculate hotels total (per night, not multiplied by number of people)
   const hotelsTotal = itinerary.days.reduce((sum, day) => {
     return sum + (day.hotel ? day.hotel.pricePerNight : 0);
   }, 0);
 
-  // Calculate meals total (per person)
   const mealsTotal = itinerary.days.reduce((sum, day) => {
     return sum + day.meals.reduce((daySum, meal) => 
       daySum + meal.pricePerPerson * numPeople, 0);
   }, 0);
 
-  // Calculate transportation total (per day, not per person)
   const transportationTotal = itinerary.days.reduce((sum, day) => {
     return sum + (day.transportation ? day.transportation.pricePerPerson : 0);
   }, 0);
 
-  // Calculate guides total (per day, not affected by number of people)
   const guidesTotal = itinerary.tourGuides.reduce((sum, guide) => {
     return sum + guide.pricePerDay * itinerary.days.length;
   }, 0);
 
-  // Calculate subtotal
-  const subtotal = destinationsTotal + hotelsTotal + mealsTotal + 
-                  transportationTotal + guidesTotal;
-  
-  // Add 10% service fee
+  const subtotal = destinationsTotal + hotelsTotal + mealsTotal + transportationTotal + guidesTotal;
   const serviceFee = subtotal * 0.1;
-  
-  // Add 5% tax
   const tax = subtotal * 0.05;
-  
-  // Calculate total
+
   return subtotal + serviceFee + tax;
 };

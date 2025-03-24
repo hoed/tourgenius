@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { CalendarIcon, Save } from 'lucide-react';
@@ -26,25 +25,39 @@ const ItineraryHeader = ({ itinerary, selectedDate, isSaving: propIsSaving }: It
       subtitle: 'Craft your perfect journey with elegance',
       googleCalendar: 'Google Calendar',
       save: 'Save',
-      saving: 'Saving...'
+      saving: 'Saving...',
+      saveSuccess: 'Itinerary saved successfully!',
+      saveError: 'Failed to save itinerary. Please try again.',
+      validationError: 'Please fill in all required fields (name, number of people, start date).'
     },
     id: {
       title: 'Pembuat Rencana Perjalanan',
       subtitle: 'Rancang perjalanan sempurna Anda dengan elegan',
       googleCalendar: 'Google Calendar',
       save: 'Simpan',
-      saving: 'Menyimpan...'
+      saving: 'Menyimpan...',
+      saveSuccess: 'Rencana perjalanan berhasil disimpan!',
+      saveError: 'Gagal menyimpan rencana perjalanan. Silakan coba lagi.',
+      validationError: 'Harap isi semua bidang yang diperlukan (nama, jumlah orang, tanggal mulai).'
     }
   };
 
   const t = translations[language];
 
   const handleSave = async () => {
+    // Validation
+    if (!itinerary.name.trim() || itinerary.numberOfPeople <= 0 || !selectedDate) {
+      toast.error(t.validationError);
+      return;
+    }
+
     try {
       setIsSaving(true);
       await saveItineraryToSupabase(itinerary, selectedDate, navigate);
+      toast.success(t.saveSuccess);
     } catch (error) {
       console.error('Error in handleSave:', error);
+      toast.error(`${t.saveError} Details: ${error instanceof Error ? error.message : 'Unknown error'}`);
     } finally {
       setIsSaving(false);
     }
