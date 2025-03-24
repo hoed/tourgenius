@@ -40,7 +40,7 @@ const Features = () => {
     <section id="features" className="py-24 bg-white relative overflow-hidden">
       <div className="container mx-auto px-6 relative z-10">
         <div className="text-center max-w-3xl mx-auto mb-16">
-          <h2 className="text-3xl lg:text-4xl font-bold bg-gradient-to-r from-blue-300 via-purple-300 to-cyan-300 bg-clip-text text-transparent mb-8">
+          <h2 className="text-3xl lg:text-4xl font-bold bg-gradient-to-r from-blue-700 via-purple-800 to-cyan-700 bg-clip-text text-transparent mb-8">
             Fitur Canggih untuk Profesional Tur
           </h2>
           <p className="text-blue-900 leading-relaxed">
