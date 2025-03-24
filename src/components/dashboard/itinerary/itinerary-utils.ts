@@ -110,15 +110,18 @@ export const saveItineraryToSupabase = async (
       total_price: totalPrice
     };
     
-    let { error } = null;
+    // Fixed: Initialize error as undefined instead of null
+    let error = undefined;
     
     if (itinerary.id && itinerary.id.length > 10) {
       // Update existing itinerary
-      ({ error } = await supabase
+      const response = await supabase
         .from('itineraries')
         .update(itineraryData)
         .eq('id', itinerary.id)
-        .eq('user_id', session.user.id));
+        .eq('user_id', session.user.id);
+      
+      error = response.error;
       
       if (error) {
         console.error('Error updating itinerary:', error);
@@ -129,9 +132,11 @@ export const saveItineraryToSupabase = async (
       toast.success('Itinerary updated successfully!');
     } else {
       // Save new itinerary
-      ({ error } = await supabase
+      const response = await supabase
         .from('itineraries')
-        .insert([itineraryData]));
+        .insert([itineraryData]);
+      
+      error = response.error;
       
       if (error) {
         console.error('Error saving new itinerary:', error);
