@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { toast } from 'sonner';
 import { useNavigate } from 'react-router-dom';
@@ -17,10 +16,11 @@ export const useItinerary = ({ initialItinerary }: UseItineraryProps) => {
     }
     
     return {
-      id: Date.now().toString(),
+      id: undefined, // Let Supabase generate UUID for new itineraries
       name: 'New Tour Itinerary',
+      start_date: new Date().toISOString(), // Set default start_date
       days: [{
-        id: '1',
+        id: Date.now().toString(),
         day: 1,
         destinations: [],
         hotel: null,
@@ -49,10 +49,10 @@ export const useItinerary = ({ initialItinerary }: UseItineraryProps) => {
         if (!session) {
           toast.error('You must be logged in to view itineraries');
           navigate('/auth');
-          return;
         }
       } catch (error) {
         console.error('Error fetching session:', error);
+        toast.error('Failed to verify authentication');
       }
     };
 

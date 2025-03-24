@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { TourItinerary } from '@/lib/types';
 import { useItinerary } from '@/hooks/use-itinerary';
@@ -15,6 +14,7 @@ const ItineraryBuilder = ({ initialItinerary }: ItineraryBuilderProps) => {
     selectedDate,
     setSelectedDate,
     isSaving,
+    setIsSaving, // Add this
     updateItineraryName,
     updateNumberOfPeople,
     addDay,
@@ -35,6 +35,7 @@ const ItineraryBuilder = ({ initialItinerary }: ItineraryBuilderProps) => {
         itinerary={itinerary}
         selectedDate={selectedDate}
         isSaving={isSaving}
+        setIsSaving={setIsSaving} // Pass this
       />
 
       <ItineraryContent 

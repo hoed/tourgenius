@@ -10,11 +10,11 @@ interface ItineraryHeaderProps {
   itinerary: TourItinerary;
   selectedDate: Date | undefined;
   isSaving: boolean;
+  setIsSaving: (saving: boolean) => void; // Add this
 }
 
-const ItineraryHeader = ({ itinerary, selectedDate, isSaving: propIsSaving }: ItineraryHeaderProps) => {
+const ItineraryHeader = ({ itinerary, selectedDate, isSaving, setIsSaving }: ItineraryHeaderProps) => {
   const navigate = useNavigate();
-  const [isSaving, setIsSaving] = useState(propIsSaving);
   const [language, setLanguage] = useState<'id' | 'en'>(
     localStorage.getItem('language') as 'id' | 'en' || 'en'
   );
@@ -45,7 +45,6 @@ const ItineraryHeader = ({ itinerary, selectedDate, isSaving: propIsSaving }: It
   const t = translations[language];
 
   const handleSave = async () => {
-    // Validation
     if (!itinerary.name.trim() || itinerary.numberOfPeople <= 0 || !selectedDate) {
       toast.error(t.validationError);
       return;
