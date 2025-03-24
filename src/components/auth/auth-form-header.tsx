@@ -14,7 +14,7 @@ const AuthFormHeader = ({ isSignUp }: AuthFormHeaderProps) => {
       <p className="text-blue-700 mt-2">
         {isSignUp
           ? 'Sign up to start planning amazing tours'
-          : 'Log in to access your dashboard'}
+          : 'Log in to access your itinerary'}
       </p>
     </div>
   );
