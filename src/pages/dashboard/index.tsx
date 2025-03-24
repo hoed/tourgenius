@@ -12,6 +12,7 @@ import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { TourItinerary } from '@/lib/types';
 import { Skeleton } from '@/components/ui/skeleton';
+import { formatRupiah } from '@/lib/utils';
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -80,18 +81,37 @@ const Dashboard = () => {
         }
         
         // Parse JSON fields and convert to TourItinerary structure
-        const parsedData = data.map(item => ({
-          id: item.id,
-          name: item.name,
-          days: typeof item.days === 'string' ? JSON.parse(item.days) : item.days,
-          tourGuides: typeof item.tour_guides === 'string' ? JSON.parse(item.tour_guides) : item.tour_guides,
-          totalPrice: item.total_price,
-          numberOfPeople: item.number_of_people,
-          start_date: item.start_date,
-          created_at: item.created_at,
-          updated_at: item.updated_at,
-          user_id: item.user_id
-        }));
+        const parsedData = data.map(item => {
+          let parsedDays;
+          let parsedGuides;
+          
+          try {
+            parsedDays = typeof item.days === 'string' ? JSON.parse(item.days) : item.days;
+          } catch (e) {
+            console.error('Error parsing days:', e);
+            parsedDays = [];
+          }
+          
+          try {
+            parsedGuides = typeof item.tour_guides === 'string' ? JSON.parse(item.tour_guides) : item.tour_guides;
+          } catch (e) {
+            console.error('Error parsing tour guides:', e);
+            parsedGuides = [];
+          }
+          
+          return {
+            id: item.id,
+            name: item.name,
+            days: parsedDays,
+            tourGuides: parsedGuides,
+            totalPrice: item.total_price,
+            numberOfPeople: item.number_of_people,
+            start_date: item.start_date,
+            created_at: item.created_at,
+            updated_at: item.updated_at,
+            user_id: item.user_id
+          };
+        });
         
         if (mounted) {
           setItineraries(parsedData);
@@ -115,6 +135,10 @@ const Dashboard = () => {
 
   const handleCreateItinerary = () => {
     navigate('/dashboard/itinerary');
+  };
+
+  const handleViewItinerary = (itineraryId: string) => {
+    navigate(`/dashboard/itinerary?id=${itineraryId}`);
   };
 
   return (
@@ -153,7 +177,7 @@ const Dashboard = () => {
         ) : itineraries.length > 0 ? (
           <div className="grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
             {itineraries.map((itinerary) => (
-              <Card key={itinerary.id} className="bg-gray-100 border-gray-200 shadow-md">
+              <Card key={itinerary.id} className="bg-gray-100 border-gray-200 shadow-md hover:shadow-lg transition-all duration-300">
                 <CardHeader>
                   <CardTitle>{itinerary.name}</CardTitle>
                   <CardDescription>
@@ -161,9 +185,15 @@ const Dashboard = () => {
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-2">
-                  <p>{t.numberOfPeople}: {itinerary.numberOfPeople}</p>
-                  <p>{t.totalPrice}: ${itinerary.totalPrice}</p>
-                  <Button variant="secondary" onClick={() => navigate('/dashboard/itinerary')}>
+                  <p><span className="font-medium">{t.numberOfPeople}:</span> {itinerary.numberOfPeople}</p>
+                  <p><span className="font-medium">{t.days}:</span> {itinerary.days?.length || 0}</p>
+                  <p><span className="font-medium">{t.tourGuides}:</span> {itinerary.tourGuides?.length || 0}</p>
+                  <p><span className="font-medium">{t.totalPrice}:</span> {formatRupiah(itinerary.totalPrice || 0)}</p>
+                  <Button 
+                    variant="secondary" 
+                    className="w-full mt-4 bg-amber-400 text-gray-900 hover:bg-amber-500"
+                    onClick={() => handleViewItinerary(itinerary.id)}
+                  >
                     {t.view}
                   </Button>
                 </CardContent>
@@ -171,8 +201,15 @@ const Dashboard = () => {
             ))}
           </div>
         ) : (
-          <div className="text-center text-gray-500">
-            <p>{t.noItineraries}</p>
+          <div className="text-center text-gray-500 p-8 bg-gray-100 rounded-lg">
+            <p className="text-lg">{t.noItineraries}</p>
+            <Button 
+              onClick={handleCreateItinerary} 
+              className="mt-4 bg-amber-400 text-gray-900 hover:bg-amber-500"
+            >
+              <Plus className="h-4 w-4 mr-2" />
+              {t.createItinerary}
+            </Button>
           </div>
         )}
       </div>

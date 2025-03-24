@@ -35,7 +35,7 @@ export interface Transportation {
   id: string;
   type: 'flight' | 'train' | 'bus' | 'car' | 'ferry';
   description: string;
-  pricePerPerson: number;
+  pricePerPerson: number; // Actually this is price per day, not per person
 }
 
 export interface Meal {

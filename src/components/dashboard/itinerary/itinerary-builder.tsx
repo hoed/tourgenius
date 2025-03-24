@@ -10,24 +10,41 @@ import TourGuidesSection from './tour-guides-section';
 import ItineraryDays from './itinerary-days';
 import PriceCalculator from '../pricing/price-calculator';
 
-const ItineraryBuilder = () => {
+interface ItineraryBuilderProps {
+  initialItinerary?: TourItinerary | null;
+}
+
+const ItineraryBuilder = ({ initialItinerary }: ItineraryBuilderProps) => {
   const navigate = useNavigate();
-  const [itinerary, setItinerary] = useState<TourItinerary>({
-    id: Date.now().toString(),
-    name: 'New Tour Itinerary',
-    days: [{
-      id: '1',
-      day: 1,
-      destinations: [],
-      hotel: null,
-      meals: [],
-      transportation: null
-    }],
-    tourGuides: [],
-    totalPrice: 0,
-    numberOfPeople: 2
+  const [itinerary, setItinerary] = useState<TourItinerary>(() => {
+    if (initialItinerary) {
+      return initialItinerary;
+    }
+    
+    return {
+      id: Date.now().toString(),
+      name: 'New Tour Itinerary',
+      days: [{
+        id: '1',
+        day: 1,
+        destinations: [],
+        hotel: null,
+        meals: [],
+        transportation: null
+      }],
+      tourGuides: [],
+      totalPrice: 0,
+      numberOfPeople: 2
+    };
   });
-  const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
+  
+  const [selectedDate, setSelectedDate] = useState<Date | undefined>(() => {
+    if (initialItinerary?.start_date) {
+      return new Date(initialItinerary.start_date);
+    }
+    return new Date();
+  });
+  
   const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {

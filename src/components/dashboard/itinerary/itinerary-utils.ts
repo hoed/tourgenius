@@ -137,30 +137,29 @@ export const calculateTotalPrice = (itinerary: TourItinerary): number => {
 
   const numPeople = itinerary.numberOfPeople || 1;
 
-  // Calculate destinations total
+  // Calculate destinations total (one-time cost per person)
   const destinationsTotal = itinerary.days.reduce((sum, day) => {
     return sum + day.destinations.reduce((daySum, dest) => 
       daySum + dest.pricePerPerson * numPeople, 0);
   }, 0);
 
-  // Calculate hotels total
+  // Calculate hotels total (per night, not multiplied by number of people)
   const hotelsTotal = itinerary.days.reduce((sum, day) => {
     return sum + (day.hotel ? day.hotel.pricePerNight : 0);
   }, 0);
 
-  // Calculate meals total
+  // Calculate meals total (per person)
   const mealsTotal = itinerary.days.reduce((sum, day) => {
     return sum + day.meals.reduce((daySum, meal) => 
       daySum + meal.pricePerPerson * numPeople, 0);
   }, 0);
 
-  // Calculate transportation total
+  // Calculate transportation total (per day, not per person)
   const transportationTotal = itinerary.days.reduce((sum, day) => {
-    return sum + (day.transportation ? 
-      day.transportation.pricePerPerson * numPeople : 0);
+    return sum + (day.transportation ? day.transportation.pricePerPerson : 0);
   }, 0);
 
-  // Calculate guides total
+  // Calculate guides total (per day, not affected by number of people)
   const guidesTotal = itinerary.tourGuides.reduce((sum, guide) => {
     return sum + guide.pricePerDay * itinerary.days.length;
   }, 0);
