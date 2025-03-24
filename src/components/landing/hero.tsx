@@ -17,8 +17,8 @@ const Hero = () => {
                 <span className="block text-sm mt-2 text-blue-300">(Create Extraordinary Travel Experiences)</span>
               </h1>
               <p className="text-lg text-blue-100 leading-relaxed animate-fade-up animation-delay-150">
-                Rencanakan, sesuaikan, dan kelola rencana perjalanan dengan presisi. Hitung biaya secara otomatis, dan hasilkan faktur profesional dalam hitungan detik.
-                <span className="block text-sm mt-1 text-blue-300">(Plan, customize, and manage tour itineraries with precision. Calculate costs automatically, and generate professional invoices in seconds.)</span>
+                Rencanakan, sesuaikan, dan kelola rencana perjalanan dengan presisi. Hitung biaya secara otomatis, dan hasilkan faktur profesional untuk klien anda dalam hitungan detik.
+                <span className="block text-sm mt-1 text-blue-300">(Plan, customize, and manage tour itineraries with precision. Calculate costs automatically, and generate professional invoices for your customers in seconds.)</span>
               </p>
               <div className="flex flex-col sm:flex-row gap-4 pt-4 justify-center lg:justify-start animate-fade-up animation-delay-300">
                 <Link to="/auth?signup=true">
