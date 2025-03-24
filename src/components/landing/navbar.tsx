@@ -35,31 +35,31 @@ const Navbar = () => {
           <Link 
             to="/" 
             className={`font-medium hover:text-primary transition-colors ${
-              isScrolled ? 'text-black' : ''
+              isScrolled ? 'text-blue' : ''
             }`}
           >
             Home
           </Link>
           <Link 
-            to="/#features" 
+            to="/features" 
             className={`font-medium hover:text-primary transition-colors ${
-              isScrolled ? 'text-black' : ''
+              isScrolled ? 'text-blue' : ''
             }`}
           >
             Features
           </Link>
           <Link 
-            to="/#testimonials" 
+            to="/testimonials" 
             className={`font-medium hover:text-primary transition-colors ${
-              isScrolled ? 'text-black' : ''
+              isScrolled ? 'text-blue' : ''
             }`}
           >
             Testimonials
           </Link>
           <Link 
-            to="/#pricing" 
+            to="/pricing" 
             className={`font-medium hover:text-primary transition-colors ${
-              isScrolled ? 'text-black' : ''
+              isScrolled ? 'text-blue' : ''
             }`}
           >
             Pricing

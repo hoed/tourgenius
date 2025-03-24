@@ -8,7 +8,7 @@ interface AuthFormHeaderProps {
 const AuthFormHeader = ({ isSignUp }: AuthFormHeaderProps) => {
   return (
     <div className="text-center mb-8">
-      <h2 className="text-3xl font-bold text-white bg-clip-text text-transparent bg-gradient-to-r from-white to-gray-400">
+      <h2 className="text-3xl font-bold text-blue bg-clip-text text-transparent bg-gradient-to-r from-blue-700 to-purple-900">
         {isSignUp ? 'Create an Account' : 'Welcome Back'}
       </h2>
       <p className="text-gray-400 mt-2">

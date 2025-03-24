@@ -14,7 +14,7 @@ const Hero = () => {
             <div className="space-y-6 max-w-2xl mx-auto lg:mx-0">
               <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight bg-gradient-to-r from-blue-300 via-purple-300 to-cyan-300 bg-clip-text text-transparent animate-gradient animate-fade-up">
                 Buat Pengalaman Perjalanan Luar Biasa
-                <span className="block text-sm mt-2 text-blue-300">(Create Extraordinary Travel Experiences)</span>
+                <span className="text-sm mt-2 text-blue-300">(Create Extraordinary Travel Experiences)</span>
               </h1>
               <p className="text-lg text-blue-100 leading-relaxed animate-fade-up animation-delay-150">
                 Rencanakan, sesuaikan, dan kelola rencana perjalanan dengan presisi. Hitung biaya secara otomatis, dan hasilkan faktur profesional dalam hitungan detik.
