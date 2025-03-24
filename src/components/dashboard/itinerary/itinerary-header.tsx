@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { CalendarIcon, Save } from 'lucide-react';
-import { saveToGoogleCalendar, saveItineraryToSupabase } from './itinerary-utils';
+import { saveToGoogleCalendar, saveItineraryToSupabase } from './itinerary-utils'; // Verify this path
 import { TourItinerary } from '@/lib/types';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
@@ -10,7 +10,7 @@ interface ItineraryHeaderProps {
   itinerary: TourItinerary;
   selectedDate: Date | undefined;
   isSaving: boolean;
-  setIsSaving: (saving: boolean) => void; // Add this
+  setIsSaving: (saving: boolean) => void;
 }
 
 const ItineraryHeader = ({ itinerary, selectedDate, isSaving, setIsSaving }: ItineraryHeaderProps) => {
