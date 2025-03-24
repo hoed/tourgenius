@@ -61,12 +61,12 @@ export interface TourItinerary {
   tourGuides: TourGuide[];
   totalPrice: number;
   numberOfPeople: number;
-  start_date?: string; // Added to match Supabase structure
-  total_price?: number; // Added for compatibility
-  number_of_people?: number; // Added for compatibility
-  created_at?: string; // Added for compatibility
-  updated_at?: string; // Added for compatibility
-  user_id?: string; // Added for compatibility
+  start_date?: string; // For compatibility with Supabase structure
+  total_price?: number; // For compatibility with Supabase structure
+  number_of_people?: number; // For compatibility with Supabase structure
+  created_at?: string; // For compatibility with Supabase structure
+  updated_at?: string; // For compatibility with Supabase structure
+  user_id?: string; // For compatibility with Supabase structure
 }
 
 export interface Invoice {

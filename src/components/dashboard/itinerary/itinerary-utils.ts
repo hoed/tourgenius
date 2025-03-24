@@ -42,12 +42,12 @@ export const saveToGoogleCalendar = (itinerary: TourItinerary) => {
     
     // Add destinations
     if (day.destinations && day.destinations.length > 0) {
-      details += encodeURIComponent(`Destinations: ${day.destinations.join(', ')}\n`);
+      details += encodeURIComponent(`Destinations: ${day.destinations.map(d => d.name).join(', ')}\n`);
     }
     
     // Add hotel
     if (day.hotel) {
-      details += encodeURIComponent(`Hotel: ${day.hotel}\n`);
+      details += encodeURIComponent(`Hotel: ${day.hotel.name}\n`);
     }
     
     // Add meals
@@ -96,6 +96,9 @@ export const saveItineraryToSupabase = async (
       return;
     }
 
+    // Calculate the total price considering number of people
+    const totalPrice = calculateTotalPrice(itinerary);
+
     // Format data for DB
     const itineraryData = {
       user_id: session.user.id,
@@ -104,7 +107,7 @@ export const saveItineraryToSupabase = async (
       number_of_people: itinerary.numberOfPeople,
       days: JSON.stringify(itinerary.days),
       tour_guides: JSON.stringify(itinerary.tourGuides),
-      total_price: itinerary.totalPrice
+      total_price: totalPrice
     };
     
     // Save to DB
@@ -124,4 +127,54 @@ export const saveItineraryToSupabase = async (
     console.error('Error in saveItineraryToSupabase:', error);
     toast.error('An error occurred while saving the itinerary');
   }
+};
+
+// Function to calculate total price considering number of people
+export const calculateTotalPrice = (itinerary: TourItinerary): number => {
+  if (!itinerary || !itinerary.days || itinerary.days.length === 0) {
+    return 0;
+  }
+
+  const numPeople = itinerary.numberOfPeople || 1;
+
+  // Calculate destinations total
+  const destinationsTotal = itinerary.days.reduce((sum, day) => {
+    return sum + day.destinations.reduce((daySum, dest) => 
+      daySum + dest.pricePerPerson * numPeople, 0);
+  }, 0);
+
+  // Calculate hotels total
+  const hotelsTotal = itinerary.days.reduce((sum, day) => {
+    return sum + (day.hotel ? day.hotel.pricePerNight : 0);
+  }, 0);
+
+  // Calculate meals total
+  const mealsTotal = itinerary.days.reduce((sum, day) => {
+    return sum + day.meals.reduce((daySum, meal) => 
+      daySum + meal.pricePerPerson * numPeople, 0);
+  }, 0);
+
+  // Calculate transportation total
+  const transportationTotal = itinerary.days.reduce((sum, day) => {
+    return sum + (day.transportation ? 
+      day.transportation.pricePerPerson * numPeople : 0);
+  }, 0);
+
+  // Calculate guides total
+  const guidesTotal = itinerary.tourGuides.reduce((sum, guide) => {
+    return sum + guide.pricePerDay * itinerary.days.length;
+  }, 0);
+
+  // Calculate subtotal
+  const subtotal = destinationsTotal + hotelsTotal + mealsTotal + 
+                  transportationTotal + guidesTotal;
+  
+  // Add 10% service fee
+  const serviceFee = subtotal * 0.1;
+  
+  // Add 5% tax
+  const tax = subtotal * 0.05;
+  
+  // Calculate total
+  return subtotal + serviceFee + tax;
 };
