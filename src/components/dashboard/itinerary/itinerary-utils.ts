@@ -110,18 +110,40 @@ export const saveItineraryToSupabase = async (
       total_price: totalPrice
     };
     
-    // Save to DB
-    const { error } = await supabase
-      .from('itineraries')
-      .insert([itineraryData]);
+    let { error } = null;
     
-    if (error) {
-      console.error('Error saving itinerary:', error);
-      toast.error('Failed to save itinerary');
-      return;
+    if (itinerary.id && itinerary.id.length > 10) {
+      // Update existing itinerary
+      ({ error } = await supabase
+        .from('itineraries')
+        .update(itineraryData)
+        .eq('id', itinerary.id)
+        .eq('user_id', session.user.id));
+      
+      if (error) {
+        console.error('Error updating itinerary:', error);
+        toast.error('Failed to update itinerary');
+        return;
+      }
+      
+      toast.success('Itinerary updated successfully!');
+    } else {
+      // Save new itinerary
+      ({ error } = await supabase
+        .from('itineraries')
+        .insert([itineraryData]));
+      
+      if (error) {
+        console.error('Error saving new itinerary:', error);
+        toast.error('Failed to save itinerary');
+        return;
+      }
+      
+      toast.success('Itinerary saved successfully!');
     }
     
-    toast.success('Itinerary saved successfully!');
+    // Redirect to dashboard
+    navigate('/dashboard');
     
   } catch (error) {
     console.error('Error in saveItineraryToSupabase:', error);

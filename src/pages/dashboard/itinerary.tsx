@@ -31,6 +31,7 @@ const ItineraryPage = () => {
 
       if (itineraryId) {
         try {
+          console.log('Loading itinerary with ID:', itineraryId);
           const { data, error } = await supabase
             .from('itineraries')
             .select('*')
@@ -39,10 +40,12 @@ const ItineraryPage = () => {
             .single();
 
           if (error) {
+            console.error('Error fetching itinerary:', error);
             throw error;
           }
 
           if (data) {
+            console.log('Loaded itinerary data:', data);
             // Parse JSON fields
             let parsedDays;
             let parsedGuides;
@@ -74,6 +77,7 @@ const ItineraryPage = () => {
               updated_at: data.updated_at
             };
 
+            console.log('Parsed itinerary:', itinerary);
             setSelectedItinerary(itinerary);
           }
         } catch (error) {

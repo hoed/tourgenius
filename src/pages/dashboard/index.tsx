@@ -77,6 +77,7 @@ const Dashboard = () => {
         if (error) {
           console.error('Error fetching itineraries:', error);
           toast.error('Failed to load your itineraries');
+          setLoading(false);
           return;
         }
         
@@ -114,6 +115,7 @@ const Dashboard = () => {
         });
         
         if (mounted) {
+          console.log('Loaded itineraries:', parsedData);
           setItineraries(parsedData);
           setLoading(false);
         }
