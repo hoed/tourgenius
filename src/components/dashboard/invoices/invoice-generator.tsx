@@ -1,10 +1,9 @@
-
 import React, { useState, useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import { Invoice, TourItinerary } from '@/lib/types';
 import { Calendar, Download, FileText, Printer, Send } from 'lucide-react';
 import { toast } from 'sonner';
@@ -42,18 +41,14 @@ const InvoiceGenerator = ({ itinerary: propItinerary }: InvoiceGeneratorProps) =
     setInvoice(prev => ({ ...prev, [name]: value }));
   };
 
-  // Function to add customer to the customers database
   const addCustomerToDatabase = async (customerName: string, customerEmail: string) => {
     try {
-      // Check if user is authenticated
       const { data: { session } } = await supabase.auth.getSession();
-      
       if (!session?.user) {
         toast.error('You must be logged in to add customers');
         return;
       }
       
-      // Check if customer already exists with this email
       const { data: existingCustomers, error: fetchError } = await supabase
         .from('customers')
         .select('*')
@@ -65,7 +60,6 @@ const InvoiceGenerator = ({ itinerary: propItinerary }: InvoiceGeneratorProps) =
         return;
       }
       
-      // If customer doesn't exist, add them
       if (!existingCustomers || existingCustomers.length === 0) {
         const { error } = await supabase
           .from('customers')
@@ -96,10 +90,7 @@ const InvoiceGenerator = ({ itinerary: propItinerary }: InvoiceGeneratorProps) =
       toast.error('Please fill in all required fields');
       return;
     }
-    
-    // Add customer to database when generating invoice
     addCustomerToDatabase(invoice.customerName, invoice.customerEmail);
-    
     toast.success('Invoice generated successfully!');
   };
 
@@ -108,10 +99,7 @@ const InvoiceGenerator = ({ itinerary: propItinerary }: InvoiceGeneratorProps) =
       toast.error('Please fill in all required fields');
       return;
     }
-    
-    // Add customer to database when sending invoice
     addCustomerToDatabase(invoice.customerName, invoice.customerEmail);
-    
     toast.success('Invoice sent to customer!');
     setInvoice(prev => ({ ...prev, status: 'sent' }));
   };
@@ -229,57 +217,108 @@ const InvoiceGenerator = ({ itinerary: propItinerary }: InvoiceGeneratorProps) =
 
   const handleDownloadPDF = () => {
     const doc = new jsPDF();
-    doc.setFontSize(20);
+    
+    // Define colors as tuples
+    const amber400: [number, number, number] = [251, 191, 36]; // #fbbf24
+    const orange500: [number, number, number] = [249, 115, 22]; // #f97316
+    const gray700: [number, number, number] = [55, 65, 81]; // #374151
+    const gray200: [number, number, number] = [229, 231, 235]; // #e5e7eb
+
+    // Header with gradient-like effect
+    doc.setFontSize(24);
+    doc.setTextColor(...amber400);
     doc.text('Invoice', 20, 20);
     doc.setFontSize(12);
+    doc.setTextColor(...gray700);
     doc.text(`#INV-${new Date().getFullYear()}-${Math.floor(1000 + Math.random() * 9000)}`, 20, 30);
-    doc.text('TourGenius', 150, 20, { align: 'right' });
-    doc.text('Premium Tour Planning', 150, 30, { align: 'right' });
+    doc.setTextColor(...orange500);
+    doc.text('TourGenius', 190, 20, { align: 'right' });
+    doc.setTextColor(...gray700);
+    doc.text('Premium Tour Planning', 190, 30, { align: 'right' });
 
-    doc.setFontSize(10);
+    // Horizontal line under header
+    doc.setDrawColor(...amber400);
+    doc.setLineWidth(0.5);
+    doc.line(20, 35, 190, 35);
+
+    // Bill To and Invoice Details
+    doc.setFontSize(12);
+    doc.setTextColor(...gray700);
     doc.text('Bill To:', 20, 50);
+    doc.setFontSize(10);
     doc.text(invoice.customerName || 'Customer Name', 20, 60);
     doc.text(invoice.customerEmail || 'customer@example.com', 20, 70);
-    doc.text('Invoice Details:', 150, 50, { align: 'right' });
-    doc.text(`Date: ${invoice.date || new Date().toISOString().split('T')[0]}`, 150, 60, { align: 'right' });
-    doc.text(`Due Date: ${invoice.dueDate || new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]}`, 150, 70, { align: 'right' });
-    doc.text(`Status: ${invoice.status || 'Draft'}`, 150, 80, { align: 'right' });
-
+    
     doc.setFontSize(12);
-    doc.text('Invoice Items:', 20, 100);
-    let yPos = 110;
+    doc.text('Invoice Details:', 190, 50, { align: 'right' });
     doc.setFontSize(10);
-    doc.text('Description', 20, yPos);
-    doc.text('Qty', 120, yPos, { align: 'right' });
-    doc.text('Unit Price', 150, yPos, { align: 'right' });
-    doc.text('Total', 180, yPos, { align: 'right' });
+    doc.text(`Date: ${invoice.date || new Date().toISOString().split('T')[0]}`, 190, 60, { align: 'right' });
+    doc.text(`Due Date: ${invoice.dueDate || new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]}`, 190, 70, { align: 'right' });
+    doc.text(`Status: ${invoice.status || 'Draft'}`, 190, 80, { align: 'right' });
+
+    // Items Section
+    doc.setFontSize(14);
+    doc.setTextColor(...amber400);
+    doc.text('Invoice Items:', 20, 100);
+    doc.setDrawColor(...gray200);
+    doc.line(20, 105, 190, 105); // Section separator
+
+    // Table Header
+    let yPos = 115;
+    doc.setFontSize(10);
+    doc.setTextColor(...gray700);
+    doc.setFillColor(...gray200);
+    doc.rect(20, yPos - 5, 170, 10, 'F'); // Header background
+    doc.text('Description', 25, yPos);
+    doc.text('Qty', 130, yPos, { align: 'right' });
+    doc.text('Unit Price', 155, yPos, { align: 'right' });
+    doc.text('Total', 185, yPos, { align: 'right' });
     yPos += 5;
-    doc.line(20, yPos, 190, yPos);
+    doc.setDrawColor(...gray700);
+    doc.line(20, yPos, 190, yPos); // Table header underline
     yPos += 10;
 
-    invoiceItems.forEach(item => {
-      doc.text(item.description, 20, yPos);
-      doc.text(item.quantity.toString(), 120, yPos, { align: 'right' });
-      doc.text(formatRupiah(item.unitPrice), 150, yPos, { align: 'right' });
-      doc.text(formatRupiah(item.total), 180, yPos, { align: 'right' });
+    // Table Rows
+    invoiceItems.forEach((item, index) => {
+      doc.setTextColor(...gray700);
+      doc.text(item.description, 25, yPos);
+      doc.text(item.quantity.toString(), 130, yPos, { align: 'right' });
+      doc.text(formatRupiah(item.unitPrice), 155, yPos, { align: 'right' });
+      doc.text(formatRupiah(item.total), 185, yPos, { align: 'right' });
       yPos += 10;
+      if (index < invoiceItems.length - 1) {
+        doc.setDrawColor(...gray200);
+        doc.line(20, yPos - 5, 190, yPos - 5); // Row separator
+      }
     });
 
+    // Totals Section
     yPos += 10;
-    doc.text(`Subtotal: ${formatRupiah(subtotal)}`, 150, yPos, { align: 'right' });
+    doc.setDrawColor(...gray200);
+    doc.line(140, yPos - 5, 190, yPos - 5); // Totals separator
+    doc.setFontSize(10);
+    doc.text(`Subtotal:`, 140, yPos, { align: 'right' });
+    doc.text(`${formatRupiah(subtotal)}`, 185, yPos, { align: 'right' });
     yPos += 10;
-    doc.text(`Tax (5%): ${formatRupiah(tax)}`, 150, yPos, { align: 'right' });
+    doc.text(`Tax (5%):`, 140, yPos, { align: 'right' });
+    doc.text(`${formatRupiah(tax)}`, 185, yPos, { align: 'right' });
     yPos += 10;
-    doc.line(150, yPos - 5, 190, yPos - 5);
+    doc.setDrawColor(...amber400);
+    doc.line(140, yPos - 5, 190, yPos - 5); // Total underline
     yPos += 10;
     doc.setFontSize(12);
-    doc.text(`Total: ${formatRupiah(total)}`, 150, yPos, { align: 'right' });
+    doc.setTextColor(...orange500);
+    doc.text(`Total:`, 140, yPos, { align: 'right' });
+    doc.text(`${formatRupiah(total)}`, 185, yPos, { align: 'right' });
 
+    // Footer
     yPos += 20;
     doc.setFontSize(8);
+    doc.setTextColor(...gray700);
     doc.text('Thank you for your business!', 105, yPos, { align: 'center' });
     doc.text('Payment is due within 14 days of receipt of this invoice.', 105, yPos + 5, { align: 'center' });
 
+    // Save the PDF
     doc.save(`invoice-${invoice.customerName || 'customer'}-${new Date().toISOString().split('T')[0]}.pdf`);
     toast.success('PDF downloaded successfully!');
   };
