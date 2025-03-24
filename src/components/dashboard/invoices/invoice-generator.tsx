@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -10,6 +11,7 @@ import { toast } from 'sonner';
 import GlassCard from '@/components/ui/glass-card';
 import { useLocation, useNavigate } from 'react-router-dom';
 import jsPDF from 'jspdf';
+import { supabase } from '@/integrations/supabase/client';
 
 interface InvoiceGeneratorProps {
   itinerary?: TourItinerary;
@@ -40,11 +42,64 @@ const InvoiceGenerator = ({ itinerary: propItinerary }: InvoiceGeneratorProps) =
     setInvoice(prev => ({ ...prev, [name]: value }));
   };
 
+  // Function to add customer to the customers database
+  const addCustomerToDatabase = async (customerName: string, customerEmail: string) => {
+    try {
+      // Check if user is authenticated
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (!session?.user) {
+        toast.error('You must be logged in to add customers');
+        return;
+      }
+      
+      // Check if customer already exists with this email
+      const { data: existingCustomers, error: fetchError } = await supabase
+        .from('customers')
+        .select('*')
+        .eq('email', customerEmail)
+        .eq('user_id', session.user.id);
+      
+      if (fetchError) {
+        console.error('Error checking for existing customer:', fetchError);
+        return;
+      }
+      
+      // If customer doesn't exist, add them
+      if (!existingCustomers || existingCustomers.length === 0) {
+        const { error } = await supabase
+          .from('customers')
+          .insert([{ 
+            name: customerName, 
+            email: customerEmail,
+            user_id: session.user.id,
+            status: 'active',
+            notes: 'Added via invoice generation'
+          }]);
+        
+        if (error) {
+          console.error('Error adding customer:', error);
+          return;
+        }
+        
+        toast.success('New customer added to database');
+      } else {
+        console.log('Customer already exists in database');
+      }
+    } catch (error) {
+      console.error('Error in addCustomerToDatabase:', error);
+    }
+  };
+
   const handleGenerateInvoice = () => {
     if (!invoice.customerName || !invoice.customerEmail) {
       toast.error('Please fill in all required fields');
       return;
     }
+    
+    // Add customer to database when generating invoice
+    addCustomerToDatabase(invoice.customerName, invoice.customerEmail);
+    
     toast.success('Invoice generated successfully!');
   };
 
@@ -53,6 +108,10 @@ const InvoiceGenerator = ({ itinerary: propItinerary }: InvoiceGeneratorProps) =
       toast.error('Please fill in all required fields');
       return;
     }
+    
+    // Add customer to database when sending invoice
+    addCustomerToDatabase(invoice.customerName, invoice.customerEmail);
+    
     toast.success('Invoice sent to customer!');
     setInvoice(prev => ({ ...prev, status: 'sent' }));
   };
