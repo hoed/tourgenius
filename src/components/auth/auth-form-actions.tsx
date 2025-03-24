@@ -24,7 +24,7 @@ const AuthFormActions = ({ isSignUp, loading, toggleAuthMode }: AuthFormActionsP
           <button
             type="button"
             onClick={toggleAuthMode}
-            className="ml-1 text-blue-300 hover:underline focus:outline-none"
+            className="ml-1 text-blue-800 hover:underline focus:outline-none"
           >
             {isSignUp ? 'Masuk' : 'Daftar'}
           </button>
