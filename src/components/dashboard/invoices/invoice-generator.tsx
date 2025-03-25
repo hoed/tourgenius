@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -621,7 +622,7 @@ const InvoiceGenerator = ({ itinerary: propItinerary }: InvoiceGeneratorProps) =
                   <h3 className="font-medium text-gray-700 mb-2">Invoice Details:</h3>
                   <p className="text-gray-900">Date: {invoice.date || new Date().toISOString().split('T')[0]}</p>
                   <p className="text-gray-900">Due Date: {invoice.dueDate || new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]}</p>
-                  <p className="text-gray-900">Status: <span className="capitalize">{invoice.status || 'Draft'}</span></p>
+                  <p className="text-gray-900">Status: <span className="capitalize">{invoice.status || 'Unpaid'}</span></p>
                 </div>
               </div>
 
@@ -660,4 +661,42 @@ const InvoiceGenerator = ({ itinerary: propItinerary }: InvoiceGeneratorProps) =
                 </div>
               </div>
 
-              <div className="w-
+              <div className="w-full max-w-md ml-auto">
+                <div className="space-y-2">
+                  <div className="flex justify-between items-center">
+                    <span className="text-gray-700">Subtotal:</span>
+                    <span className="font-medium">{formatRupiah(subtotal)}</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-gray-700">Tax (5%):</span>
+                    <span>{formatRupiah(tax)}</span>
+                  </div>
+                  <div className="h-px bg-gray-200 my-2"></div>
+                  <div className="flex justify-between items-center font-bold">
+                    <span>Total:</span>
+                    <span className="text-amber-700">{formatRupiah(total)}</span>
+                  </div>
+                  
+                  {itinerary && itinerary.numberOfPeople > 1 && (
+                    <div className="flex justify-between items-center text-sm text-amber-600 mt-1">
+                      <span>Price per person:</span>
+                      <span>{formatRupiah(total / itinerary.numberOfPeople)}</span>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              <div className="mt-12 pt-6 border-t border-gray-200 text-center text-gray-600">
+                <p className="text-sm">Thank you for your business!</p>
+                <p className="text-xs mt-1">Payment is due within 14 days of receipt of this invoice.</p>
+                <p className="text-xs mt-1">Questions? Email us at info@tourgenius.com</p>
+              </div>
+            </CardContent>
+          </GlassCard>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default InvoiceGenerator;
