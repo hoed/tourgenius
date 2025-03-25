@@ -12,6 +12,7 @@ import Dashboard from "./pages/dashboard/index";
 import ItineraryPage from "./pages/dashboard/itinerary";
 import InvoicesPage from "./pages/dashboard/invoices";
 import CustomersPage from "./pages/dashboard/customers";
+import TourPlansPage from "./pages/dashboard/tour-plans";
 import SettingsPage from "./pages/dashboard/settings";
 import NotFound from "./pages/NotFound";
 import Features from "./pages/Features";
@@ -100,6 +101,14 @@ const App = () => (
             element={
               <ProtectedRoute>
                 <ItineraryPage />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/dashboard/tour-plans" 
+            element={
+              <ProtectedRoute>
+                <TourPlansPage />
               </ProtectedRoute>
             } 
           />

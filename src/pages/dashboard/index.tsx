@@ -1,21 +1,23 @@
-
 import React, { useEffect, useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Toaster } from 'sonner';
 import { toast } from 'sonner';
 import DashboardLayout from '@/components/dashboard/layout';
-import { CalendarDays, FileText, Users, Map, ArrowRight, Clock } from 'lucide-react';
+import { CalendarDays, FileText, Users, Map, ArrowRight, Clock, Plus } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
-import { TourItinerary } from '@/lib/types';
+import { TourItinerary, TourPlan } from '@/lib/types';
 import { Skeleton } from '@/components/ui/skeleton';
+import TourPlanCard from '@/components/dashboard/tour-plans/tour-plan-card';
 
 const Dashboard = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [itineraries, setItineraries] = useState<TourItinerary[]>([]);
   const [customerCount, setCustomerCount] = useState(0);
+  const [tourPlans, setTourPlans] = useState<TourPlan[]>([]);
+  const [tourPlansLoading, setTourPlansLoading] = useState(true);
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -86,6 +88,23 @@ const Dashboard = () => {
         }
 
         setCustomerCount(count || 0);
+        
+        // Fetch tour plans
+        setTourPlansLoading(true);
+        const { data: tourPlansData, error: tourPlansError } = await supabase
+          .from('tour_plans')
+          .select('*')
+          .eq('user_id', session.user.id)
+          .order('created_at', { ascending: false })
+          .limit(4);
+          
+        if (tourPlansError) {
+          console.error('Error fetching tour plans:', tourPlansError);
+          throw tourPlansError;
+        }
+        
+        setTourPlans(tourPlansData || []);
+        setTourPlansLoading(false);
       } catch (error) {
         console.error('Error loading dashboard data:', error);
         toast.error('Failed to load dashboard data');
@@ -189,6 +208,39 @@ const Dashboard = () => {
     ));
   };
 
+  const renderTourPlans = () => {
+    if (tourPlansLoading) {
+      return Array(4).fill(0).map((_, i) => (
+        <div key={i} className="h-64">
+          <Skeleton className="w-full h-full rounded-lg" />
+        </div>
+      ));
+    }
+
+    if (tourPlans.length === 0) {
+      return (
+        <div className="col-span-full flex flex-col items-center justify-center p-6 bg-gray-50 rounded-lg border-2 border-dashed border-gray-200">
+          <Map className="h-12 w-12 text-gray-300 mb-3" />
+          <h3 className="text-lg font-medium text-gray-700 mb-2">No Tour Plans Yet</h3>
+          <p className="text-gray-500 text-center mb-4">Create your first tour plan to showcase to your customers.</p>
+          <Button onClick={() => navigate('/dashboard/tour-plans')} className="bg-amber-500 text-black">
+            <Plus className="h-4 w-4 mr-2" />
+            Create Tour Plan
+          </Button>
+        </div>
+      );
+    }
+
+    return tourPlans.map(tourPlan => (
+      <div key={tourPlan.id} className="h-64">
+        <TourPlanCard
+          tourPlan={tourPlan}
+          onEdit={() => navigate(`/dashboard/tour-plans?id=${tourPlan.id}`)}
+        />
+      </div>
+    ));
+  };
+
   return (
     <DashboardLayout>
       <Toaster position="top-center" richColors />
@@ -270,6 +322,19 @@ const Dashboard = () => {
           </Card>
         </div>
 
+        {/* Tour Plans Section */}
+        <div className="flex justify-between items-center">
+          <h2 className="text-2xl font-bold text-gray-800">Tour Plans</h2>
+          <Button onClick={() => navigate('/dashboard/tour-plans')} className="bg-amber-500 text-black hover:bg-amber-600">
+            View All Tour Plans
+          </Button>
+        </div>
+        
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
+          {renderTourPlans()}
+        </div>
+
+        {/* Itineraries Section */}
         <div className="flex justify-between items-center">
           <h2 className="text-2xl font-bold text-gray-800">Your Itineraries</h2>
           <Button onClick={() => navigate('/dashboard/itinerary')} className="bg-amber-500 text-black hover:bg-amber-600">

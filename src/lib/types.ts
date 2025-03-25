@@ -70,6 +70,17 @@ export interface TourItinerary {
   user_id?: string; // For compatibility with Supabase structure
 }
 
+export interface TourPlan {
+  id: string;
+  title: string;
+  description: string;
+  price: number;
+  image_path?: string;
+  created_at?: string;
+  updated_at?: string;
+  user_id?: string;
+}
+
 export interface Invoice {
   id: string;
   itineraryId: string;

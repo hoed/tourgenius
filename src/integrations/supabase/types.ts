@@ -111,6 +111,39 @@ export type Database = {
         }
         Relationships: []
       }
+      tour_plans: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          image_path: string | null
+          price: number
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          image_path?: string | null
+          price?: number
+          title: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          image_path?: string | null
+          price?: number
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
