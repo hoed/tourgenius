@@ -26,7 +26,10 @@ const PriceCalculator = ({ itinerary }: PriceCalculatorProps) => {
 
     const hotels = {
       total: itinerary.days.reduce((sum, day) => {
-        return sum + (day.hotel ? day.hotel.pricePerNight : 0);
+        if (!day.hotel) return sum;
+        // Calculate based on room amount
+        const roomsNeeded = day.hotel.roomAmount || Math.ceil(itinerary.numberOfPeople / 2);
+        return sum + (day.hotel.pricePerNight * roomsNeeded);
       }, 0),
       count: itinerary.days.reduce((sum, day) => sum + (day.hotel ? 1 : 0), 0)
     };
@@ -40,9 +43,10 @@ const PriceCalculator = ({ itinerary }: PriceCalculatorProps) => {
     };
 
     const transportation = {
-      // Transportation is per day, not per person
       total: itinerary.days.reduce((sum, day) => {
-        return sum + (day.transportation ? day.transportation.pricePerPerson : 0);
+        if (!day.transportation) return sum;
+        // Transportation is now a fixed price per day, not multiplied by number of people
+        return sum + day.transportation.pricePerPerson;
       }, 0),
       count: itinerary.days.reduce((sum, day) => sum + (day.transportation ? 1 : 0), 0)
     };
@@ -65,6 +69,9 @@ const PriceCalculator = ({ itinerary }: PriceCalculatorProps) => {
     
     const total = subtotal + serviceFee + tax;
 
+    // Price per person
+    const pricePerPerson = itinerary.numberOfPeople > 0 ? total / itinerary.numberOfPeople : total;
+
     return {
       destinations,
       hotels,
@@ -74,7 +81,8 @@ const PriceCalculator = ({ itinerary }: PriceCalculatorProps) => {
       subtotal,
       serviceFee,
       tax,
-      total
+      total,
+      pricePerPerson
     };
   }, [itinerary]);
 
@@ -152,8 +160,9 @@ const PriceCalculator = ({ itinerary }: PriceCalculatorProps) => {
               <span>Total</span>
               <span>{formatRupiah(calculatedPrices.total)}</span>
             </div>
-            <div className="text-xs text-muted-foreground text-right mt-1">
-              {formatRupiah(calculatedPrices.total / itinerary.numberOfPeople)} per person
+            <div className="flex justify-between text-sm mt-1 font-medium text-primary">
+              <span>Price per person</span>
+              <span>{formatRupiah(calculatedPrices.pricePerPerson)}</span>
             </div>
           </div>
         </CardContent>

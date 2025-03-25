@@ -40,7 +40,7 @@ const DayTransportation = ({
         <div className="flex items-center p-3 bg-gray-50 rounded-lg border border-gray-200 mb-4 hover:bg-gray-100 transition-all duration-300">
           <div>
             <p className="font-medium text-gray-900">{transportation.description}</p>
-            <p className="text-sm text-gray-900">{formatRupiah(transportation.pricePerPerson)}/day</p>
+            <p className="text-sm text-gray-900">{formatRupiah(transportation.pricePerPerson)} (per day, fixed price)</p>
           </div>
           <Button 
             variant="ghost" 

@@ -13,7 +13,8 @@ import {
   User,
   Users,
   X,
-  Globe
+  Globe,
+  Map
 } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { toast } from 'sonner';
@@ -39,7 +40,6 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
     
     const initializeUser = async () => {
       try {
-        // Get session from Supabase
         const { data: { session } } = await supabase.auth.getSession();
         
         if (!session) {
@@ -47,7 +47,6 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
           return;
         }
         
-        // Get user from session
         const userData = {
           name: session.user.user_metadata?.name || session.user.email?.split('@')[0] || 'User',
           email: session.user.email || ''
@@ -55,7 +54,6 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
         
         if (mounted) {
           setUser(userData);
-          // Store in localStorage for future use
           localStorage.setItem('user', JSON.stringify(userData));
           setIsLoading(false);
         }
@@ -68,13 +66,11 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
       }
     };
 
-    // Get language preference
     const savedLanguage = localStorage.getItem('language') as 'id' | 'en';
     if (savedLanguage) {
       setLanguage(savedLanguage);
     }
 
-    // Check if mobile
     const checkMobile = () => {
       setIsMobile(window.innerWidth < 1024);
       if (window.innerWidth < 1024) {
@@ -125,7 +121,8 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
       customers: 'Customers',
       settings: 'Settings',
       logout: 'Logout',
-      tourGenius: 'TourGenius'
+      tourGenius: 'TourGenius',
+      tourPlans: 'Tour Plans'
     },
     id: {
       dashboard: 'Dasbor',
@@ -134,7 +131,8 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
       customers: 'Pelanggan',
       settings: 'Pengaturan',
       logout: 'Keluar',
-      tourGenius: 'TourGenius'
+      tourGenius: 'TourGenius',
+      tourPlans: 'Paket Wisata'
     }
   };
 
@@ -142,6 +140,7 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
 
   const navItems = [
     { path: '/dashboard', label: t.dashboard, icon: <Home className="h-5 w-5" /> },
+    { path: '/dashboard/tour-plans', label: t.tourPlans, icon: <Map className="h-5 w-5" /> },
     { path: '/dashboard/itinerary', label: t.itinerary, icon: <Calendar className="h-5 w-5" /> },
     { path: '/dashboard/invoices', label: t.invoices, icon: <FileText className="h-5 w-5" /> },
     { path: '/dashboard/customers', label: t.customers, icon: <Users className="h-5 w-5" /> },
@@ -165,7 +164,6 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
 
   return (
     <div className="min-h-screen flex bg-batik-dark bg-opacity-95 batik-overlay">
-      {/* Sidebar */}
       <aside 
         className={`fixed inset-y-0 left-0 z-40 lg:relative transition-all duration-300 transform ${
           isSidebarOpen ? 'translate-x-0' : '-translate-x-full lg:w-20'
@@ -264,9 +262,7 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
         </div>
       </aside>
 
-      {/* Main content */}
       <div className="flex-1 flex flex-col min-w-0">
-        {/* Mobile header */}
         <header className="sticky top-0 z-30 flex items-center bg-batik-dark/90 backdrop-blur-md h-16 px-4 border-b border-border/20 lg:hidden">
           <Button variant="ghost" size="icon" onClick={toggleSidebar} className="text-white">
             <Menu className="h-5 w-5" />
@@ -274,7 +270,6 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
           <div className="ml-4 font-bold text-white">{t.tourGenius}</div>
         </header>
 
-        {/* Overlay for mobile */}
         {isMobile && isSidebarOpen && (
           <div 
             className="fixed inset-0 bg-black/70 backdrop-blur-sm z-30 lg:hidden"
@@ -282,7 +277,6 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
           />
         )}
 
-        {/* Page content */}
         <main className="flex-1 p-6 overflow-auto animate-fade-in">
           {children}
         </main>

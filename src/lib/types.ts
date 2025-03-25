@@ -29,13 +29,14 @@ export interface Hotel {
   stars: number;
   pricePerNight: number;
   image?: string;
+  roomAmount?: number; // New field for number of rooms
 }
 
 export interface Transportation {
   id: string;
   type: 'flight' | 'train' | 'bus' | 'car' | 'ferry';
   description: string;
-  pricePerPerson: number; // This is actually price per day, not per person
+  pricePerPerson: number; // Price per person
 }
 
 export interface Meal {
@@ -69,6 +70,17 @@ export interface TourItinerary {
   user_id?: string; // For compatibility with Supabase structure
 }
 
+export interface TourPlan {
+  id: string;
+  title: string;
+  description: string;
+  price: number;
+  image_path?: string;
+  created_at?: string;
+  updated_at?: string;
+  user_id?: string;
+}
+
 export interface Invoice {
   id: string;
   itineraryId: string;
@@ -80,7 +92,7 @@ export interface Invoice {
   subtotal: number;
   tax: number;
   total: number;
-  status: 'draft' | 'sent' | 'paid';
+  status: 'draft' | 'sent' | 'paid' | 'unpaid';
 }
 
 export interface InvoiceItem {

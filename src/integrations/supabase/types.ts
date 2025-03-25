@@ -49,7 +49,7 @@ export type Database = {
           id: string
           name: string
           number_of_people: number
-          start_date: string | null
+          start_date: string
           total_price: number
           tour_guides: Json
           updated_at: string
@@ -61,7 +61,7 @@ export type Database = {
           id?: string
           name: string
           number_of_people?: number
-          start_date?: string | null
+          start_date: string
           total_price?: number
           tour_guides?: Json
           updated_at?: string
@@ -73,7 +73,7 @@ export type Database = {
           id?: string
           name?: string
           number_of_people?: number
-          start_date?: string | null
+          start_date?: string
           total_price?: number
           tour_guides?: Json
           updated_at?: string
@@ -108,6 +108,39 @@ export type Database = {
           id?: string
           is_admin?: boolean | null
           updated_at?: string
+        }
+        Relationships: []
+      }
+      tour_plans: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          image_path: string | null
+          price: number
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          image_path?: string | null
+          price?: number
+          title: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          image_path?: string | null
+          price?: number
+          title?: string
+          updated_at?: string
+          user_id?: string
         }
         Relationships: []
       }

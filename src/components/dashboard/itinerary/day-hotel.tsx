@@ -9,7 +9,7 @@ import { formatRupiah } from './itinerary-utils';
 interface DayHotelProps {
   dayId: string;
   hotel: Hotel | null;
-  onSetHotel: (dayId: string, name: string, location: string, stars: number, price: number) => void;
+  onSetHotel: (dayId: string, name: string, location: string, stars: number, price: number, roomAmount: number) => void;
 }
 
 const DayHotel = ({ dayId, hotel, onSetHotel }: DayHotelProps) => {
@@ -18,8 +18,9 @@ const DayHotel = ({ dayId, hotel, onSetHotel }: DayHotelProps) => {
     const location = (document.getElementById(`hotel-location-${dayId}`) as HTMLInputElement).value;
     const stars = Number((document.getElementById(`hotel-stars-${dayId}`) as HTMLInputElement).value);
     const price = Number((document.getElementById(`hotel-price-${dayId}`) as HTMLInputElement).value);
+    const roomAmount = Number((document.getElementById(`hotel-rooms-${dayId}`) as HTMLInputElement).value);
     
-    onSetHotel(dayId, name, location, stars, price);
+    onSetHotel(dayId, name, location, stars, price, roomAmount);
     
     // Clear inputs after setting
     if (name.trim()) {
@@ -27,6 +28,7 @@ const DayHotel = ({ dayId, hotel, onSetHotel }: DayHotelProps) => {
       (document.getElementById(`hotel-location-${dayId}`) as HTMLInputElement).value = '';
       (document.getElementById(`hotel-stars-${dayId}`) as HTMLInputElement).value = '';
       (document.getElementById(`hotel-price-${dayId}`) as HTMLInputElement).value = '';
+      (document.getElementById(`hotel-rooms-${dayId}`) as HTMLInputElement).value = '';
     }
   };
 
@@ -41,23 +43,25 @@ const DayHotel = ({ dayId, hotel, onSetHotel }: DayHotelProps) => {
           <div>
             <p className="font-medium text-gray-900">{hotel.name}</p>
             <p className="text-sm text-gray-600">{hotel.location} - {hotel.stars} Stars</p>
-            <p className="text-sm text-gray-900">{formatRupiah(hotel.pricePerNight)}/night</p>
+            <p className="text-sm text-gray-700">{hotel.roomAmount || 1} rooms at {formatRupiah(hotel.pricePerNight)}/night</p>
+            <p className="text-sm text-gray-900">Total: {formatRupiah(hotel.pricePerNight * (hotel.roomAmount || 1))}</p>
           </div>
           <Button 
             variant="ghost" 
             size="icon" 
-            onClick={() => onSetHotel(dayId, '', '', 0, 0)}
+            onClick={() => onSetHotel(dayId, '', '', 0, 0, 0)}
             className="ml-auto text-rose-600 hover:text-rose-700 hover:bg-rose-400/10"
           >
             <Trash2 className="h-4 w-4" />
           </Button>
         </div>
       )}
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-3">
         <Input id={`hotel-name-${dayId}`} placeholder="Hotel name" className="bg-gray-50 border-gray-200 text-gray-900 focus:ring-amber-400/50" />
         <Input id={`hotel-location-${dayId}`} placeholder="Location" className="bg-gray-50 border-gray-200 text-gray-900 focus:ring-amber-400/50" />
         <Input id={`hotel-stars-${dayId}`} type="number" min="1" max="5" placeholder="3" className="bg-gray-50 border-gray-200 text-gray-900 focus:ring-amber-400/50" />
         <Input id={`hotel-price-${dayId}`} type="number" placeholder="500000" className="bg-gray-50 border-gray-200 text-gray-900 focus:ring-amber-400/50" />
+        <Input id={`hotel-rooms-${dayId}`} type="number" min="1" placeholder="Rooms" className="bg-gray-50 border-gray-200 text-gray-900 focus:ring-amber-400/50" />
       </div>
       <Button 
         onClick={handleSetHotel}
