@@ -1,11 +1,47 @@
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
 import { Edit, Trash2, PlusCircle, Image } from 'lucide-react';
 import { TourPlan } from '@/lib/types';
 import { formatRupiah } from '@/components/dashboard/itinerary/itinerary-utils';
 import { supabase } from '@/integrations/supabase/client';
+
+// Mock auth context (replace with your actual auth setup)
+interface User {
+  id: string;
+  role: 'user' | 'admin';
+}
+
+const useAuth = () => {
+  const [user, setUser] = useState<User | null>(null);
+
+  useEffect(() => {
+    const fetchUser = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        // Check if user_metadata exists and contains the role
+        if (user.user_metadata && user.user_metadata.role) {
+          setUser({
+            id: user.id,
+            role: user.user_metadata.role as 'user' | 'admin',
+          });
+        } else {
+          // Fallback to fetching from 'profiles' table if user_metadata is not available
+          const { data: profile } = await supabase
+            .from('profiles')
+            .select('role')
+            .eq('id', user.id)
+            .single();
+          setUser({ id: user.id, role: profile?.role || 'user' });
+        }
+      }
+    };
+    fetchUser();
+  }, []);
+
+  return user;
+};
 
 interface TourPlanCardProps {
   tourPlan?: TourPlan;
@@ -19,6 +55,7 @@ const TourPlanCard = ({ tourPlan, onEdit, onDelete, isNew = false, onClick }: To
   const [imageError, setImageError] = useState(false);
   const [signedImageUrl, setSignedImageUrl] = useState<string | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const currentUser = useAuth(); // Get current user info
 
   useEffect(() => {
     const fetchSignedUrl = async () => {
@@ -59,10 +96,12 @@ const TourPlanCard = ({ tourPlan, onEdit, onDelete, isNew = false, onClick }: To
   const displayImageUrl = tourPlan.image_path && signedImageUrl && !imageError ? signedImageUrl : fallbackImageUrl;
 
   const handleCardClick = (e: React.MouseEvent) => {
-    // Prevent dialog from opening if clicking Edit or Delete buttons
     if ((e.target as HTMLElement).closest('button')) return;
     setIsDialogOpen(true);
   };
+
+  // Check if the current user can edit (creator or admin)
+  const canEdit = currentUser && (currentUser.id === tourPlan.user_id || currentUser.role === 'admin');
 
   return (
     <>
@@ -103,7 +142,7 @@ const TourPlanCard = ({ tourPlan, onEdit, onDelete, isNew = false, onClick }: To
             variant="outline"
             size="sm"
             onClick={(e) => {
-              e.stopPropagation(); // Prevent card click from triggering dialog
+              e.stopPropagation();
               onEdit && tourPlan && onEdit(tourPlan);
             }}
             className="flex gap-1 text-blue-600 hover:text-blue-800 hover:bg-blue-50 border-blue-100"
@@ -115,7 +154,7 @@ const TourPlanCard = ({ tourPlan, onEdit, onDelete, isNew = false, onClick }: To
             variant="outline"
             size="sm"
             onClick={(e) => {
-              e.stopPropagation(); // Prevent card click from triggering dialog
+              e.stopPropagation();
               onDelete && tourPlan.id && onDelete(tourPlan.id);
             }}
             className="flex gap-1 text-rose-600 hover:text-rose-800 hover:bg-rose-50 border-rose-100"
@@ -161,6 +200,21 @@ const TourPlanCard = ({ tourPlan, onEdit, onDelete, isNew = false, onClick }: To
               <p className="text-gray-600">{new Date(tourPlan.created_at || '').toLocaleDateString()}</p>
             </div>
           </div>
+          {canEdit && (
+            <DialogFooter>
+              <Button
+                variant="outline"
+                onClick={() => {
+                  onEdit && tourPlan && onEdit(tourPlan);
+                  setIsDialogOpen(false); // Close dialog after clicking Edit
+                }}
+                className="flex gap-1 text-blue-600 hover:text-blue-800 hover:bg-blue-50 border-blue-100"
+              >
+                <Edit className="h-4 w-4" />
+                Edit Tour Plan
+              </Button>
+            </DialogFooter>
+          )}
         </DialogContent>
       </Dialog>
     </>
