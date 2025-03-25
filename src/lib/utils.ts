@@ -14,6 +14,17 @@ export function formatRupiah(amount: number) {
   }).format(amount);
 }
 
+// Format date to display nicely
+export function formatDate(dateString?: string) {
+  if (!dateString) return 'Not set';
+  const date = new Date(dateString);
+  return date.toLocaleDateString('en-US', { 
+    year: 'numeric', 
+    month: 'short', 
+    day: 'numeric' 
+  });
+}
+
 // Adding utility function for generating darker backgrounds
 export function darkenHexColor(hex: string, percent: number): string {
   // Remove the # if it exists
