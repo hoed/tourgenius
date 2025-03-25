@@ -172,17 +172,17 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
         <div className="p-4 flex items-center justify-between">
           <Link to="/dashboard" className="flex items-center gap-2">
             {isSidebarOpen && (
-              <span className="text-xl font-bold text-white">{t.tourGenius}</span>
+              <span className="text-xl font-bold text-blue">{t.tourGenius}</span>
             )}
             {!isSidebarOpen && (
-              <span className="text-xl font-bold text-white">TG</span>
+              <span className="text-xl font-bold text-blue">TG</span>
             )}
           </Link>
           <Button
             variant="ghost"
             size="icon"
             onClick={toggleSidebar}
-            className="lg:flex hidden text-white"
+            className="lg:flex hidden text-blue"
           >
             <Menu className="h-5 w-5" />
           </Button>
@@ -191,7 +191,7 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
               variant="ghost"
               size="icon"
               onClick={toggleSidebar}
-              className="lg:hidden text-white"
+              className="lg:hidden text-blue"
             >
               <X className="h-5 w-5" />
             </Button>
