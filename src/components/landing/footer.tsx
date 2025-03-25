@@ -56,7 +56,7 @@ const Footer = () => {
           </div>
         </div>
         
-        <div className="border-t border-blue-400/20 mt-12 pt-8 flex flex-col md:flex-row justify-between items-center bg-gradient-to-t from-blue-900/80 to-transparent p-8">
+        <div className="mt-12 pt-8 flex flex-col md:flex-row justify-between items-center">
           <p className="text-white text-sm mb-4 md:mb-0">
             © {new Date().getFullYear()} TourGenius. All rights reserved.
           </p>
