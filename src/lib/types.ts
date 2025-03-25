@@ -81,7 +81,7 @@ export interface Invoice {
   subtotal: number;
   tax: number;
   total: number;
-  status: 'draft' | 'sent' | 'paid';
+  status: 'draft' | 'sent' | 'paid' | 'unpaid';
 }
 
 export interface InvoiceItem {

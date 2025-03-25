@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -36,7 +35,7 @@ const InvoiceGenerator = ({ itinerary: propItinerary }: InvoiceGeneratorProps) =
     customerEmail: '',
     date: new Date().toISOString().split('T')[0],
     dueDate: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-    status: 'unpaid'  // Changed from 'draft' to 'unpaid'
+    status: 'unpaid'  // Now this will be a valid value for the Invoice type
   });
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -700,3 +699,4 @@ const InvoiceGenerator = ({ itinerary: propItinerary }: InvoiceGeneratorProps) =
 };
 
 export default InvoiceGenerator;
+
