@@ -202,8 +202,8 @@ export const calculateTotalPrice = (itinerary: TourItinerary): number => {
   const transportationTotal = itinerary.days.reduce(
     (sum, day) => {
       if (!day.transportation) return sum;
-      // Transportation is per person
-      return sum + (day.transportation.pricePerPerson * numPeople);
+      // Transportation is now a fixed price per day, not multiplied by number of people
+      return sum + day.transportation.pricePerPerson;
     },
     0
   );

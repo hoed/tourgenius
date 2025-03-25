@@ -45,8 +45,8 @@ const PriceCalculator = ({ itinerary }: PriceCalculatorProps) => {
     const transportation = {
       total: itinerary.days.reduce((sum, day) => {
         if (!day.transportation) return sum;
-        // Transportation is per person
-        return sum + (day.transportation.pricePerPerson * itinerary.numberOfPeople);
+        // Transportation is now a fixed price per day, not multiplied by number of people
+        return sum + day.transportation.pricePerPerson;
       }, 0),
       count: itinerary.days.reduce((sum, day) => sum + (day.transportation ? 1 : 0), 0)
     };

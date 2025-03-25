@@ -35,7 +35,7 @@ const InvoiceGenerator = ({ itinerary: propItinerary }: InvoiceGeneratorProps) =
     customerEmail: '',
     date: new Date().toISOString().split('T')[0],
     dueDate: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-    status: 'draft'
+    status: 'unpaid'  // Changed from 'draft' to 'unpaid'
   });
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -195,14 +195,15 @@ const InvoiceGenerator = ({ itinerary: propItinerary }: InvoiceGeneratorProps) =
     });
     
     // Process transportation - show actual transportation details
+    // Transportation is now a fixed price per day, not multiplied by number of people
     itinerary.days.forEach((day, dayIndex) => {
       if (day.transportation) {
         items.push({
           id: `trans-${dayIndex}`,
           description: `Day ${day.day}: Transportation - ${day.transportation.description}`,
-          quantity: itinerary.numberOfPeople,
+          quantity: 1, // Fixed to 1 as it's per day, not per person
           unitPrice: day.transportation.pricePerPerson,
-          total: day.transportation.pricePerPerson * itinerary.numberOfPeople
+          total: day.transportation.pricePerPerson
         });
       }
     });
@@ -295,7 +296,9 @@ const InvoiceGenerator = ({ itinerary: propItinerary }: InvoiceGeneratorProps) =
     doc.setFontSize(10);
     doc.text(`Date: ${invoice.date || new Date().toISOString().split('T')[0]}`, 190, 60, { align: 'right' });
     doc.text(`Due Date: ${invoice.dueDate || new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]}`, 190, 70, { align: 'right' });
-    doc.text(`Status: ${invoice.status || 'Draft'}`, 190, 80, { align: 'right' });
+    
+    // When adding the status, use 'Unpaid' instead of 'Draft'
+    doc.text(`Status: ${invoice.status || 'Unpaid'}`, 190, 80, { align: 'right' });
 
     // Add Itinerary name and details
     if (itinerary) {
@@ -657,38 +660,4 @@ const InvoiceGenerator = ({ itinerary: propItinerary }: InvoiceGeneratorProps) =
                 </div>
               </div>
 
-              <div className="w-full max-w-xs ml-auto">
-                <div className="flex justify-between mb-2">
-                  <span className="text-gray-700">Subtotal:</span>
-                  <span className="text-gray-900">{formatRupiah(subtotal)}</span>
-                </div>
-                <div className="flex justify-between mb-2">
-                  <span className="text-gray-700">Tax (5%):</span>
-                  <span className="text-gray-900">{formatRupiah(tax)}</span>
-                </div>
-                <Separator className="my-2 bg-gray-200" />
-                <div className="flex justify-between font-bold bg-amber-100 p-2 rounded-md">
-                  <span className="text-gray-700">Total:</span>
-                  <span className="text-amber-800">{formatRupiah(total)}</span>
-                </div>
-                {itinerary && itinerary.numberOfPeople > 1 && (
-                  <div className="flex justify-between text-sm mt-2 text-gray-700">
-                    <span>Price per person:</span>
-                    <span>{formatRupiah(total / itinerary.numberOfPeople)}</span>
-                  </div>
-                )}
-              </div>
-
-              <div className="mt-12 text-center text-sm text-gray-600 border-t border-gray-200 pt-4">
-                <p>Thank you for your business!</p>
-                <p>Payment is due within 14 days of receipt of this invoice.</p>
-              </div>
-            </CardContent>
-          </GlassCard>
-        </div>
-      </div>
-    </div>
-  );
-};
-
-export default InvoiceGenerator;
+              <div className="w-
