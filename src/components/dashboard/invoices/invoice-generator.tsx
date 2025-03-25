@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -11,6 +12,7 @@ import GlassCard from '@/components/ui/glass-card';
 import { useLocation, useNavigate } from 'react-router-dom';
 import jsPDF from 'jspdf';
 import { supabase } from '@/integrations/supabase/client';
+import { addCustomerToDatabase } from '../itinerary/itinerary-utils';
 
 interface InvoiceGeneratorProps {
   itinerary?: TourItinerary;
@@ -21,6 +23,7 @@ const InvoiceGenerator = ({ itinerary: propItinerary }: InvoiceGeneratorProps) =
   const navigate = useNavigate();
   const [itinerary, setItinerary] = useState<TourItinerary | undefined>(propItinerary);
   const invoiceRef = useRef<HTMLDivElement>(null);
+  const [isSending, setIsSending] = useState(false);
   
   useEffect(() => {
     if (location.state?.itinerary && !propItinerary) {
@@ -41,67 +44,84 @@ const InvoiceGenerator = ({ itinerary: propItinerary }: InvoiceGeneratorProps) =
     setInvoice(prev => ({ ...prev, [name]: value }));
   };
 
-  const addCustomerToDatabase = async (customerName: string, customerEmail: string) => {
+  const handleGenerateInvoice = async () => {
+    if (!invoice.customerName || !invoice.customerEmail) {
+      toast.error('Please fill in all required fields');
+      return;
+    }
+    
+    const success = await addCustomerToDatabase(invoice.customerName, invoice.customerEmail);
+    if (success) {
+      toast.success('Invoice generated successfully!');
+    }
+  };
+
+  const handleSendInvoice = async () => {
+    if (!invoice.customerName || !invoice.customerEmail) {
+      toast.error('Please fill in all required fields');
+      return;
+    }
+    
+    setIsSending(true);
     try {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session?.user) {
-        toast.error('You must be logged in to add customers');
-        return;
-      }
+      // First, add the customer to the database
+      await addCustomerToDatabase(invoice.customerName, invoice.customerEmail);
+
+      // Generate PDF as base64
+      const pdfBase64 = await generatePDFBase64();
+
+      // Create HTML email content
+      const htmlContent = `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+          <div style="background: linear-gradient(to right, #f97316, #f59e0b); padding: 20px; color: white; border-radius: 10px 10px 0 0;">
+            <h1 style="margin: 0; font-size: 24px;">Invoice from TourGenius</h1>
+          </div>
+          <div style="border: 1px solid #e5e7eb; border-top: none; padding: 20px; border-radius: 0 0 10px 10px;">
+            <p>Dear ${invoice.customerName},</p>
+            <p>Thank you for choosing TourGenius for your travel planning needs!</p>
+            <p>Please find attached your invoice for the "${itinerary?.name}" itinerary.</p>
+            <p>Invoice details:</p>
+            <ul>
+              <li>Invoice Date: ${invoice.date}</li>
+              <li>Due Date: ${invoice.dueDate}</li>
+              <li>Total Amount: ${formatRupiah(subtotal + tax)}</li>
+            </ul>
+            <p>If you have any questions, please don't hesitate to contact us.</p>
+            <p>Best regards,<br>The TourGenius Team</p>
+          </div>
+        </div>
+      `;
+
+      // Send email via Supabase Edge Function
+      const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/send-invoice`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${(await supabase.auth.getSession()).data.session?.access_token}`
+        },
+        body: JSON.stringify({
+          to: invoice.customerEmail,
+          name: invoice.customerName,
+          subject: `Invoice for ${itinerary?.name} Tour Package`,
+          htmlContent,
+          pdfAttachment: pdfBase64
+        })
+      });
+
+      const result = await response.json();
       
-      const { data: existingCustomers, error: fetchError } = await supabase
-        .from('customers')
-        .select('*')
-        .eq('email', customerEmail)
-        .eq('user_id', session.user.id);
-      
-      if (fetchError) {
-        console.error('Error checking for existing customer:', fetchError);
-        return;
-      }
-      
-      if (!existingCustomers || existingCustomers.length === 0) {
-        const { error } = await supabase
-          .from('customers')
-          .insert([{ 
-            name: customerName, 
-            email: customerEmail,
-            user_id: session.user.id,
-            status: 'active',
-            notes: 'Added via invoice generation'
-          }]);
-        
-        if (error) {
-          console.error('Error adding customer:', error);
-          return;
-        }
-        
-        toast.success('New customer added to database');
+      if (result.success) {
+        toast.success('Invoice sent to customer!');
+        setInvoice(prev => ({ ...prev, status: 'sent' }));
       } else {
-        console.log('Customer already exists in database');
+        throw new Error(result.error || 'Failed to send email');
       }
     } catch (error) {
-      console.error('Error in addCustomerToDatabase:', error);
+      console.error('Error sending invoice:', error);
+      toast.error(`Failed to send invoice: ${error.message || 'Unknown error'}`);
+    } finally {
+      setIsSending(false);
     }
-  };
-
-  const handleGenerateInvoice = () => {
-    if (!invoice.customerName || !invoice.customerEmail) {
-      toast.error('Please fill in all required fields');
-      return;
-    }
-    addCustomerToDatabase(invoice.customerName, invoice.customerEmail);
-    toast.success('Invoice generated successfully!');
-  };
-
-  const handleSendInvoice = () => {
-    if (!invoice.customerName || !invoice.customerEmail) {
-      toast.error('Please fill in all required fields');
-      return;
-    }
-    addCustomerToDatabase(invoice.customerName, invoice.customerEmail);
-    toast.success('Invoice sent to customer!');
-    setInvoice(prev => ({ ...prev, status: 'sent' }));
   };
 
   const handleAddToCalendar = () => {
@@ -133,73 +153,71 @@ const InvoiceGenerator = ({ itinerary: propItinerary }: InvoiceGeneratorProps) =
     if (!itinerary) return [];
     const items = [];
     
+    // Process destinations - show actual destinations in invoice
     if (itinerary.days.some(day => day.destinations.length > 0)) {
-      const totalDestinationsCost = itinerary.days.reduce((sum, day) => {
-        return sum + day.destinations.reduce((daySum, dest) => 
-          daySum + dest.pricePerPerson * itinerary.numberOfPeople, 0);
-      }, 0);
-      items.push({
-        id: '1',
-        description: 'Destinations & Attractions',
-        quantity: itinerary.numberOfPeople,
-        unitPrice: totalDestinationsCost / itinerary.numberOfPeople,
-        total: totalDestinationsCost
+      itinerary.days.forEach((day, dayIndex) => {
+        day.destinations.forEach((dest, destIndex) => {
+          items.push({
+            id: `dest-${dayIndex}-${destIndex}`,
+            description: `Day ${day.day}: ${dest.name}`,
+            quantity: itinerary.numberOfPeople,
+            unitPrice: dest.pricePerPerson,
+            total: dest.pricePerPerson * itinerary.numberOfPeople
+          });
+        });
       });
     }
     
-    const totalAccommodationCost = itinerary.days.reduce((sum, day) => {
-      return sum + (day.hotel ? day.hotel.pricePerNight : 0);
-    }, 0);
-    if (totalAccommodationCost > 0) {
+    // Process accommodations - show actual hotels with room details
+    itinerary.days.forEach((day, dayIndex) => {
+      if (day.hotel) {
+        const roomsNeeded = day.hotel.roomAmount || Math.ceil(itinerary.numberOfPeople / 2);
+        items.push({
+          id: `hotel-${dayIndex}`,
+          description: `Day ${day.day}: ${day.hotel.name} (${roomsNeeded} room${roomsNeeded > 1 ? 's' : ''})`,
+          quantity: roomsNeeded,
+          unitPrice: day.hotel.pricePerNight,
+          total: day.hotel.pricePerNight * roomsNeeded
+        });
+      }
+    });
+    
+    // Process meals - show actual meals
+    itinerary.days.forEach((day, dayIndex) => {
+      day.meals.forEach((meal, mealIndex) => {
+        items.push({
+          id: `meal-${dayIndex}-${mealIndex}`,
+          description: `Day ${day.day}: ${meal.type.charAt(0).toUpperCase() + meal.type.slice(1)} - ${meal.description}`,
+          quantity: itinerary.numberOfPeople,
+          unitPrice: meal.pricePerPerson,
+          total: meal.pricePerPerson * itinerary.numberOfPeople
+        });
+      });
+    });
+    
+    // Process transportation - show actual transportation details
+    itinerary.days.forEach((day, dayIndex) => {
+      if (day.transportation) {
+        items.push({
+          id: `trans-${dayIndex}`,
+          description: `Day ${day.day}: Transportation - ${day.transportation.description}`,
+          quantity: itinerary.numberOfPeople,
+          unitPrice: day.transportation.pricePerPerson,
+          total: day.transportation.pricePerPerson * itinerary.numberOfPeople
+        });
+      }
+    });
+    
+    // Process tour guides - show actual guides
+    itinerary.tourGuides.forEach((guide, guideIndex) => {
       items.push({
-        id: '2',
-        description: `Accommodation (${itinerary.days.length} nights)`,
+        id: `guide-${guideIndex}`,
+        description: `Tour Guide: ${guide.name} (${guide.expertise}) for ${itinerary.days.length} days`,
         quantity: 1,
-        unitPrice: totalAccommodationCost,
-        total: totalAccommodationCost
+        unitPrice: guide.pricePerDay * itinerary.days.length,
+        total: guide.pricePerDay * itinerary.days.length
       });
-    }
-    
-    const totalMealsCost = itinerary.days.reduce((sum, day) => {
-      return sum + day.meals.reduce((daySum, meal) => 
-        daySum + meal.pricePerPerson * itinerary.numberOfPeople, 0);
-    }, 0);
-    if (totalMealsCost > 0) {
-      items.push({
-        id: '3',
-        description: 'Meals & Dining',
-        quantity: itinerary.numberOfPeople,
-        unitPrice: totalMealsCost / itinerary.numberOfPeople,
-        total: totalMealsCost
-      });
-    }
-    
-    const totalTransportationCost = itinerary.days.reduce((sum, day) => {
-      return sum + (day.transportation ? 
-        day.transportation.pricePerPerson * itinerary.numberOfPeople : 0);
-    }, 0);
-    if (totalTransportationCost > 0) {
-      items.push({
-        id: '4',
-        description: 'Transportation',
-        quantity: itinerary.numberOfPeople,
-        unitPrice: totalTransportationCost / itinerary.numberOfPeople,
-        total: totalTransportationCost
-      });
-    }
-    
-    const totalGuidesCost = itinerary.tourGuides.reduce((sum, guide) => {
-      return sum + guide.pricePerDay * itinerary.days.length;
-    }, 0);
-    if (totalGuidesCost > 0) {
-      items.push({
-        id: '5',
-        description: `Tour Guide Services (${itinerary.days.length} days)`,
-        quantity: 1,
-        unitPrice: totalGuidesCost,
-        total: totalGuidesCost
-      });
-    }
+    });
     
     return items;
   };
@@ -215,7 +233,22 @@ const InvoiceGenerator = ({ itinerary: propItinerary }: InvoiceGeneratorProps) =
   const tax = subtotal * 0.05;
   const total = subtotal + tax;
 
-  const handleDownloadPDF = () => {
+  // Generate PDF as base64 string for email attachment
+  const generatePDFBase64 = () => {
+    return new Promise<string>((resolve, reject) => {
+      try {
+        const doc = generatePDF();
+        const pdfBase64 = doc.output('datauristring').split(',')[1];
+        resolve(pdfBase64);
+      } catch (error) {
+        console.error('Error generating PDF base64:', error);
+        reject(error);
+      }
+    });
+  };
+
+  // Generate PDF with enhanced styling
+  const generatePDF = () => {
     const doc = new jsPDF();
     
     // Define colors as tuples
@@ -223,10 +256,19 @@ const InvoiceGenerator = ({ itinerary: propItinerary }: InvoiceGeneratorProps) =
     const orange500: [number, number, number] = [249, 115, 22]; // #f97316
     const gray700: [number, number, number] = [55, 65, 81]; // #374151
     const gray200: [number, number, number] = [229, 231, 235]; // #e5e7eb
+    const amber600: [number, number, number] = [217, 119, 6]; // #d97706
 
-    // Header with gradient-like effect
+    // Add background rectangle for header
+    doc.setFillColor(250, 250, 250);
+    doc.rect(0, 0, 210, 40, 'F');
+    
+    // Add gradient-like effect for header
+    doc.setFillColor(...orange500);
+    doc.rect(0, 0, 210, 2, 'F');
+    
+    // Header content
     doc.setFontSize(24);
-    doc.setTextColor(...amber400);
+    doc.setTextColor(...amber600);
     doc.text('Invoice', 20, 20);
     doc.setFontSize(12);
     doc.setTextColor(...gray700);
@@ -256,69 +298,129 @@ const InvoiceGenerator = ({ itinerary: propItinerary }: InvoiceGeneratorProps) =
     doc.text(`Due Date: ${invoice.dueDate || new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]}`, 190, 70, { align: 'right' });
     doc.text(`Status: ${invoice.status || 'Draft'}`, 190, 80, { align: 'right' });
 
+    // Add Itinerary name and details
+    if (itinerary) {
+      doc.setFontSize(12);
+      doc.setTextColor(...orange500);
+      doc.text(`Tour Package: ${itinerary.name}`, 20, 90);
+      doc.setFontSize(10);
+      doc.setTextColor(...gray700);
+      doc.text(`Duration: ${itinerary.days.length} days | Travelers: ${itinerary.numberOfPeople}`, 20, 100);
+    }
+
     // Items Section
     doc.setFontSize(14);
     doc.setTextColor(...amber400);
-    doc.text('Invoice Items:', 20, 100);
-    doc.setDrawColor(...gray200);
-    doc.line(20, 105, 190, 105); // Section separator
-
-    // Table Header
-    let yPos = 115;
+    doc.text('Invoice Items:', 20, 115);
+    
+    // Add decorative line
+    doc.setDrawColor(...orange500);
+    doc.setLineWidth(0.7);
+    doc.line(20, 120, 190, 120);
+    
+    // Add background for table header
+    doc.setFillColor(250, 250, 250);
+    doc.rect(20, 125, 170, 10, 'F');
+    
+    // Table Header with border
+    let yPos = 132;
     doc.setFontSize(10);
     doc.setTextColor(...gray700);
-    doc.setFillColor(...gray200);
-    doc.rect(20, yPos - 5, 170, 10, 'F'); // Header background
     doc.text('Description', 25, yPos);
     doc.text('Qty', 130, yPos, { align: 'right' });
     doc.text('Unit Price', 155, yPos, { align: 'right' });
     doc.text('Total', 185, yPos, { align: 'right' });
     yPos += 5;
     doc.setDrawColor(...gray700);
-    doc.line(20, yPos, 190, yPos); // Table header underline
+    doc.setLineWidth(0.2);
+    doc.line(20, yPos, 190, yPos);
     yPos += 10;
 
-    // Table Rows
+    // Table Rows with alternating background
     invoiceItems.forEach((item, index) => {
+      // Add subtle alternating background
+      if (index % 2 === 0) {
+        doc.setFillColor(250, 250, 250);
+        doc.rect(20, yPos - 5, 170, 10, 'F');
+      }
+      
       doc.setTextColor(...gray700);
-      doc.text(item.description, 25, yPos);
+      // Ensure description fits within bounds
+      const description = item.description.length > 50 
+        ? item.description.substring(0, 47) + '...' 
+        : item.description;
+      doc.text(description, 25, yPos);
       doc.text(item.quantity.toString(), 130, yPos, { align: 'right' });
       doc.text(formatRupiah(item.unitPrice), 155, yPos, { align: 'right' });
       doc.text(formatRupiah(item.total), 185, yPos, { align: 'right' });
       yPos += 10;
+      
+      // Add lighter row separator
       if (index < invoiceItems.length - 1) {
         doc.setDrawColor(...gray200);
-        doc.line(20, yPos - 5, 190, yPos - 5); // Row separator
+        doc.setLineWidth(0.1);
+        doc.line(25, yPos - 5, 185, yPos - 5);
       }
     });
 
-    // Totals Section
-    yPos += 10;
+    // Border around the items table
     doc.setDrawColor(...gray200);
-    doc.line(140, yPos - 5, 190, yPos - 5); // Totals separator
+    doc.setLineWidth(0.5);
+    doc.rect(20, 125, 170, yPos - 125, 'S');
+
+    // Totals Section with background
+    yPos += 5;
+    doc.setFillColor(250, 250, 250);
+    doc.rect(140, yPos - 5, 50, 40, 'F');
+    doc.setDrawColor(...orange500);
+    doc.setLineWidth(0.5);
+    doc.rect(140, yPos - 5, 50, 40, 'S');
+    
     doc.setFontSize(10);
+    doc.setTextColor(...gray700);
     doc.text(`Subtotal:`, 140, yPos, { align: 'right' });
     doc.text(`${formatRupiah(subtotal)}`, 185, yPos, { align: 'right' });
     yPos += 10;
     doc.text(`Tax (5%):`, 140, yPos, { align: 'right' });
     doc.text(`${formatRupiah(tax)}`, 185, yPos, { align: 'right' });
     yPos += 10;
-    doc.setDrawColor(...amber400);
-    doc.line(140, yPos - 5, 190, yPos - 5); // Total underline
-    yPos += 10;
+    
+    // Highlight the total with a background
+    doc.setFillColor(...amber400);
+    doc.rect(140, yPos - 5, 50, 10, 'F');
     doc.setFontSize(12);
-    doc.setTextColor(...orange500);
+    doc.setTextColor(255, 255, 255);
     doc.text(`Total:`, 140, yPos, { align: 'right' });
     doc.text(`${formatRupiah(total)}`, 185, yPos, { align: 'right' });
 
-    // Footer
-    yPos += 20;
-    doc.setFontSize(8);
+    // Add per person price if relevant
+    if (itinerary && itinerary.numberOfPeople > 1) {
+      yPos += 15;
+      doc.setFontSize(10);
+      doc.setTextColor(...gray700);
+      doc.text(`Price per person: ${formatRupiah(total / itinerary.numberOfPeople)}`, 185, yPos, { align: 'right' });
+    }
+
+    // Footer with background
+    yPos = 270;
+    doc.setFillColor(250, 250, 250);
+    doc.rect(0, yPos - 10, 210, 40, 'F');
+    doc.setDrawColor(...orange500);
+    doc.setLineWidth(0.5);
+    doc.line(20, yPos - 5, 190, yPos - 5);
+    
+    doc.setFontSize(10);
     doc.setTextColor(...gray700);
     doc.text('Thank you for your business!', 105, yPos, { align: 'center' });
+    doc.setFontSize(8);
     doc.text('Payment is due within 14 days of receipt of this invoice.', 105, yPos + 5, { align: 'center' });
+    doc.text('TourGenius | Premium Tour Planning | +62 123 456 7890', 105, yPos + 10, { align: 'center' });
 
-    // Save the PDF
+    return doc;
+  };
+
+  const handleDownloadPDF = () => {
+    const doc = generatePDF();
     doc.save(`invoice-${invoice.customerName || 'customer'}-${new Date().toISOString().split('T')[0]}.pdf`);
     toast.success('PDF downloaded successfully!');
   };
@@ -456,9 +558,10 @@ const InvoiceGenerator = ({ itinerary: propItinerary }: InvoiceGeneratorProps) =
                 className="w-full border-amber-400/50 text-amber-600 hover:bg-amber-400/10"
                 variant="outline"
                 onClick={handleSendInvoice}
+                disabled={isSending}
               >
                 <Send className="h-4 w-4 mr-2" />
-                Send to Customer
+                {isSending ? 'Sending...' : 'Send to Customer'}
               </Button>
             </CardFooter>
           </GlassCard>
@@ -518,28 +621,39 @@ const InvoiceGenerator = ({ itinerary: propItinerary }: InvoiceGeneratorProps) =
                 </div>
               </div>
 
+              {itinerary && (
+                <div className="mb-6 p-4 border border-amber-200 bg-amber-50 rounded-md">
+                  <h3 className="font-medium text-amber-700">Tour Package: {itinerary.name}</h3>
+                  <p className="text-sm text-gray-600">
+                    Duration: {itinerary.days.length} days | Travelers: {itinerary.numberOfPeople}
+                  </p>
+                </div>
+              )}
+
               <div className="mb-8">
-                <h3 className="font-medium text-amber-700 mb-4">Invoice Items:</h3>
-                <table className="w-full">
-                  <thead>
-                    <tr className="border-b border-gray-200">
-                      <th className="text-left pb-2 text-gray-700">Description</th>
-                      <th className="text-right pb-2 text-gray-700">Qty</th>
-                      <th className="text-right pb-2 text-gray-700">Unit Price</th>
-                      <th className="text-right pb-2 text-gray-700">Total</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {invoiceItems.map((item) => (
-                      <tr key={item.id} className="border-b border-gray-200">
-                        <td className="py-3 text-gray-900">{item.description}</td>
-                        <td className="py-3 text-right text-gray-900">{item.quantity}</td>
-                        <td className="py-3 text-right text-gray-900">{formatRupiah(item.unitPrice)}</td>
-                        <td className="py-3 text-right text-gray-900">{formatRupiah(item.total)}</td>
+                <h3 className="font-medium text-amber-700 mb-4 pb-2 border-b border-amber-200">Invoice Items:</h3>
+                <div className="overflow-x-auto">
+                  <table className="w-full">
+                    <thead>
+                      <tr className="border-b border-gray-200 bg-gray-50">
+                        <th className="text-left py-3 px-2 text-gray-700">Description</th>
+                        <th className="text-right py-3 px-2 text-gray-700">Qty</th>
+                        <th className="text-right py-3 px-2 text-gray-700">Unit Price</th>
+                        <th className="text-right py-3 px-2 text-gray-700">Total</th>
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
+                    </thead>
+                    <tbody>
+                      {invoiceItems.map((item) => (
+                        <tr key={item.id} className="border-b border-gray-200 hover:bg-gray-50">
+                          <td className="py-3 px-2 text-gray-900">{item.description}</td>
+                          <td className="py-3 px-2 text-right text-gray-900">{item.quantity}</td>
+                          <td className="py-3 px-2 text-right text-gray-900">{formatRupiah(item.unitPrice)}</td>
+                          <td className="py-3 px-2 text-right text-gray-900">{formatRupiah(item.total)}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
               </div>
 
               <div className="w-full max-w-xs ml-auto">
@@ -552,13 +666,19 @@ const InvoiceGenerator = ({ itinerary: propItinerary }: InvoiceGeneratorProps) =
                   <span className="text-gray-900">{formatRupiah(tax)}</span>
                 </div>
                 <Separator className="my-2 bg-gray-200" />
-                <div className="flex justify-between font-bold">
+                <div className="flex justify-between font-bold bg-amber-100 p-2 rounded-md">
                   <span className="text-gray-700">Total:</span>
-                  <span className="text-gray-900">{formatRupiah(total)}</span>
+                  <span className="text-amber-800">{formatRupiah(total)}</span>
                 </div>
+                {itinerary && itinerary.numberOfPeople > 1 && (
+                  <div className="flex justify-between text-sm mt-2 text-gray-700">
+                    <span>Price per person:</span>
+                    <span>{formatRupiah(total / itinerary.numberOfPeople)}</span>
+                  </div>
+                )}
               </div>
 
-              <div className="mt-12 text-center text-sm text-gray-600">
+              <div className="mt-12 text-center text-sm text-gray-600 border-t border-gray-200 pt-4">
                 <p>Thank you for your business!</p>
                 <p>Payment is due within 14 days of receipt of this invoice.</p>
               </div>

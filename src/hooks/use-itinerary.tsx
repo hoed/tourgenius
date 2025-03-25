@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { toast } from 'sonner';
 import { useNavigate } from 'react-router-dom';
@@ -16,9 +17,9 @@ export const useItinerary = ({ initialItinerary }: UseItineraryProps) => {
     }
     
     return {
-      id: undefined, // Let Supabase generate UUID for new itineraries
+      id: '',
       name: 'New Tour Itinerary',
-      start_date: new Date().toISOString(), // Set default start_date
+      start_date: new Date().toISOString(),
       days: [{
         id: Date.now().toString(),
         day: 1,
@@ -130,8 +131,8 @@ export const useItinerary = ({ initialItinerary }: UseItineraryProps) => {
     }));
   };
 
-  // Hotel handlers
-  const setHotel = (dayId: string, name: string, location: string, stars: number, price: number) => {
+  // Hotel handlers - Updated to include roomAmount
+  const setHotel = (dayId: string, name: string, location: string, stars: number, price: number, roomAmount: number = 0) => {
     setItinerary((prev) => ({
       ...prev,
       days: prev.days.map(day => {
@@ -144,6 +145,7 @@ export const useItinerary = ({ initialItinerary }: UseItineraryProps) => {
               location,
               stars,
               pricePerNight: price,
+              roomAmount: roomAmount || Math.ceil(prev.numberOfPeople / 2),
               image: undefined
             } : null
           };

@@ -29,13 +29,14 @@ export interface Hotel {
   stars: number;
   pricePerNight: number;
   image?: string;
+  roomAmount?: number; // New field for number of rooms
 }
 
 export interface Transportation {
   id: string;
   type: 'flight' | 'train' | 'bus' | 'car' | 'ferry';
   description: string;
-  pricePerPerson: number; // This is actually price per day, not per person
+  pricePerPerson: number; // Price per person
 }
 
 export interface Meal {

@@ -1,10 +1,11 @@
+
 import { format } from 'date-fns';
 import { supabase } from '@/integrations/supabase/client';
 import { TourItinerary, TourGuide } from '@/lib/types';
 import { NavigateFunction } from 'react-router-dom';
 import { toast } from 'sonner';
 
-// Function to format currency in Rupiah
+// Format currency in Rupiah
 export const formatRupiah = (amount: number): string => {
   return new Intl.NumberFormat('id-ID', {
     style: 'currency',
@@ -13,14 +14,14 @@ export const formatRupiah = (amount: number): string => {
   }).format(amount);
 };
 
-// Function to format date for Google Calendar
+// Format date for Google Calendar
 export const formatDateForGoogleCalendar = (date: string): string => {
   if (!date) return '';
   const formattedDate = format(new Date(date), 'yyyyMMdd');
   return formattedDate;
 };
 
-// Function to save to Google Calendar
+// Save to Google Calendar
 export const saveToGoogleCalendar = (itinerary: TourItinerary): void => {
   if (!itinerary || !itinerary.days || itinerary.days.length === 0) {
     toast.error('No itinerary data to save to calendar');
@@ -73,7 +74,7 @@ export const saveToGoogleCalendar = (itinerary: TourItinerary): void => {
   window.open(googleCalendarUrl, '_blank');
 };
 
-// Function to save itinerary to Supabase
+// Save itinerary to Supabase - Fixed to properly handle errors
 export const saveItineraryToSupabase = async (
   itinerary: TourItinerary,
   selectedDate: Date | undefined,
@@ -94,63 +95,60 @@ export const saveItineraryToSupabase = async (
       return;
     }
 
-    const { data: { session }, error: authError } = await supabase.auth.getSession();
-    if (authError || !session?.user) {
+    const sessionResponse = await supabase.auth.getSession();
+    if (sessionResponse.error || !sessionResponse.data.session?.user) {
       toast.error('You must be logged in to save an itinerary');
       navigate('/auth');
       return;
     }
 
+    const userId = sessionResponse.data.session.user.id;
     const totalPrice = calculateTotalPrice(itinerary);
 
     const itineraryData = {
       id: itinerary.id && itinerary.id.length > 10 ? itinerary.id : undefined,
-      user_id: session.user.id,
+      user_id: userId,
       name: itinerary.name.trim(),
       start_date: selectedDate.toISOString(),
       number_of_people: itinerary.numberOfPeople,
       days: JSON.stringify(itinerary.days || []),
       tour_guides: JSON.stringify(itinerary.tourGuides || []),
       total_price: totalPrice,
-      created_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
     };
 
     console.log('Attempting to save itineraryData:', itineraryData);
 
+    let response;
     if (itinerary.id && itinerary.id.length > 10) {
-      const { data, error } = await supabase
+      // Update existing itinerary
+      response = await supabase
         .from('itineraries')
         .update(itineraryData)
         .eq('id', itinerary.id)
-        .eq('user_id', session.user.id)
+        .eq('user_id', userId)
         .select()
         .single();
-
-      if (error) {
-        console.error('Supabase update error:', error);
-        toast.error(`Failed to update itinerary: ${error.message} (Code: ${error.code})`);
-        return;
-      }
-
-      toast.success('Itinerary updated successfully!');
-      navigate(`/dashboard/itinerary/${data.id}`);
     } else {
-      const { data, error } = await supabase
+      // Create new itinerary
+      response = await supabase
         .from('itineraries')
-        .insert([itineraryData])
+        .insert([{ ...itineraryData, created_at: new Date().toISOString() }])
         .select()
         .single();
-
-      if (error) {
-        console.error('Supabase insert error:', error);
-        toast.error(`Failed to save itinerary: ${error.message} (Code: ${error.code})`);
-        return;
-      }
-
-      toast.success('Itinerary saved successfully!');
-      navigate(`/dashboard/itinerary/${data.id}`);
     }
+
+    if (response.error) {
+      console.error('Supabase error:', response.error);
+      toast.error(`Failed to save itinerary: ${response.error.message} (Code: ${response.error.code})`);
+      return;
+    }
+
+    console.log('Itinerary saved successfully:', response.data);
+    toast.success(itinerary.id ? 'Itinerary updated successfully!' : 'Itinerary saved successfully!');
+    
+    // Navigate to the itinerary page with the new ID
+    navigate(`/dashboard/itinerary?id=${response.data.id}`);
   } catch (error) {
     console.error('Unexpected error in saveItineraryToSupabase:', error);
     toast.error(
@@ -161,7 +159,7 @@ export const saveItineraryToSupabase = async (
   }
 };
 
-// Function to calculate total price considering number of people
+// Calculate total price considering number of people and room amounts
 export const calculateTotalPrice = (itinerary: TourItinerary): number => {
   if (!itinerary || !itinerary.days || itinerary.days.length === 0) return 0;
 
@@ -178,7 +176,12 @@ export const calculateTotalPrice = (itinerary: TourItinerary): number => {
   );
 
   const hotelsTotal = itinerary.days.reduce(
-    (sum, day) => sum + (day.hotel ? day.hotel.pricePerNight : 0),
+    (sum, day) => {
+      if (!day.hotel) return sum;
+      // Calculate hotel price based on rooms needed
+      const roomsNeeded = day.hotel.roomAmount || Math.ceil(numPeople / 2);
+      return sum + (day.hotel.pricePerNight * roomsNeeded);
+    },
     0
   );
 
@@ -193,7 +196,11 @@ export const calculateTotalPrice = (itinerary: TourItinerary): number => {
   );
 
   const transportationTotal = itinerary.days.reduce(
-    (sum, day) => sum + (day.transportation ? day.transportation.pricePerPerson : 0),
+    (sum, day) => {
+      if (!day.transportation) return sum;
+      // Transportation is per person
+      return sum + (day.transportation.pricePerPerson * numPeople);
+    },
     0
   );
 
@@ -208,4 +215,52 @@ export const calculateTotalPrice = (itinerary: TourItinerary): number => {
   const tax = subtotal * 0.05;
 
   return subtotal + serviceFee + tax;
+};
+
+// Add customer to database
+export const addCustomerToDatabase = async (customerName: string, customerEmail: string) => {
+  try {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session?.user) {
+      toast.error('You must be logged in to add customers');
+      return;
+    }
+    
+    const { data: existingCustomers, error: fetchError } = await supabase
+      .from('customers')
+      .select('*')
+      .eq('email', customerEmail)
+      .eq('user_id', session.user.id);
+    
+    if (fetchError) {
+      console.error('Error checking for existing customer:', fetchError);
+      return;
+    }
+    
+    if (!existingCustomers || existingCustomers.length === 0) {
+      const { error } = await supabase
+        .from('customers')
+        .insert([{ 
+          name: customerName, 
+          email: customerEmail,
+          user_id: session.user.id,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        }]);
+      
+      if (error) {
+        console.error('Error adding customer:', error);
+        return false;
+      }
+      
+      toast.success('New customer added to database');
+      return true;
+    } else {
+      console.log('Customer already exists in database');
+      return true;
+    }
+  } catch (error) {
+    console.error('Error in addCustomerToDatabase:', error);
+    return false;
+  }
 };
