@@ -194,7 +194,7 @@ const Dashboard = () => {
       <Toaster position="top-center" richColors />
       
       <div className="container mx-auto px-4 py-6 space-y-8">
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4 md:gap-6">
           {/* Stats Cards */}
           <Card className="bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-100 shadow-md">
             <CardHeader className="pb-2">
@@ -206,6 +206,9 @@ const Dashboard = () => {
                 <FileText className="h-8 w-8 text-blue-300" />
               </div>
               <p className="text-blue-600 text-sm mt-2">Total created itineraries</p>
+              <Link to="/dashboard/itinerary" className="text-blue-500 text-xs mt-2 hover:underline inline-block">
+                View all itineraries →
+              </Link>
             </CardContent>
           </Card>
 
@@ -238,6 +241,9 @@ const Dashboard = () => {
                 <Users className="h-8 w-8 text-amber-300" />
               </div>
               <p className="text-amber-600 text-sm mt-2">Customers in database</p>
+              <Link to="/dashboard/customers" className="text-amber-500 text-xs mt-2 hover:underline inline-block">
+                View all customers →
+              </Link>
             </CardContent>
           </Card>
 
@@ -257,6 +263,9 @@ const Dashboard = () => {
                 <Map className="h-8 w-8 text-purple-300" />
               </div>
               <p className="text-purple-600 text-sm mt-2">Total value of all itineraries</p>
+              <Link to="/dashboard/invoices" className="text-purple-500 text-xs mt-2 hover:underline inline-block">
+                Generate invoices →
+              </Link>
             </CardContent>
           </Card>
         </div>
@@ -268,7 +277,7 @@ const Dashboard = () => {
           </Button>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
           {renderItineraries()}
         </div>
       </div>

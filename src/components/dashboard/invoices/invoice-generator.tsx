@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -426,41 +425,43 @@ const InvoiceGenerator = ({ itinerary: propItinerary }: InvoiceGeneratorProps) =
   };
 
   const handlePrint = () => {
-    if (invoiceRef.current) {
-      const printWindow = window.open('', '_blank');
-      if (printWindow) {
-        printWindow.document.write(`
-          <html>
-            <head>
-              <title>Invoice</title>
-              <style>
-                body { font-family: Arial, sans-serif; padding: 20px; }
-                .invoice { max-width: 800px; margin: auto; }
-                .header { display: flex; justify-content: space-between; margin-bottom: 20px; }
-                .details { display: flex; justify-content: space-between; margin-bottom: 20px; }
-                table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
-                th, td { padding: 8px; text-align: left; border-bottom: 1px solid #ddd; }
-                th { font-weight: bold; }
-                .right { text-align: right; }
-                .totals { max-width: 300px; margin-left: auto; }
-                .footer { text-align: center; font-size: 12px; margin-top: 20px; }
-              </style>
-            </head>
-            <body>
-              <div class="invoice">
-                ${invoiceRef.current.innerHTML}
-              </div>
-            </body>
-          </html>
-        `);
-        printWindow.document.close();
-        printWindow.focus();
-        printWindow.print();
-        printWindow.close();
-        toast.success('Print dialog opened!');
-      } else {
-        toast.error('Failed to open print window. Please allow pop-ups.');
-      }
+    const doc = generatePDF();
+    const printWindow = window.open('', '_blank');
+    if (printWindow) {
+      printWindow.document.write(`
+        <html>
+          <head>
+            <title>Invoice</title>
+            <style>
+              body { font-family: Arial, sans-serif; padding: 20px; }
+              .invoice { max-width: 800px; margin: auto; }
+              .header { display: flex; justify-content: space-between; margin-bottom: 20px; }
+              .details { display: flex; justify-content: space-between; margin-bottom: 20px; }
+              table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
+              th, td { padding: 8px; text-align: left; border-bottom: 1px solid #ddd; }
+              th { font-weight: bold; }
+              .right { text-align: right; }
+              .totals { max-width: 300px; margin-left: auto; }
+              .footer { text-align: center; font-size: 12px; margin-top: 20px; }
+            </style>
+          </head>
+          <body>
+            <iframe id="pdfFrame" style="width:100%;height:100vh;border:none;"></iframe>
+            <script>
+              const pdfData = "${doc.output('datauristring')}";
+              document.getElementById('pdfFrame').src = pdfData;
+              setTimeout(() => {
+                window.print();
+                window.close();
+              }, 1000);
+            </script>
+          </body>
+        </html>
+      `);
+      printWindow.document.close();
+      toast.success('Print dialog opened!');
+    } else {
+      toast.error('Failed to open print window. Please allow pop-ups.');
     }
   };
 

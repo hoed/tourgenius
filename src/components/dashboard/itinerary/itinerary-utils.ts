@@ -95,18 +95,17 @@ export const saveItineraryToSupabase = async (
       return;
     }
 
-    const sessionResponse = await supabase.auth.getSession();
-    if (sessionResponse.error || !sessionResponse.data.session?.user) {
+    const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+    if (sessionError || !session?.user) {
       toast.error('You must be logged in to save an itinerary');
       navigate('/auth');
       return;
     }
 
-    const userId = sessionResponse.data.session.user.id;
+    const userId = session.user.id;
     const totalPrice = calculateTotalPrice(itinerary);
 
     const itineraryData = {
-      id: itinerary.id && itinerary.id.length > 10 ? itinerary.id : undefined,
       user_id: userId,
       name: itinerary.name.trim(),
       start_date: selectedDate.toISOString(),
@@ -127,20 +126,23 @@ export const saveItineraryToSupabase = async (
         .update(itineraryData)
         .eq('id', itinerary.id)
         .eq('user_id', userId)
-        .select()
-        .single();
+        .select('*');
     } else {
       // Create new itinerary
+      const newItineraryData = {
+        ...itineraryData,
+        created_at: new Date().toISOString()
+      };
+      
       response = await supabase
         .from('itineraries')
-        .insert([{ ...itineraryData, created_at: new Date().toISOString() }])
-        .select()
-        .single();
+        .insert([newItineraryData])
+        .select('*');
     }
 
     if (response.error) {
       console.error('Supabase error:', response.error);
-      toast.error(`Failed to save itinerary: ${response.error.message} (Code: ${response.error.code})`);
+      toast.error(`Failed to save itinerary: ${response.error.message}`);
       return;
     }
 
@@ -148,7 +150,9 @@ export const saveItineraryToSupabase = async (
     toast.success(itinerary.id ? 'Itinerary updated successfully!' : 'Itinerary saved successfully!');
     
     // Navigate to the itinerary page with the new ID
-    navigate(`/dashboard/itinerary?id=${response.data.id}`);
+    if (response.data && response.data.length > 0) {
+      navigate(`/dashboard/itinerary?id=${response.data[0].id}`);
+    }
   } catch (error) {
     console.error('Unexpected error in saveItineraryToSupabase:', error);
     toast.error(
@@ -223,7 +227,7 @@ export const addCustomerToDatabase = async (customerName: string, customerEmail:
     const { data: { session } } = await supabase.auth.getSession();
     if (!session?.user) {
       toast.error('You must be logged in to add customers');
-      return;
+      return false;
     }
     
     const { data: existingCustomers, error: fetchError } = await supabase
@@ -234,7 +238,7 @@ export const addCustomerToDatabase = async (customerName: string, customerEmail:
     
     if (fetchError) {
       console.error('Error checking for existing customer:', fetchError);
-      return;
+      return false;
     }
     
     if (!existingCustomers || existingCustomers.length === 0) {
