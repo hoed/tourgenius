@@ -29,22 +29,41 @@ const InvoiceList = () => {
         
         // Transform the data to match our Invoice type
         if (data) {
-          const transformedInvoices: Invoice[] = data.map(item => ({
-            id: item.id,
-            itineraryId: item.itinerary_id || undefined,
-            customerName: item.customer_name,
-            customerEmail: item.customer_email,
-            date: item.date,
-            dueDate: item.due_date,
-            items: Array.isArray(item.items) ? item.items : JSON.parse(item.items as string) as InvoiceItem[],
-            subtotal: item.subtotal,
-            tax: item.tax,
-            total: item.total,
-            status: item.status as 'draft' | 'sent' | 'paid' | 'unpaid',
-            created_at: item.created_at,
-            updated_at: item.updated_at,
-            user_id: item.user_id
-          }));
+          const transformedInvoices: Invoice[] = data.map(item => {
+            // Parse items if they're a string, or process them if they're already an array
+            let parsedItems: InvoiceItem[] = [];
+            
+            if (typeof item.items === 'string') {
+              // If items is a JSON string
+              parsedItems = JSON.parse(item.items) as InvoiceItem[];
+            } else if (Array.isArray(item.items)) {
+              // If items is already an array (possibly of Json objects)
+              parsedItems = item.items.map(itemData => ({
+                id: typeof itemData.id === 'string' ? itemData.id : String(itemData.id),
+                description: String(itemData.description || ''),
+                quantity: Number(itemData.quantity || 0),
+                unitPrice: Number(itemData.unitPrice || itemData.unit_price || 0),
+                total: Number(itemData.total || 0)
+              }));
+            }
+            
+            return {
+              id: item.id,
+              itineraryId: item.itinerary_id || undefined,
+              customerName: item.customer_name,
+              customerEmail: item.customer_email,
+              date: item.date,
+              dueDate: item.due_date,
+              items: parsedItems,
+              subtotal: item.subtotal,
+              tax: item.tax,
+              total: item.total,
+              status: item.status as 'draft' | 'sent' | 'paid' | 'unpaid',
+              created_at: item.created_at,
+              updated_at: item.updated_at,
+              user_id: item.user_id
+            };
+          });
           
           setInvoices(transformedInvoices);
         }
