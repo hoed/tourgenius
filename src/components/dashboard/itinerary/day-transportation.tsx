@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Transportation } from '@/lib/types';
 import { Button } from '@/components/ui/button';
@@ -11,6 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 interface DayTransportationProps {
   dayId: string;
   transportation: Transportation | null;
+  transportationItems?: Transportation[];
   onSetTransportation: (dayId: string, description: string, price: number, type?: string) => void;
   onAddTransportationItem?: (dayId: string, type: string, description: string, price: number) => void;
   onRemoveTransportationItem?: (dayId: string, transportationId: string) => void;
@@ -27,6 +27,7 @@ const transportationIcons = {
 const DayTransportation = ({ 
   dayId, 
   transportation, 
+  transportationItems = [],
   onSetTransportation,
   onAddTransportationItem,
   onRemoveTransportationItem
@@ -35,7 +36,7 @@ const DayTransportation = ({
   const [transportPrice, setTransportPrice] = useState('');
   const [transportType, setTransportType] = useState<'flight' | 'train' | 'bus' | 'car' | 'ferry'>('flight');
   
-  // Updated to support multiple transportation items
+  // Function to handle adding a transportation item
   const handleAddTransportation = () => {
     if (!transportDesc.trim() || !transportPrice.trim()) {
       return;
@@ -64,6 +65,7 @@ const DayTransportation = ({
         Transportation
       </h3>
       
+      {/* Legacy single transportation item (keeping for backward compatibility) */}
       {transportation && (
         <Card className="p-3 bg-gray-50 rounded-lg border border-gray-200 mb-4 hover:bg-gray-100 transition-all duration-300">
           <div className="flex items-center">
@@ -86,6 +88,36 @@ const DayTransportation = ({
         </Card>
       )}
       
+      {/* Multiple transportation items */}
+      {transportationItems && transportationItems.length > 0 && (
+        <div className="space-y-3 mb-4">
+          {transportationItems.map((item) => (
+            <Card key={item.id} className="p-3 bg-gray-50 rounded-lg border border-gray-200 hover:bg-gray-100 transition-all duration-300">
+              <div className="flex items-center">
+                <div className="flex items-center gap-2">
+                  {getTransportIcon(item.type)}
+                  <div>
+                    <p className="font-medium text-gray-900">{item.description}</p>
+                    <p className="text-sm text-gray-900">{formatRupiah(item.pricePerPerson)} (per day)</p>
+                  </div>
+                </div>
+                {onRemoveTransportationItem && (
+                  <Button 
+                    variant="ghost" 
+                    size="icon" 
+                    onClick={() => onRemoveTransportationItem(dayId, item.id)}
+                    className="ml-auto text-rose-600 hover:text-rose-700 hover:bg-rose-400/10"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                )}
+              </div>
+            </Card>
+          ))}
+        </div>
+      )}
+      
+      {/* Add new transportation form */}
       <div className="space-y-3">
         <div className="grid grid-cols-1 sm:grid-cols-4 gap-3">
           <Select 
