@@ -35,16 +35,24 @@ const InvoiceList = () => {
             
             if (typeof item.items === 'string') {
               // If items is a JSON string
-              parsedItems = JSON.parse(item.items) as InvoiceItem[];
+              try {
+                parsedItems = JSON.parse(item.items) as InvoiceItem[];
+              } catch (e) {
+                console.error('Error parsing JSON items:', e);
+              }
             } else if (Array.isArray(item.items)) {
               // If items is already an array (possibly of Json objects)
-              parsedItems = item.items.map(itemData => ({
-                id: typeof itemData.id === 'string' ? itemData.id : String(itemData.id),
-                description: String(itemData.description || ''),
-                quantity: Number(itemData.quantity || 0),
-                unitPrice: Number(itemData.unitPrice || itemData.unit_price || 0),
-                total: Number(itemData.total || 0)
-              }));
+              parsedItems = item.items.map(itemData => {
+                // Safely access object properties with type checking
+                const itemObj = itemData as Record<string, any>;
+                return {
+                  id: typeof itemObj.id === 'string' ? itemObj.id : String(itemObj.id || ''),
+                  description: String(itemObj.description || ''),
+                  quantity: Number(itemObj.quantity || 0),
+                  unitPrice: Number(itemObj.unitPrice || itemObj.unit_price || 0),
+                  total: Number(itemObj.total || 0)
+                };
+              });
             }
             
             return {
