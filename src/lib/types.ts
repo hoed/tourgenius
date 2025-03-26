@@ -29,14 +29,14 @@ export interface Hotel {
   stars: number;
   pricePerNight: number;
   image?: string;
-  roomAmount?: number; // New field for number of rooms
+  roomAmount?: number; // Number of rooms
 }
 
 export interface Transportation {
   id: string;
   type: 'flight' | 'train' | 'bus' | 'car' | 'ferry';
   description: string;
-  pricePerPerson: number; // Price per person
+  pricePerPerson: number; // Price per day
 }
 
 export interface Meal {
@@ -53,6 +53,8 @@ export interface DayItinerary {
   hotel: Hotel | null;
   meals: Meal[];
   transportation: Transportation | null;
+  // Adding support for multiple transportation items in the future
+  transportationItems?: Transportation[];
 }
 
 export interface TourItinerary {
@@ -83,7 +85,7 @@ export interface TourPlan {
 
 export interface Invoice {
   id: string;
-  itineraryId: string;
+  itineraryId?: string;
   customerName: string;
   customerEmail: string;
   date: string;
@@ -93,6 +95,9 @@ export interface Invoice {
   tax: number;
   total: number;
   status: 'draft' | 'sent' | 'paid' | 'unpaid';
+  created_at?: string;
+  updated_at?: string;
+  user_id?: string;
 }
 
 export interface InvoiceItem {

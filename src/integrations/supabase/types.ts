@@ -42,6 +42,57 @@ export type Database = {
         }
         Relationships: []
       }
+      invoices: {
+        Row: {
+          created_at: string
+          customer_email: string
+          customer_name: string
+          date: string
+          due_date: string
+          id: string
+          items: Json
+          itinerary_id: string | null
+          status: string
+          subtotal: number
+          tax: number
+          total: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          customer_email: string
+          customer_name: string
+          date: string
+          due_date: string
+          id?: string
+          items?: Json
+          itinerary_id?: string | null
+          status?: string
+          subtotal?: number
+          tax?: number
+          total?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          customer_email?: string
+          customer_name?: string
+          date?: string
+          due_date?: string
+          id?: string
+          items?: Json
+          itinerary_id?: string | null
+          status?: string
+          subtotal?: number
+          tax?: number
+          total?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       itineraries: {
         Row: {
           created_at: string

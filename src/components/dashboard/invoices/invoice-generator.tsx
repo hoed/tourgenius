@@ -5,13 +5,14 @@ import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import { Invoice, TourItinerary } from '@/lib/types';
-import { Calendar, Download, FileText, Printer, Send } from 'lucide-react';
+import { Calendar, Download, FileText, Printer, Send, CheckCircle } from 'lucide-react';
 import { toast } from 'sonner';
 import GlassCard from '@/components/ui/glass-card';
 import { useLocation, useNavigate } from 'react-router-dom';
 import jsPDF from 'jspdf';
 import { supabase } from '@/integrations/supabase/client';
 import { addCustomerToDatabase } from '../itinerary/itinerary-utils';
+import { formatRupiah } from '@/lib/utils';
 
 interface InvoiceGeneratorProps {
   itinerary?: TourItinerary;
@@ -23,6 +24,7 @@ const InvoiceGenerator = ({ itinerary: propItinerary }: InvoiceGeneratorProps) =
   const [itinerary, setItinerary] = useState<TourItinerary | undefined>(propItinerary);
   const invoiceRef = useRef<HTMLDivElement>(null);
   const [isSending, setIsSending] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
   
   useEffect(() => {
     if (location.state?.itinerary && !propItinerary) {
@@ -35,7 +37,7 @@ const InvoiceGenerator = ({ itinerary: propItinerary }: InvoiceGeneratorProps) =
     customerEmail: '',
     date: new Date().toISOString().split('T')[0],
     dueDate: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-    status: 'unpaid'  // Now this will be a valid value for the Invoice type
+    status: 'unpaid'
   });
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -49,9 +51,73 @@ const InvoiceGenerator = ({ itinerary: propItinerary }: InvoiceGeneratorProps) =
       return;
     }
     
-    const success = await addCustomerToDatabase(invoice.customerName, invoice.customerEmail);
-    if (success) {
-      toast.success('Invoice generated successfully!');
+    setIsSaving(true);
+    
+    try {
+      // First add customer to database
+      const customerAdded = await addCustomerToDatabase(invoice.customerName, invoice.customerEmail);
+      
+      if (!customerAdded) {
+        throw new Error('Failed to add customer to database');
+      }
+      
+      // Generate invoice items
+      const invoiceItems = itinerary ? generateInvoiceItems() : [
+        { id: '1', description: 'Tour Package (Standard)', quantity: 2, unitPrice: 750000, total: 1500000 }
+      ];
+      
+      const subtotal = invoiceItems.reduce((sum, item) => sum + item.total, 0);
+      const tax = subtotal * 0.05;
+      const total = subtotal + tax;
+      
+      // Get the user session
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        throw new Error('You must be logged in to save an invoice');
+      }
+      
+      // Save invoice to Supabase
+      const { data: savedInvoice, error } = await supabase
+        .from('invoices')
+        .insert([{
+          user_id: session.user.id,
+          itinerary_id: itinerary?.id || null,
+          customer_name: invoice.customerName,
+          customer_email: invoice.customerEmail,
+          date: invoice.date,
+          due_date: invoice.dueDate,
+          items: invoiceItems,
+          subtotal: subtotal,
+          tax: tax,
+          total: total,
+          status: invoice.status,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        }])
+        .select()
+        .single();
+      
+      if (error) {
+        throw error;
+      }
+      
+      toast.success('Invoice generated and saved successfully!');
+      
+      // Update local invoice state with the saved ID
+      setInvoice(prev => ({ 
+        ...prev, 
+        id: savedInvoice.id,
+        subtotal: subtotal,
+        tax: tax,
+        total: total,
+        items: invoiceItems
+      }));
+      
+    } catch (error) {
+      console.error('Error saving invoice:', error);
+      toast.error(`Failed to save invoice: ${error.message}`);
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -233,7 +299,6 @@ const InvoiceGenerator = ({ itinerary: propItinerary }: InvoiceGeneratorProps) =
   const tax = subtotal * 0.05;
   const total = subtotal + tax;
 
-  // Generate PDF as base64 string for email attachment
   const generatePDFBase64 = () => {
     return new Promise<string>((resolve, reject) => {
       try {
@@ -247,26 +312,21 @@ const InvoiceGenerator = ({ itinerary: propItinerary }: InvoiceGeneratorProps) =
     });
   };
 
-  // Generate PDF with enhanced styling
   const generatePDF = () => {
     const doc = new jsPDF();
     
-    // Define colors as tuples
     const amber400: [number, number, number] = [251, 191, 36]; // #fbbf24
     const orange500: [number, number, number] = [249, 115, 22]; // #f97316
     const gray700: [number, number, number] = [55, 65, 81]; // #374151
     const gray200: [number, number, number] = [229, 231, 235]; // #e5e7eb
     const amber600: [number, number, number] = [217, 119, 6]; // #d97706
 
-    // Add background rectangle for header
     doc.setFillColor(250, 250, 250);
     doc.rect(0, 0, 210, 40, 'F');
     
-    // Add gradient-like effect for header
     doc.setFillColor(...orange500);
     doc.rect(0, 0, 210, 2, 'F');
     
-    // Header content
     doc.setFontSize(24);
     doc.setTextColor(...amber600);
     doc.text('Invoice', 20, 20);
@@ -278,12 +338,10 @@ const InvoiceGenerator = ({ itinerary: propItinerary }: InvoiceGeneratorProps) =
     doc.setTextColor(...gray700);
     doc.text('Premium Tour Planning', 190, 30, { align: 'right' });
 
-    // Horizontal line under header
     doc.setDrawColor(...amber400);
     doc.setLineWidth(0.5);
     doc.line(20, 35, 190, 35);
 
-    // Bill To and Invoice Details
     doc.setFontSize(12);
     doc.setTextColor(...gray700);
     doc.text('Bill To:', 20, 50);
@@ -297,10 +355,8 @@ const InvoiceGenerator = ({ itinerary: propItinerary }: InvoiceGeneratorProps) =
     doc.text(`Date: ${invoice.date || new Date().toISOString().split('T')[0]}`, 190, 60, { align: 'right' });
     doc.text(`Due Date: ${invoice.dueDate || new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]}`, 190, 70, { align: 'right' });
     
-    // When adding the status, use 'Unpaid' instead of 'Draft'
     doc.text(`Status: ${invoice.status || 'Unpaid'}`, 190, 80, { align: 'right' });
 
-    // Add Itinerary name and details
     if (itinerary) {
       doc.setFontSize(12);
       doc.setTextColor(...orange500);
@@ -310,21 +366,17 @@ const InvoiceGenerator = ({ itinerary: propItinerary }: InvoiceGeneratorProps) =
       doc.text(`Duration: ${itinerary.days.length} days | Travelers: ${itinerary.numberOfPeople}`, 20, 100);
     }
 
-    // Items Section
     doc.setFontSize(14);
     doc.setTextColor(...amber400);
     doc.text('Invoice Items:', 20, 115);
     
-    // Add decorative line
     doc.setDrawColor(...orange500);
     doc.setLineWidth(0.7);
     doc.line(20, 120, 190, 120);
     
-    // Add background for table header
     doc.setFillColor(250, 250, 250);
     doc.rect(20, 125, 170, 10, 'F');
     
-    // Table Header with border
     let yPos = 132;
     doc.setFontSize(10);
     doc.setTextColor(...gray700);
@@ -338,16 +390,13 @@ const InvoiceGenerator = ({ itinerary: propItinerary }: InvoiceGeneratorProps) =
     doc.line(20, yPos, 190, yPos);
     yPos += 10;
 
-    // Table Rows with alternating background
     invoiceItems.forEach((item, index) => {
-      // Add subtle alternating background
       if (index % 2 === 0) {
         doc.setFillColor(250, 250, 250);
         doc.rect(20, yPos - 5, 170, 10, 'F');
       }
       
       doc.setTextColor(...gray700);
-      // Ensure description fits within bounds
       const description = item.description.length > 50 
         ? item.description.substring(0, 47) + '...' 
         : item.description;
@@ -357,7 +406,6 @@ const InvoiceGenerator = ({ itinerary: propItinerary }: InvoiceGeneratorProps) =
       doc.text(formatRupiah(item.total), 185, yPos, { align: 'right' });
       yPos += 10;
       
-      // Add lighter row separator
       if (index < invoiceItems.length - 1) {
         doc.setDrawColor(...gray200);
         doc.setLineWidth(0.1);
@@ -365,13 +413,10 @@ const InvoiceGenerator = ({ itinerary: propItinerary }: InvoiceGeneratorProps) =
       }
     });
 
-    // Border around the items table
     doc.setDrawColor(...gray200);
     doc.setLineWidth(0.5);
     doc.rect(20, 125, 170, yPos - 125, 'S');
 
-    // Totals Section with background
-    yPos += 5;
     doc.setFillColor(250, 250, 250);
     doc.rect(140, yPos - 5, 50, 40, 'F');
     doc.setDrawColor(...orange500);
@@ -387,7 +432,6 @@ const InvoiceGenerator = ({ itinerary: propItinerary }: InvoiceGeneratorProps) =
     doc.text(`${formatRupiah(tax)}`, 185, yPos, { align: 'right' });
     yPos += 10;
     
-    // Highlight the total with a background
     doc.setFillColor(...amber400);
     doc.rect(140, yPos - 5, 50, 10, 'F');
     doc.setFontSize(12);
@@ -395,19 +439,21 @@ const InvoiceGenerator = ({ itinerary: propItinerary }: InvoiceGeneratorProps) =
     doc.text(`Total:`, 140, yPos, { align: 'right' });
     doc.text(`${formatRupiah(total)}`, 185, yPos, { align: 'right' });
 
-    // Add per person price if relevant
     if (itinerary && itinerary.numberOfPeople > 1) {
       yPos += 15;
       doc.setFontSize(10);
       doc.setTextColor(...gray700);
-      doc.text(`Price per person: ${formatRupiah(total / itinerary.numberOfPeople)}`, 185, yPos, { align: 'right' });
+      const perPersonText = `Price per person: ${formatRupiah(total / itinerary.numberOfPeople)}`;
+      const textWidth = doc.getStringUnitWidth(perPersonText) * doc.getFontSize() / doc.internal.scaleFactor;
+      
+      if (textWidth > 40) {
+        doc.setFontSize(8);
+      }
+      
+      doc.text(perPersonText, 185, yPos, { align: 'right' });
     }
 
-    // Footer with background
-    yPos = 270;
-    doc.setFillColor(250, 250, 250);
-    doc.rect(0, yPos - 10, 210, 40, 'F');
-    doc.setDrawColor(...orange500);
+    doc.setDrawColor(...gray200);
     doc.setLineWidth(0.5);
     doc.line(20, yPos - 5, 190, yPos - 5);
     
@@ -554,10 +600,30 @@ const InvoiceGenerator = ({ itinerary: propItinerary }: InvoiceGeneratorProps) =
               <Button 
                 className="w-full bg-amber-400 text-gray-900 hover:bg-amber-500 transition-all duration-300"
                 onClick={handleGenerateInvoice}
+                disabled={isSaving}
               >
-                <FileText className="h-4 w-4 mr-2" />
-                Generate Invoice
+                {isSaving ? (
+                  <>
+                    <span className="animate-spin mr-2">○</span>
+                    Saving...
+                  </>
+                ) : invoice.id ? (
+                  <>
+                    <CheckCircle className="h-4 w-4 mr-2" />
+                    Invoice Saved
+                  </>
+                ) : (
+                  <>
+                    <FileText className="h-4 w-4 mr-2" />
+                    Generate Invoice
+                  </>
+                )}
               </Button>
+              {invoice.id && (
+                <div className="text-center text-sm text-green-600 mt-2">
+                  Invoice successfully saved to database!
+                </div>
+              )}
               <Button 
                 className="w-full border-amber-400/50 text-amber-600 hover:bg-amber-400/10"
                 variant="outline"
@@ -699,4 +765,3 @@ const InvoiceGenerator = ({ itinerary: propItinerary }: InvoiceGeneratorProps) =
 };
 
 export default InvoiceGenerator;
-
