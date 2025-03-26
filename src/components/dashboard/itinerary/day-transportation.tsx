@@ -12,6 +12,8 @@ interface DayTransportationProps {
   dayId: string;
   transportation: Transportation | null;
   onSetTransportation: (dayId: string, description: string, price: number, type?: string) => void;
+  onAddTransportationItem?: (dayId: string, type: string, description: string, price: number) => void;
+  onRemoveTransportationItem?: (dayId: string, transportationId: string) => void;
 }
 
 const transportationIcons = {
@@ -25,7 +27,9 @@ const transportationIcons = {
 const DayTransportation = ({ 
   dayId, 
   transportation, 
-  onSetTransportation 
+  onSetTransportation,
+  onAddTransportationItem,
+  onRemoveTransportationItem
 }: DayTransportationProps) => {
   const [transportDesc, setTransportDesc] = useState('');
   const [transportPrice, setTransportPrice] = useState('');
@@ -37,7 +41,11 @@ const DayTransportation = ({
       return;
     }
     
-    onSetTransportation(dayId, transportDesc, Number(transportPrice), transportType);
+    if (onAddTransportationItem) {
+      onAddTransportationItem(dayId, transportType, transportDesc, Number(transportPrice));
+    } else {
+      onSetTransportation(dayId, transportDesc, Number(transportPrice), transportType);
+    }
     
     // Clear inputs after setting
     setTransportDesc('');

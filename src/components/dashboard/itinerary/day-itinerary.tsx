@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { DayItinerary } from '@/lib/types';
+import { DayItinerary, Transportation } from '@/lib/types';
 import { CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { CalendarIcon, Trash2 } from 'lucide-react';
@@ -19,6 +19,8 @@ interface DayItineraryProps {
   onAddMeal: (dayId: string, description: string, type: string, price: number) => void;
   onRemoveMeal: (dayId: string, mealId: string) => void;
   onSetTransportation: (dayId: string, description: string, price: number) => void;
+  onAddTransportationItem?: (dayId: string, type: string, description: string, price: number) => void;
+  onRemoveTransportationItem?: (dayId: string, transportationId: string) => void;
   totalDays: number;
 }
 
@@ -31,6 +33,8 @@ const DayItineraryComponent = ({
   onAddMeal,
   onRemoveMeal,
   onSetTransportation,
+  onAddTransportationItem,
+  onRemoveTransportationItem,
   totalDays
 }: DayItineraryProps) => {
   return (
@@ -79,6 +83,8 @@ const DayItineraryComponent = ({
           dayId={day.id}
           transportation={day.transportation}
           onSetTransportation={onSetTransportation}
+          onAddTransportationItem={onAddTransportationItem}
+          onRemoveTransportationItem={onRemoveTransportationItem}
         />
       </CardContent>
     </GlassCard>

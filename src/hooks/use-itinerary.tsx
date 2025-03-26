@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 import { toast } from 'sonner';
 import { useNavigate } from 'react-router-dom';
-import { TourItinerary, DayItinerary } from '@/lib/types';
+import { TourItinerary, DayItinerary, Transportation } from '@/lib/types';
 import { supabase } from '@/integrations/supabase/client';
 
 interface UseItineraryProps {
@@ -26,7 +26,8 @@ export const useItinerary = ({ initialItinerary }: UseItineraryProps) => {
         destinations: [],
         hotel: null,
         meals: [],
-        transportation: null
+        transportation: null,
+        transportationItems: []
       }],
       tourGuides: [],
       totalPrice: 0,
@@ -77,7 +78,8 @@ export const useItinerary = ({ initialItinerary }: UseItineraryProps) => {
       destinations: [],
       hotel: null,
       meals: [],
-      transportation: null
+      transportation: null,
+      transportationItems: []
     };
     setItinerary((prev) => ({ ...prev, days: [...prev.days, newDay] }));
   };
@@ -131,7 +133,7 @@ export const useItinerary = ({ initialItinerary }: UseItineraryProps) => {
     }));
   };
 
-  // Hotel handlers - Updated to include roomAmount
+  // Hotel handlers
   const setHotel = (dayId: string, name: string, location: string, stars: number, price: number, roomAmount: number = 0) => {
     setItinerary((prev) => ({
       ...prev,
@@ -200,7 +202,7 @@ export const useItinerary = ({ initialItinerary }: UseItineraryProps) => {
   };
 
   // Transportation handlers
-  const setTransportation = (dayId: string, description: string, price: number) => {
+  const setTransportation = (dayId: string, description: string, price: number, type: string = 'car') => {
     setItinerary((prev) => ({
       ...prev,
       days: prev.days.map(day => {
@@ -211,8 +213,48 @@ export const useItinerary = ({ initialItinerary }: UseItineraryProps) => {
               id: Date.now().toString(),
               description,
               pricePerPerson: price,
-              type: 'car'
+              type: type as 'flight' | 'train' | 'bus' | 'car' | 'ferry'
             } : null
+          };
+        }
+        return day;
+      })
+    }));
+  };
+  
+  // Multiple transportation items handlers
+  const addTransportationItem = (dayId: string, type: string, description: string, price: number) => {
+    if (!description.trim()) return;
+    
+    const newTransportation: Transportation = {
+      id: Date.now().toString(),
+      type: type as 'flight' | 'train' | 'bus' | 'car' | 'ferry',
+      description,
+      pricePerPerson: price
+    };
+    
+    setItinerary((prev) => ({
+      ...prev,
+      days: prev.days.map(day => {
+        if (day.id === dayId) {
+          return {
+            ...day,
+            transportationItems: [...(day.transportationItems || []), newTransportation]
+          };
+        }
+        return day;
+      })
+    }));
+  };
+  
+  const removeTransportationItem = (dayId: string, transportationId: string) => {
+    setItinerary((prev) => ({
+      ...prev,
+      days: prev.days.map(day => {
+        if (day.id === dayId && day.transportationItems) {
+          return {
+            ...day,
+            transportationItems: day.transportationItems.filter(t => t.id !== transportationId)
           };
         }
         return day;
@@ -266,6 +308,8 @@ export const useItinerary = ({ initialItinerary }: UseItineraryProps) => {
     addMeal,
     removeMeal,
     setTransportation,
+    addTransportationItem,
+    removeTransportationItem,
     addTourGuide,
     removeTourGuide
   };
