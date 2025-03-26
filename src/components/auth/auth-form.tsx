@@ -1,16 +1,25 @@
-import React, { useState } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
-import GlassCard from '../ui/glass-card';
 import AuthFormHeader from './auth-form-header';
 import AuthFormFields from './auth-form-fields';
 import AuthFormActions from './auth-form-actions';
 import { AuthFormData, signUpUser, signInUser, createAndSignInTestAccount } from './auth-utils';
 
-const AuthForm = () => {
+interface AuthFormProps {
+  initialIsSignUp?: boolean;
+  onToggleMode?: () => void;
+}
+
+const AuthForm = ({ initialIsSignUp = false, onToggleMode }: AuthFormProps) => {
   const navigate = useNavigate();
-  const location = useLocation();
-  const [isSignUp, setIsSignUp] = useState(location.search.includes('signup=true'));
+  const [isSignUp, setIsSignUp] = useState(initialIsSignUp);
+  
+  // Update local state when prop changes
+  useEffect(() => {
+    setIsSignUp(initialIsSignUp);
+  }, [initialIsSignUp]);
   
   const [formData, setFormData] = useState<AuthFormData>({
     email: '',
@@ -19,7 +28,6 @@ const AuthForm = () => {
   });
   
   const [loading, setLoading] = useState(false);
-  const [debugMode, setDebugMode] = useState(true);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -46,39 +54,32 @@ const AuthForm = () => {
   };
 
   const toggleAuthMode = () => {
-    setIsSignUp(!isSignUp);
-  };
-
-  const handleTestAccount = async () => {
-    setLoading(true);
-    try {
-      await createAndSignInTestAccount();
-      navigate('/dashboard');
-    } catch (error: any) {
-    } finally {
-      setLoading(false);
+    if (onToggleMode) {
+      onToggleMode();
+    } else {
+      setIsSignUp(!isSignUp);
     }
   };
 
   return (
-    <GlassCard className="w-full max-w-md mx-auto bg-blue-950 backdrop-blur-xl border border-blue-400/20">
-      <AuthFormHeader isSignUp={isSignUp} />
+    <div className="w-full max-w-md mx-auto">
+      <div className={`transition-all duration-300 transform ${isSignUp ? 'translate-x-0' : 'translate-x-0'}`}>
+        <form onSubmit={handleSubmit} className="space-y-5">
+          <AuthFormFields
+            formData={formData}
+            handleChange={handleChange}
+            isSignUp={isSignUp}
+            loading={loading}
+          />
 
-      <form onSubmit={handleSubmit} className="space-y-5">
-        <AuthFormFields
-          formData={formData}
-          handleChange={handleChange}
-          isSignUp={isSignUp}
-          loading={loading}
-        />
-
-        <AuthFormActions 
-          isSignUp={isSignUp} 
-          loading={loading} 
-          toggleAuthMode={toggleAuthMode} 
-        />
-      </form>
-    </GlassCard>
+          <AuthFormActions 
+            isSignUp={isSignUp} 
+            loading={loading} 
+            toggleAuthMode={toggleAuthMode} 
+          />
+        </form>
+      </div>
+    </div>
   );
 };
 

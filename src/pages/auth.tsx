@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Link } from 'react-router-dom';
@@ -11,6 +12,7 @@ const Auth = () => {
   const location = useLocation();
   const [loading, setLoading] = useState(true);
   const [initialCheckDone, setInitialCheckDone] = useState(false);
+  const [isSignUp, setIsSignUp] = useState(location.search.includes('signup=true'));
 
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
@@ -51,17 +53,21 @@ const Auth = () => {
     }
   };
 
+  const toggleAuthMode = () => {
+    setIsSignUp(!isSignUp);
+  };
+
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-white">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-900"></div>
+      <div className="min-h-screen flex items-center justify-center bg-blue-950">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-300"></div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-white flex flex-col">
-      <header className="bg-white p-6 shadow-md border-b border-blue-400/20">
+    <div className="min-h-screen bg-blue-950 flex flex-col">
+      <header className="p-6 border-b border-blue-400/20">
         <div className="container mx-auto flex items-center justify-between">
           <Link to="/" className="flex items-center space-x-2">
             <span className="text-2xl font-bold bg-gradient-to-r from-blue-300 via-purple-300 to-cyan-300 bg-clip-text text-transparent">
@@ -73,32 +79,36 @@ const Auth = () => {
 
       <main className="flex-1 flex items-center justify-center p-6">
         <div className="container mx-auto max-w-md">
-          <div className="bg-blue-950 p-6 rounded-xl border border-blue-400/20 shadow-md">
-            <h1 className="text-2xl font-bold text-white mb-6 text-center">Selamat Datang di TourGenius</h1>
+          <div className="rounded-xl border border-blue-400/20 shadow-md overflow-hidden">
+            <h1 className="text-2xl font-bold text-white mb-6 text-center pt-6">
+              {isSignUp ? 'Buat Akun Baru' : 'Selamat Datang di TourGenius'}
+            </h1>
             
-            <Button
-              onClick={handleGoogleLogin}
-              className="w-full mb-4 bg-white border border-blue-400/50 text-blue-900 hover:bg-blue-50 transition-all duration-300 flex items-center justify-center gap-2"
-            >
-              <FcGoogle size={20} />
-              Masuk dengan Google
-            </Button>
+            <div className="px-6 pb-6">
+              <Button
+                onClick={handleGoogleLogin}
+                className="w-full mb-4 bg-white border border-blue-400/50 text-blue-900 hover:bg-blue-50 transition-all duration-300 flex items-center justify-center gap-2"
+              >
+                <FcGoogle size={20} />
+                {isSignUp ? 'Daftar dengan Google' : 'Masuk dengan Google'}
+              </Button>
 
-            <div className="relative my-6">
-              <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-blue-400/50"></div>
+              <div className="relative my-6">
+                <div className="absolute inset-0 flex items-center">
+                  <div className="w-full border-t border-blue-400/50"></div>
+                </div>
+                <div className="relative flex justify-center text-sm">
+                  <span className="px-2 bg-blue-950 text-white">Atau lanjutkan dengan email</span>
+                </div>
               </div>
-              <div className="relative flex justify-center text-sm">
-                <span className="px-2 bg-blue-950 text-white">Atau lanjutkan dengan email</span>
-              </div>
+
+              <AuthForm initialIsSignUp={isSignUp} onToggleMode={toggleAuthMode} />
             </div>
-
-            <AuthForm />
           </div>
         </div>
       </main>
 
-      <footer className="p-6 text-center text-sm text-blue-900">
+      <footer className="p-6 text-center text-sm text-blue-300/70">
         <p>© {new Date().getFullYear()} TourGenius. Semua hak dilindungi.</p>
       </footer>
     </div>
