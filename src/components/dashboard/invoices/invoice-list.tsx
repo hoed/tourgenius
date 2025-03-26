@@ -10,31 +10,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { useNavigate } from 'react-router-dom';
 import jsPDF from 'jspdf';
-
-interface InvoiceItem {
-  id: string;
-  description: string;
-  quantity: number;
-  unitPrice: number;
-  total: number;
-}
-
-interface Invoice {
-  id: string;
-  user_id: string;
-  customer_name: string;
-  customer_email: string;
-  date: string;
-  due_date: string;
-  items: InvoiceItem[];
-  subtotal: number;
-  tax: number;
-  total: number;
-  status: 'draft' | 'sent' | 'paid' | 'unpaid';
-  created_at: string;
-  updated_at: string;
-  itinerary_id?: string;
-}
+import { Invoice, InvoiceItem } from '@/lib/types';
 
 const InvoiceList = () => {
   const [invoices, setInvoices] = useState<Invoice[]>([]);
@@ -50,7 +26,28 @@ const InvoiceList = () => {
           .order('created_at', { ascending: false });
 
         if (error) throw error;
-        setInvoices(data || []);
+        
+        // Transform the data to match our Invoice type
+        if (data) {
+          const transformedInvoices: Invoice[] = data.map(item => ({
+            id: item.id,
+            itineraryId: item.itinerary_id || undefined,
+            customerName: item.customer_name,
+            customerEmail: item.customer_email,
+            date: item.date,
+            dueDate: item.due_date,
+            items: Array.isArray(item.items) ? item.items : JSON.parse(item.items as string) as InvoiceItem[],
+            subtotal: item.subtotal,
+            tax: item.tax,
+            total: item.total,
+            status: item.status as 'draft' | 'sent' | 'paid' | 'unpaid',
+            created_at: item.created_at,
+            updated_at: item.updated_at,
+            user_id: item.user_id
+          }));
+          
+          setInvoices(transformedInvoices);
+        }
       } catch (error) {
         console.error('Error fetching invoices:', error);
         toast.error('Failed to load invoices');
@@ -101,21 +98,21 @@ const InvoiceList = () => {
       
       // Header
       doc.setFontSize(24);
-      doc.setTextColor(...amber600);
+      doc.setTextColor(amber600[0], amber600[1], amber600[2]);
       doc.text('Invoice', 20, 20);
       doc.setFontSize(12);
-      doc.setTextColor(...gray700);
+      doc.setTextColor(gray700[0], gray700[1], gray700[2]);
       doc.text(`#INV-${invoice.id.substring(0, 8)}`, 20, 30);
       
       // Customer info
       doc.text('Bill To:', 20, 45);
-      doc.text(invoice.customer_name, 20, 55);
-      doc.text(invoice.customer_email, 20, 65);
+      doc.text(invoice.customerName, 20, 55);
+      doc.text(invoice.customerEmail, 20, 65);
       
       // Invoice details
       doc.text('Invoice Details:', 150, 45, { align: 'right' });
       doc.text(`Date: ${formatDate(invoice.date)}`, 150, 55, { align: 'right' });
-      doc.text(`Due Date: ${formatDate(invoice.due_date)}`, 150, 65, { align: 'right' });
+      doc.text(`Due Date: ${formatDate(invoice.dueDate)}`, 150, 65, { align: 'right' });
       doc.text(`Status: ${invoice.status}`, 150, 75, { align: 'right' });
       
       // Items table header
@@ -271,13 +268,13 @@ const InvoiceList = () => {
                     </h3>
                     <div className="flex flex-wrap gap-3 items-center">
                       <p className="text-sm text-gray-500">
-                        {formatDate(invoice.created_at)}
+                        {formatDate(invoice.created_at || '')}
                       </p>
                       <Badge className={`${getStatusColor(invoice.status)} capitalize`}>
                         {invoice.status}
                       </Badge>
                       <p className="text-sm text-gray-500">
-                        {invoice.customer_name}
+                        {invoice.customerName}
                       </p>
                     </div>
                   </div>
@@ -314,7 +311,7 @@ const InvoiceList = () => {
                 <div className="flex justify-between mt-4 pt-4 border-t border-gray-100">
                   <div className="text-sm">
                     <span className="text-gray-500">Due: </span>
-                    <span className="font-medium text-gray-700">{formatDate(invoice.due_date)}</span>
+                    <span className="font-medium text-gray-700">{formatDate(invoice.dueDate)}</span>
                   </div>
                   <div className="text-right">
                     <span className="text-lg font-bold text-amber-700">

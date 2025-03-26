@@ -120,9 +120,19 @@ const TourPlansPage = () => {
         tourPlan.user_id = session.session.user.id;
       }
 
+      // Ensure we have proper data for Supabase
+      const tourPlanForDB = {
+        id: tourPlan.id,
+        title: tourPlan.title,
+        description: tourPlan.description,
+        price: tourPlan.price,
+        image_path: tourPlan.image_path,
+        user_id: tourPlan.user_id
+      };
+
       const { error } = isNewTourPlan
-        ? await supabase.from('tour_plans').insert([tourPlan])
-        : await supabase.from('tour_plans').update(tourPlan).eq('id', tourPlan.id);
+        ? await supabase.from('tour_plans').insert([tourPlanForDB])
+        : await supabase.from('tour_plans').update(tourPlanForDB).eq('id', tourPlan.id);
 
       if (error) throw error;
 

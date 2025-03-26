@@ -53,7 +53,7 @@ export interface DayItinerary {
   hotel: Hotel | null;
   meals: Meal[];
   transportation: Transportation | null;
-  // Adding support for multiple transportation items in the future
+  // Adding support for multiple transportation items
   transportationItems?: Transportation[];
 }
 
@@ -83,6 +83,14 @@ export interface TourPlan {
   user_id?: string;
 }
 
+export interface InvoiceItem {
+  id: string;
+  description: string;
+  quantity: number;
+  unitPrice: number;
+  total: number;
+}
+
 export interface Invoice {
   id: string;
   itineraryId?: string;
@@ -98,12 +106,4 @@ export interface Invoice {
   created_at?: string;
   updated_at?: string;
   user_id?: string;
-}
-
-export interface InvoiceItem {
-  id: string;
-  description: string;
-  quantity: number;
-  unitPrice: number;
-  total: number;
 }
