@@ -20,6 +20,8 @@ interface ItineraryContentProps {
   addMeal: (dayId: string, description: string, type: string, price: number) => void;
   removeMeal: (dayId: string, mealId: string) => void;
   setTransportation: (dayId: string, description: string, price: number) => void;
+  addTransportationItem?: (dayId: string, type: string, description: string, price: number) => void;
+  removeTransportationItem?: (dayId: string, transportationId: string) => void;
   addTourGuide: (name: string, expertise: string, pricePerDay: number) => void;
   removeTourGuide: (guideId: string) => void;
 }
@@ -38,6 +40,8 @@ const ItineraryContent = ({
   addMeal,
   removeMeal,
   setTransportation,
+  addTransportationItem,
+  removeTransportationItem,
   addTourGuide,
   removeTourGuide
 }: ItineraryContentProps) => {
@@ -69,6 +73,8 @@ const ItineraryContent = ({
           onAddMeal={addMeal}
           onRemoveMeal={removeMeal}
           onSetTransportation={setTransportation}
+          onAddTransportationItem={addTransportationItem}
+          onRemoveTransportationItem={removeTransportationItem}
         />
       </div>
 

@@ -2,7 +2,7 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
-import { DayItinerary } from '@/lib/types';
+import { DayItinerary, Transportation } from '@/lib/types';
 import { Plus } from 'lucide-react';
 import DayItineraryComponent from './day-itinerary';
 
@@ -16,6 +16,8 @@ interface ItineraryDaysProps {
   onAddMeal: (dayId: string, description: string, type: string, price: number) => void;
   onRemoveMeal: (dayId: string, mealId: string) => void;
   onSetTransportation: (dayId: string, description: string, price: number) => void;
+  onAddTransportationItem?: (dayId: string, type: string, description: string, price: number) => void;
+  onRemoveTransportationItem?: (dayId: string, transportationId: string) => void;
 }
 
 const ItineraryDays = ({
@@ -27,7 +29,9 @@ const ItineraryDays = ({
   onSetHotel,
   onAddMeal,
   onRemoveMeal,
-  onSetTransportation
+  onSetTransportation,
+  onAddTransportationItem,
+  onRemoveTransportationItem
 }: ItineraryDaysProps) => {
   return (
     <Tabs defaultValue={days[0]?.id} className="space-y-6">
@@ -63,6 +67,8 @@ const ItineraryDays = ({
             onAddMeal={onAddMeal}
             onRemoveMeal={onRemoveMeal}
             onSetTransportation={onSetTransportation}
+            onAddTransportationItem={onAddTransportationItem}
+            onRemoveTransportationItem={onRemoveTransportationItem}
             totalDays={days.length}
           />
         </TabsContent>
