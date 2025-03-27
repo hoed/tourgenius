@@ -81,6 +81,11 @@ export interface TourPlan {
   created_at?: string;
   updated_at?: string;
   user_id?: string;
+  // Adding fields to make it compatible with itinerary structure
+  days?: DayItinerary[];
+  tourGuides?: TourGuide[];
+  numberOfPeople?: number;
+  start_date?: string;
 }
 
 export interface InvoiceItem {
@@ -107,3 +112,4 @@ export interface Invoice {
   updated_at?: string;
   user_id?: string;
 }
+

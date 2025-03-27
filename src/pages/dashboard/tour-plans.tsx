@@ -11,8 +11,10 @@ import TourPlanCard from '@/components/dashboard/tour-plans/tour-plan-card';
 import TourPlanEditor from '@/components/dashboard/tour-plans/tour-plan-editor';
 import { Plus, Map } from 'lucide-react';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
+import { useNavigate } from 'react-router-dom';
 
 const TourPlansPage = () => {
+  const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [tourPlans, setTourPlans] = useState<TourPlan[]>([]);
   const [editorOpen, setEditorOpen] = useState(false);
@@ -44,7 +46,23 @@ const TourPlansPage = () => {
         throw error;
       }
 
-      setTourPlans(data || []);
+      // Parse the JSON fields
+      const parsedData = data?.map(tourPlan => {
+        try {
+          return {
+            ...tourPlan,
+            days: tourPlan.days ? JSON.parse(tourPlan.days) : [],
+            tourGuides: tourPlan.tour_guides ? JSON.parse(tourPlan.tour_guides) : [],
+            numberOfPeople: tourPlan.number_of_people || 2,
+            start_date: tourPlan.start_date || new Date().toISOString().split('T')[0]
+          };
+        } catch (e) {
+          console.error('Error parsing tour plan data:', e);
+          return tourPlan;
+        }
+      }) || [];
+
+      setTourPlans(parsedData);
     } catch (error) {
       console.error('Error fetching tour plans:', error);
       toast.error('Failed to load tour plans');
@@ -104,6 +122,41 @@ const TourPlansPage = () => {
     }
   };
 
+  const convertToItinerary = (tourPlan: TourPlan) => {
+    try {
+      // Create a new itinerary based on the tour plan
+      const newItinerary = {
+        name: tourPlan.title,
+        start_date: tourPlan.start_date || new Date().toISOString().split('T')[0],
+        tour_guides: JSON.stringify(tourPlan.tourGuides || []),
+        days: JSON.stringify(tourPlan.days || [{
+          id: crypto.randomUUID(),
+          day: 1,
+          destinations: [],
+          hotel: null,
+          meals: [],
+          transportation: null,
+          transportationItems: []
+        }]),
+        number_of_people: tourPlan.numberOfPeople || 2,
+        total_price: tourPlan.price || 0
+      };
+
+      // Save to Supabase
+      supabase.from('itineraries').insert([newItinerary])
+        .then(({ data, error }) => {
+          if (error) {
+            throw error;
+          }
+          toast.success('Tour plan converted to itinerary');
+          navigate(`/dashboard/itinerary?id=${data?.[0]?.id}`);
+        });
+    } catch (error) {
+      console.error('Error converting to itinerary:', error);
+      toast.error('Failed to convert tour plan to itinerary');
+    }
+  };
+
   const handleSaveTourPlan = async (tourPlan: TourPlan) => {
     try {
       const { data: session } = await supabase.auth.getSession();
@@ -127,7 +180,11 @@ const TourPlansPage = () => {
         description: tourPlan.description,
         price: tourPlan.price,
         image_path: tourPlan.image_path,
-        user_id: tourPlan.user_id
+        user_id: tourPlan.user_id,
+        days: JSON.stringify(tourPlan.days || []),
+        tour_guides: JSON.stringify(tourPlan.tourGuides || []),
+        number_of_people: tourPlan.numberOfPeople || 2,
+        start_date: tourPlan.start_date || new Date().toISOString().split('T')[0]
       };
 
       const { error } = isNewTourPlan
@@ -166,6 +223,7 @@ const TourPlansPage = () => {
               tourPlan={tourPlan}
               onEdit={handleEditTourPlan}
               onDelete={handleDeleteTourPlan}
+              onConvertToItinerary={() => convertToItinerary(tourPlan)}
             />
           </div>
         ))}
@@ -243,3 +301,4 @@ const TourPlansPage = () => {
 };
 
 export default TourPlansPage;
+
