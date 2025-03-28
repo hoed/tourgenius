@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -25,7 +26,7 @@ const AuthFormFields = ({
     <>
       {isSignUp && (
         <div className="space-y-2">
-          <Label htmlFor="name" className="text-blue">Nama Lengkap</Label>
+          <Label htmlFor="name" className="text-white">Nama Lengkap</Label>
           <Input
             id="name"
             name="name"
@@ -35,13 +36,13 @@ const AuthFormFields = ({
             placeholder="Masukkan nama Anda"
             required={isSignUp}
             disabled={loading}
-            className="w-full bg-blue border-blue-400/50 text-black placeholder:text-gray-500"
+            className="w-full bg-blue-900/50 border-blue-400/30 text-white placeholder:text-blue-300/50 focus:border-blue-300"
           />
         </div>
       )}
 
       <div className="space-y-2">
-        <Label htmlFor="email" className="text-blue">Email</Label>
+        <Label htmlFor="email" className="text-white">Email</Label>
         <Input
           id="email"
           name="email"
@@ -51,15 +52,15 @@ const AuthFormFields = ({
           placeholder="Masukkan email Anda"
           required
           disabled={loading}
-          className="w-full bg-white border-blue-400/50 text-black placeholder:text-gray-500"
+          className="w-full bg-blue-900/50 border-blue-400/30 text-white placeholder:text-blue-300/50 focus:border-blue-300"
         />
       </div>
 
       <div className="space-y-2">
         <div className="flex justify-between items-center">
-          <Label htmlFor="password" className="text-blue">Kata Sandi</Label>
+          <Label htmlFor="password" className="text-white">Kata Sandi</Label>
           {!isSignUp && (
-            <a href="#" className="text-sm text-blue-900 hover:underline">
+            <a href="#" className="text-sm text-blue-300 hover:underline">
               Lupa kata sandi?
             </a>
           )}
@@ -73,7 +74,7 @@ const AuthFormFields = ({
           placeholder="Masukkan kata sandi Anda"
           required
           disabled={loading}
-          className="w-full bg-white border-blue-400/50 text-black placeholder:text-gray-500"
+          className="w-full bg-blue-900/50 border-blue-400/30 text-white placeholder:text-blue-300/50 focus:border-blue-300"
         />
       </div>
     </>

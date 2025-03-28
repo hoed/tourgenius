@@ -28,12 +28,17 @@ const useAuth = () => {
           });
         } else {
           // Fallback to fetching from 'profiles' table if user_metadata is not available
+          // Check if is_admin field exists and use that instead
           const { data: profile } = await supabase
             .from('profiles')
-            .select('role')
+            .select('is_admin')
             .eq('id', user.id)
             .single();
-          setUser({ id: user.id, role: profile?.role || 'user' });
+            
+          setUser({ 
+            id: user.id, 
+            role: profile?.is_admin ? 'admin' : 'user'
+          });
         }
       }
     };
