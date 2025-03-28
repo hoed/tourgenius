@@ -7,16 +7,36 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { toast } from 'sonner';
-import { PlusCircle, Search, Trash2, Edit, UserPlus } from 'lucide-react';
+import { PlusCircle, Search, Trash2, Edit, UserPlus, Star } from 'lucide-react';
 
-// Mock data
+// Mock data with ratings instead of status (0-5 scale)
 const initialCustomers = [
-  { id: 1, name: 'John Doe', email: 'john@example.com', phone: '+62 812-3456-7890', status: 'active', notes: 'Repeat customer' },
-  { id: 2, name: 'Jane Smith', email: 'jane@example.com', phone: '+62 813-5678-9012', status: 'inactive', notes: 'Cultural tours' },
-  { id: 3, name: 'Robert Johnson', email: 'robert@example.com', phone: '+62 857-1234-5678', status: 'active', notes: 'Vegetarian' },
-  { id: 4, name: 'Emily Davis', email: 'emily@example.com', phone: '+62 878-9012-3456', status: 'pending', notes: 'First-timer' },
-  { id: 5, name: 'Michael Wilson', email: 'michael@example.com', phone: '+62 821-3456-7890', status: 'active', notes: 'Adventure' },
+  { id: 1, name: 'John Doe', email: 'john@example.com', phone: '+62 812-3456-7890', rating: 4, notes: 'Repeat customer' },
+  { id: 2, name: 'Jane Smith', email: 'jane@example.com', phone: '+62 813-5678-9012', rating: 2, notes: 'Cultural tours' },
+  { id: 3, name: 'Robert Johnson', email: 'robert@example.com', phone: '+62 857-1234-5678', rating: 5, notes: 'Vegetarian' },
+  { id: 4, name: 'Emily Davis', email: 'emily@example.com', phone: '+62 878-9012-3456', rating: 3, notes: 'First-timer' },
+  { id: 5, name: 'Michael Wilson', email: 'michael@example.com', phone: '+62 821-3456-7890', rating: 4, notes: 'Adventure' },
 ];
+
+// Star Rating Component
+const StarRating = ({ rating, maxRating = 5, size = 'sm' }) => {
+  const starSize = size === 'sm' ? 'h-4 w-4' : 'h-5 w-5';
+  return (
+    <div className="flex items-center">
+      {[...Array(maxRating)].map((_, index) => (
+        <Star
+          key={index}
+          className={`${starSize} ${
+            index < rating 
+              ? 'text-yellow-400 fill-yellow-400' 
+              : 'text-gray-300'
+          }`}
+        />
+      ))}
+      <span className="ml-1 text-xs text-gray-600">({rating})</span>
+    </div>
+  );
+};
 
 const CustomerManagement = () => {
   const [customers, setCustomers] = useState(initialCustomers);
@@ -24,12 +44,12 @@ const CustomerManagement = () => {
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
-  const [currentCustomer, setCurrentCustomer] = useState<any>(null);
+  const [currentCustomer, setCurrentCustomer] = useState(null);
   const [newCustomer, setNewCustomer] = useState({
     name: '',
     email: '',
     phone: '',
-    status: 'pending',
+    rating: 0,
     notes: ''
   });
 
@@ -46,7 +66,7 @@ const CustomerManagement = () => {
     }
     const id = customers.length > 0 ? Math.max(...customers.map(c => c.id)) + 1 : 1;
     setCustomers([...customers, { ...newCustomer, id }]);
-    setNewCustomer({ name: '', email: '', phone: '', status: 'pending', notes: '' });
+    setNewCustomer({ name: '', email: '', phone: '', rating: 0, notes: '' });
     setIsAddDialogOpen(false);
     toast.success('Customer added successfully');
   };
@@ -67,19 +87,6 @@ const CustomerManagement = () => {
     setCustomers(customers.filter(customer => customer.id !== currentCustomer.id));
     setIsDeleteDialogOpen(false);
     toast.success('Customer deleted successfully');
-  };
-
-  const StatusBadge = ({ status }: { status: string }) => {
-    const styles = {
-      active: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30',
-      inactive: 'bg-rose-500/20 text-rose-300 border-rose-500/30',
-      pending: 'bg-amber-500/20 text-amber-300 border-amber-500/30',
-    };
-    return (
-      <span className={`px-2.5 py-1 rounded-full text-xs font-medium border ${styles[status as keyof typeof styles]} transition-all duration-300 hover:scale-105`}>
-        {status.charAt(0).toUpperCase() + status.slice(1)}
-      </span>
-    );
   };
 
   return (
@@ -118,7 +125,7 @@ const CustomerManagement = () => {
         <Table>
           <TableHeader className="bg-gray-100">
             <TableRow className="border-b border-gray-200">
-              {['Name', 'Email', 'Phone', 'Status', 'Notes', 'Actions'].map((header) => (
+              {['Name', 'Email', 'Phone', 'Rating', 'Notes', 'Actions'].map((header) => (
                 <TableHead key={header} className="text-amber-700 font-semibold">
                   {header}
                 </TableHead>
@@ -135,7 +142,9 @@ const CustomerManagement = () => {
                   <TableCell className="font-medium">{customer.name}</TableCell>
                   <TableCell>{customer.email}</TableCell>
                   <TableCell>{customer.phone}</TableCell>
-                  <TableCell><StatusBadge status={customer.status} /></TableCell>
+                  <TableCell>
+                    <StarRating rating={customer.rating} />
+                  </TableCell>
                   <TableCell className="max-w-xs truncate">{customer.notes}</TableCell>
                   <TableCell className="text-right space-x-2">
                     <Button
@@ -213,18 +222,18 @@ const CustomerManagement = () => {
               />
             </div>
             <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="status" className="text-right text-gray-700">Status</Label>
+              <Label htmlFor="rating" className="text-right text-gray-700">Rating</Label>
               <Select
-                value={newCustomer.status}
-                onValueChange={(value) => setNewCustomer({ ...newCustomer, status: value })}
+                value={newCustomer.rating.toString()}
+                onValueChange={(value) => setNewCustomer({ ...newCustomer, rating: parseInt(value) })}
               >
                 <SelectTrigger className="col-span-3 bg-gray-50 border-gray-200 text-gray-900">
-                  <SelectValue placeholder="Select status" />
+                  <SelectValue placeholder="Select rating" />
                 </SelectTrigger>
                 <SelectContent className="bg-white border-gray-200 text-gray-900">
-                  <SelectItem value="active">Active</SelectItem>
-                  <SelectItem value="inactive">Inactive</SelectItem>
-                  <SelectItem value="pending">Pending</SelectItem>
+                  {[0, 1, 2, 3, 4, 5].map((num) => (
+                    <SelectItem key={num} value={num.toString()}>{num} Stars</SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>
@@ -296,18 +305,18 @@ const CustomerManagement = () => {
                 />
               </div>
               <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="edit-status" className="text-right text-gray-700">Status</Label>
+                <Label htmlFor="edit-rating" className="text-right text-gray-700">Rating</Label>
                 <Select
-                  value={currentCustomer.status}
-                  onValueChange={(value) => setCurrentCustomer({ ...currentCustomer, status: value })}
+                  value={currentCustomer.rating.toString()}
+                  onValueChange={(value) => setCurrentCustomer({ ...currentCustomer, rating: parseInt(value) })}
                 >
                   <SelectTrigger className="col-span-3 bg-gray-50 border-gray-200 text-gray-900">
-                    <SelectValue placeholder="Select status" />
+                    <SelectValue placeholder="Select rating" />
                   </SelectTrigger>
                   <SelectContent className="bg-white border-gray-200 text-gray-900">
-                    <SelectItem value="active">Active</SelectItem>
-                    <SelectItem value="inactive">Inactive</SelectItem>
-                    <SelectItem value="pending">Pending</SelectItem>
+                    {[0, 1, 2, 3, 4, 5].map((num) => (
+                      <SelectItem key={num} value={num.toString()}>{num} Stars</SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
               </div>
@@ -353,6 +362,7 @@ const CustomerManagement = () => {
             <div className="py-4">
               <p><strong>Name:</strong> {currentCustomer.name}</p>
               <p><strong>Email:</strong> {currentCustomer.email}</p>
+              <p><strong>Rating:</strong> <StarRating rating={currentCustomer.rating} size="sm" /></p>
             </div>
           )}
           <DialogFooter>
