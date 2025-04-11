@@ -2,11 +2,13 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { Menu, X } from 'lucide-react';
+import { Menu, X, MessageCircle } from 'lucide-react';
+import { useChat } from '@/contexts/ChatContext';
 
 const Navbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const { openChat } = useChat();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -68,6 +70,14 @@ const Navbar = () => {
         </nav>
 
         <div className="hidden md:flex items-center space-x-4">
+          <Button 
+            variant="outline" 
+            size="icon"
+            className="text-blue-600 hover:text-blue-700"
+            onClick={openChat}
+          >
+            <MessageCircle size={20} />
+          </Button>
           <Link to="/auth">
             <Button variant="outline" className="text-blue-600 hover:text-blue-700">
               Log In
@@ -78,12 +88,22 @@ const Navbar = () => {
           </Link>
         </div>
 
-        <button
-          className="md:hidden text-foreground"
-          onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-        >
-          {isMobileMenuOpen ? <X size={24} className="text-white" /> : <Menu size={24} className="text-white" />}
-        </button>
+        <div className="md:hidden flex items-center space-x-2">
+          <Button 
+            variant="outline" 
+            size="icon"
+            className="text-white"
+            onClick={openChat}
+          >
+            <MessageCircle size={20} />
+          </Button>
+          <button
+            className="text-foreground"
+            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+          >
+            {isMobileMenuOpen ? <X size={24} className="text-white" /> : <Menu size={24} className="text-white" />}
+          </button>
+        </div>
       </div>
 
       {/* Mobile menu */}
