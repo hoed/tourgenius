@@ -5,10 +5,12 @@ import InvoiceGenerator from '@/components/dashboard/invoices/invoice-generator'
 import InvoiceList from '@/components/dashboard/invoices/invoice-list';
 import { Toaster } from 'sonner';
 import { Button } from '@/components/ui/button';
-import { PlusCircle, FileText } from 'lucide-react';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
+import { PlusCircle, FileText, FileImport, FileEdit } from 'lucide-react';
 
 const InvoicesPage = () => {
   const [showGenerator, setShowGenerator] = useState(false);
+  const [invoiceSource, setInvoiceSource] = useState<'manual' | 'itinerary'>('manual');
 
   return (
     <DashboardLayout>
@@ -40,7 +42,32 @@ const InvoicesPage = () => {
         </div>
 
         {showGenerator ? (
-          <InvoiceGenerator />
+          <div className="space-y-6">
+            <Tabs
+              defaultValue="manual"
+              value={invoiceSource}
+              onValueChange={(value) => setInvoiceSource(value as 'manual' | 'itinerary')}
+              className="w-full"
+            >
+              <TabsList className="grid w-full max-w-md mx-auto grid-cols-2 mb-6">
+                <TabsTrigger value="manual" className="flex items-center gap-2">
+                  <FileEdit className="h-4 w-4" />
+                  <span>Manual Input</span>
+                </TabsTrigger>
+                <TabsTrigger value="itinerary" className="flex items-center gap-2">
+                  <FileImport className="h-4 w-4" />
+                  <span>From Itinerary</span>
+                </TabsTrigger>
+              </TabsList>
+              
+              <TabsContent value="manual">
+                <InvoiceGenerator source="manual" />
+              </TabsContent>
+              <TabsContent value="itinerary">
+                <InvoiceGenerator source="itinerary" />
+              </TabsContent>
+            </Tabs>
+          </div>
         ) : (
           <InvoiceList />
         )}

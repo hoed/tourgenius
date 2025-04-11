@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect } from 'react';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -169,7 +168,7 @@ const TourPlanEditor = ({ isOpen, onClose, onSave, tourPlan }: TourPlanEditorPro
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="max-w-md md:max-w-xl">
+      <DialogContent className="max-w-md md:max-w-xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>{tourPlan ? 'Edit Tour Plan' : 'Create Tour Plan'}</DialogTitle>
           <DialogDescription>
@@ -180,7 +179,7 @@ const TourPlanEditor = ({ isOpen, onClose, onSave, tourPlan }: TourPlanEditorPro
         </DialogHeader>
 
         <Tabs defaultValue="basic" className="w-full" onValueChange={setActiveTab} value={activeTab}>
-          <TabsList className="w-full grid grid-cols-2">
+          <TabsList className="w-full grid grid-cols-2 sticky top-0 z-10 bg-background">
             <TabsTrigger value="basic">Basic Info</TabsTrigger>
             <TabsTrigger value="itinerary">Itinerary Details</TabsTrigger>
           </TabsList>
@@ -330,7 +329,7 @@ const TourPlanEditor = ({ isOpen, onClose, onSave, tourPlan }: TourPlanEditorPro
               </p>
             </TabsContent>
 
-            <DialogFooter className="flex gap-2 pt-2">
+            <DialogFooter className="flex gap-2 pt-2 sticky bottom-0 bg-background pb-2">
               <Button 
                 type="button" 
                 variant="outline" 

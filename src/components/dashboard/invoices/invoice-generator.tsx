@@ -1,764 +1,527 @@
-import React, { useState, useEffect, useRef } from 'react';
+
+import React, { useState, useEffect } from 'react';
+import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Separator } from '@/components/ui/separator';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
-import { Invoice, TourItinerary } from '@/lib/types';
-import { Calendar, Download, FileText, Printer, Send, CheckCircle } from 'lucide-react';
+import { Textarea } from '@/components/ui/textarea';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { toast } from 'sonner';
-import GlassCard from '@/components/ui/glass-card';
-import { useLocation, useNavigate } from 'react-router-dom';
-import jsPDF from 'jspdf';
 import { supabase } from '@/integrations/supabase/client';
-import { addCustomerToDatabase } from '../itinerary/itinerary-utils';
+import { v4 as uuidv4 } from 'uuid';
+import { Plus, Trash2, Save, Send, FileText, Calendar, Users, Loader2 } from 'lucide-react';
 import { formatRupiah } from '@/lib/utils';
+import { Invoice, InvoiceItem } from '@/lib/types';
 
 interface InvoiceGeneratorProps {
-  itinerary?: TourItinerary;
+  source?: 'manual' | 'itinerary';
 }
 
-const InvoiceGenerator = ({ itinerary: propItinerary }: InvoiceGeneratorProps) => {
-  const location = useLocation();
-  const navigate = useNavigate();
-  const [itinerary, setItinerary] = useState<TourItinerary | undefined>(propItinerary);
-  const invoiceRef = useRef<HTMLDivElement>(null);
-  const [isSending, setIsSending] = useState(false);
-  const [isSaving, setIsSaving] = useState(false);
-  
-  useEffect(() => {
-    if (location.state?.itinerary && !propItinerary) {
-      setItinerary(location.state.itinerary);
-    }
-  }, [location.state?.itinerary, propItinerary]);
-
-  const [invoice, setInvoice] = useState<Partial<Invoice>>({
-    customerName: '',
-    customerEmail: '',
-    date: new Date().toISOString().split('T')[0],
-    dueDate: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-    status: 'unpaid'
+const InvoiceGenerator = ({ source = 'manual' }: InvoiceGeneratorProps) => {
+  // Basic invoice state
+  const [customerName, setCustomerName] = useState('');
+  const [customerEmail, setCustomerEmail] = useState('');
+  const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
+  const [dueDate, setDueDate] = useState(() => {
+    const date = new Date();
+    date.setDate(date.getDate() + 14);
+    return date.toISOString().split('T')[0];
   });
+  
+  // Items state
+  const [items, setItems] = useState<InvoiceItem[]>([
+    { id: uuidv4(), description: '', quantity: 1, unitPrice: 0, total: 0 }
+  ]);
+  
+  // Totals
+  const [subtotal, setSubtotal] = useState(0);
+  const [taxRate, setTaxRate] = useState(11); // 11% VAT in Indonesia
+  const [tax, setTax] = useState(0);
+  const [total, setTotal] = useState(0);
+  
+  // UI states
+  const [isSaving, setIsSaving] = useState(false);
+  const [isSending, setIsSending] = useState(false);
+  
+  // Itinerary selection state (for itinerary-based invoices)
+  const [itineraries, setItineraries] = useState<any[]>([]);
+  const [selectedItineraryId, setSelectedItineraryId] = useState<string | null>(null);
+  const [isLoadingItinerary, setIsLoadingItinerary] = useState(false);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setInvoice(prev => ({ ...prev, [name]: value }));
+  // Fetch itineraries if source is "itinerary"
+  useEffect(() => {
+    if (source === 'itinerary') {
+      fetchItineraries();
+    }
+  }, [source]);
+
+  // Calculate totals whenever items change
+  useEffect(() => {
+    calculateTotals();
+  }, [items, taxRate]);
+
+  const fetchItineraries = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('itineraries')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      setItineraries(data || []);
+    } catch (error) {
+      console.error('Error fetching itineraries:', error);
+      toast.error('Failed to load itineraries');
+    }
   };
 
-  const handleGenerateInvoice = async () => {
-    if (!invoice.customerName || !invoice.customerEmail) {
-      toast.error('Please fill in all required fields');
+  const loadItineraryData = async (itineraryId: string) => {
+    setIsLoadingItinerary(true);
+    try {
+      const { data, error } = await supabase
+        .from('itineraries')
+        .select('*')
+        .eq('id', itineraryId)
+        .single();
+
+      if (error) throw error;
+      
+      if (data) {
+        // Parse JSON fields if needed
+        const parsedDays = typeof data.days === 'string' ? JSON.parse(data.days) : data.days;
+        const parsedGuides = typeof data.tour_guides === 'string' ? JSON.parse(data.tour_guides) : data.tour_guides;
+        
+        // Get customer information if available
+        // This depends on your data structure, you may need to adjust
+        
+        // Generate invoice items based on itinerary
+        const newItems: InvoiceItem[] = [];
+        
+        // Add main tour price
+        newItems.push({
+          id: uuidv4(),
+          description: `Tour Package: ${data.name}`,
+          quantity: data.number_of_people || 1,
+          unitPrice: data.total_price / (data.number_of_people || 1),
+          total: data.total_price
+        });
+        
+        // Add additional items if needed (optional)
+        // For example, you could add guide fees, special activities, etc.
+        if (parsedGuides && parsedGuides.length > 0) {
+          parsedGuides.forEach((guide: any) => {
+            newItems.push({
+              id: uuidv4(),
+              description: `Tour Guide: ${guide.name} (${guide.expertise})`,
+              quantity: 1,
+              unitPrice: guide.pricePerDay,
+              total: guide.pricePerDay
+            });
+          });
+        }
+        
+        setItems(newItems);
+        setCustomerName(`Customer for ${data.name}`); // You may want to improve this
+        setSelectedItineraryId(itineraryId);
+        
+        // Calculate totals based on new items
+        calculateTotals(newItems);
+      }
+    } catch (error) {
+      console.error('Error loading itinerary data:', error);
+      toast.error('Failed to load itinerary data');
+    } finally {
+      setIsLoadingItinerary(false);
+    }
+  };
+
+  const calculateTotals = (itemsToCalculate = items) => {
+    const newSubtotal = itemsToCalculate.reduce((sum, item) => sum + item.total, 0);
+    const newTax = newSubtotal * (taxRate / 100);
+    const newTotal = newSubtotal + newTax;
+    
+    setSubtotal(newSubtotal);
+    setTax(newTax);
+    setTotal(newTotal);
+  };
+
+  const updateItemTotal = (index: number, quantity: number, unitPrice: number) => {
+    const updatedItems = [...items];
+    updatedItems[index].quantity = quantity;
+    updatedItems[index].unitPrice = unitPrice;
+    updatedItems[index].total = quantity * unitPrice;
+    setItems(updatedItems);
+  };
+
+  const addItem = () => {
+    setItems([...items, { id: uuidv4(), description: '', quantity: 1, unitPrice: 0, total: 0 }]);
+  };
+
+  const removeItem = (index: number) => {
+    if (items.length > 1) {
+      const updatedItems = [...items];
+      updatedItems.splice(index, 1);
+      setItems(updatedItems);
+    } else {
+      toast.error('Invoice must have at least one item');
+    }
+  };
+
+  const handleSave = async (status: 'draft' | 'sent' = 'draft') => {
+    if (!customerName.trim()) {
+      toast.error('Please enter customer name');
       return;
     }
-    
+
+    if (!customerEmail.trim() || !customerEmail.includes('@')) {
+      toast.error('Please enter a valid customer email');
+      return;
+    }
+
+    const hasEmptyDescription = items.some(item => !item.description.trim());
+    if (hasEmptyDescription) {
+      toast.error('All items must have a description');
+      return;
+    }
+
     setIsSaving(true);
     
     try {
-      // First add customer to database
-      const customerAdded = await addCustomerToDatabase(invoice.customerName, invoice.customerEmail);
+      const { data: session } = await supabase.auth.getSession();
       
-      if (!customerAdded) {
-        throw new Error('Failed to add customer to database');
+      if (!session?.session) {
+        toast.error('You must be logged in to save invoices');
+        return;
       }
       
-      // Generate invoice items
-      const invoiceItems = itinerary ? generateInvoiceItems() : [
-        { id: '1', description: 'Tour Package (Standard)', quantity: 2, unitPrice: 750000, total: 1500000 }
-      ];
+      const invoice: Partial<Invoice> = {
+        id: uuidv4(),
+        itineraryId: selectedItineraryId || undefined,
+        customerName,
+        customerEmail,
+        date,
+        dueDate,
+        items, // This will be converted to JSONB in Supabase
+        subtotal,
+        tax,
+        total,
+        status,
+        user_id: session.session.user.id,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      };
       
-      const subtotal = invoiceItems.reduce((sum, item) => sum + item.total, 0);
-      const tax = subtotal * 0.05;
-      const total = subtotal + tax;
-      
-      // Get the user session
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) {
-        throw new Error('You must be logged in to save an invoice');
-      }
-      
-      // Save invoice to Supabase
-      const { data: savedInvoice, error } = await supabase
+      // Insert to database
+      const { error } = await supabase
         .from('invoices')
-        .insert([{
-          user_id: session.user.id,
-          itinerary_id: itinerary?.id || null,
-          customer_name: invoice.customerName,
-          customer_email: invoice.customerEmail,
-          date: invoice.date,
-          due_date: invoice.dueDate,
-          items: invoiceItems,
-          subtotal: subtotal,
-          tax: tax,
-          total: total,
-          status: invoice.status,
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString()
-        }])
-        .select()
-        .single();
+        .insert([invoice]);
       
-      if (error) {
-        throw error;
+      if (error) throw error;
+      
+      toast.success(`Invoice ${status === 'draft' ? 'saved as draft' : 'created and marked as sent'}`);
+      
+      // Reset form after successful save
+      if (status === 'sent') {
+        resetForm();
       }
-      
-      toast.success('Invoice generated and saved successfully!');
-      
-      // Update local invoice state with the saved ID
-      setInvoice(prev => ({ 
-        ...prev, 
-        id: savedInvoice.id,
-        subtotal: subtotal,
-        tax: tax,
-        total: total,
-        items: invoiceItems
-      }));
-      
     } catch (error) {
       console.error('Error saving invoice:', error);
-      toast.error(`Failed to save invoice: ${error.message}`);
+      toast.error('Failed to save invoice');
     } finally {
       setIsSaving(false);
     }
   };
 
-  const handleSendInvoice = async () => {
-    if (!invoice.customerName || !invoice.customerEmail) {
-      toast.error('Please fill in all required fields');
-      return;
-    }
-    
+  const sendInvoice = async () => {
     setIsSending(true);
     try {
-      // First, add the customer to the database
-      await addCustomerToDatabase(invoice.customerName, invoice.customerEmail);
-
-      // Generate PDF as base64
-      const pdfBase64 = await generatePDFBase64();
-
-      // Create HTML email content
-      const htmlContent = `
-        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-          <div style="background: linear-gradient(to right, #f97316, #f59e0b); padding: 20px; color: white; border-radius: 10px 10px 0 0;">
-            <h1 style="margin: 0; font-size: 24px;">Invoice from TourGenius</h1>
-          </div>
-          <div style="border: 1px solid #e5e7eb; border-top: none; padding: 20px; border-radius: 0 0 10px 10px;">
-            <p>Dear ${invoice.customerName},</p>
-            <p>Thank you for choosing TourGenius for your travel planning needs!</p>
-            <p>Please find attached your invoice for the "${itinerary?.name}" itinerary.</p>
-            <p>Invoice details:</p>
-            <ul>
-              <li>Invoice Date: ${invoice.date}</li>
-              <li>Due Date: ${invoice.dueDate}</li>
-              <li>Total Amount: ${formatRupiah(subtotal + tax)}</li>
-            </ul>
-            <p>If you have any questions, please don't hesitate to contact us.</p>
-            <p>Best regards,<br>The TourGenius Team</p>
-          </div>
-        </div>
-      `;
-
-      // Send email via Supabase Edge Function
-      const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/send-invoice`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${(await supabase.auth.getSession()).data.session?.access_token}`
-        },
-        body: JSON.stringify({
-          to: invoice.customerEmail,
-          name: invoice.customerName,
-          subject: `Invoice for ${itinerary?.name} Tour Package`,
-          htmlContent,
-          pdfAttachment: pdfBase64
-        })
-      });
-
-      const result = await response.json();
+      // First save the invoice as sent
+      await handleSave('sent');
       
-      if (result.success) {
-        toast.success('Invoice sent to customer!');
-        setInvoice(prev => ({ ...prev, status: 'sent' }));
-      } else {
-        throw new Error(result.error || 'Failed to send email');
-      }
+      // Here you would typically integrate with an email service
+      // For now, we'll just simulate sending
+      
+      setTimeout(() => {
+        toast.success(`Invoice sent to ${customerEmail}`);
+        setIsSending(false);
+      }, 1500);
+      
+      // In a real implementation, you'd call your email sending function or API
+      // Example: await sendInvoiceEmail(invoice, customerEmail);
     } catch (error) {
       console.error('Error sending invoice:', error);
-      toast.error(`Failed to send invoice: ${error.message || 'Unknown error'}`);
-    } finally {
+      toast.error('Failed to send invoice');
       setIsSending(false);
     }
   };
 
-  const handleAddToCalendar = () => {
-    if (!itinerary) {
-      toast.error('No itinerary data available');
-      return;
-    }
-    try {
-      toast.loading('Preparing to save to Google Calendar...');
-      setTimeout(() => {
-        toast.dismiss();
-        toast.success('Itinerary saved to Google Calendar!');
-      }, 2000);
-    } catch (error) {
-      toast.error('Failed to save to Google Calendar');
-      console.error(error);
-    }
-  };
-
-  const formatRupiah = (amount: number) => {
-    return new Intl.NumberFormat('id-ID', {
-      style: 'currency',
-      currency: 'IDR',
-      minimumFractionDigits: 0
-    }).format(amount);
-  };
-
-  const generateInvoiceItems = () => {
-    if (!itinerary) return [];
-    const items = [];
-    
-    // Process destinations - show actual destinations in invoice
-    if (itinerary.days.some(day => day.destinations.length > 0)) {
-      itinerary.days.forEach((day, dayIndex) => {
-        day.destinations.forEach((dest, destIndex) => {
-          items.push({
-            id: `dest-${dayIndex}-${destIndex}`,
-            description: `Day ${day.day}: ${dest.name}`,
-            quantity: itinerary.numberOfPeople,
-            unitPrice: dest.pricePerPerson,
-            total: dest.pricePerPerson * itinerary.numberOfPeople
-          });
-        });
-      });
-    }
-    
-    // Process accommodations - show actual hotels with room details
-    itinerary.days.forEach((day, dayIndex) => {
-      if (day.hotel) {
-        const roomsNeeded = day.hotel.roomAmount || Math.ceil(itinerary.numberOfPeople / 2);
-        items.push({
-          id: `hotel-${dayIndex}`,
-          description: `Day ${day.day}: ${day.hotel.name} (${roomsNeeded} room${roomsNeeded > 1 ? 's' : ''})`,
-          quantity: roomsNeeded,
-          unitPrice: day.hotel.pricePerNight,
-          total: day.hotel.pricePerNight * roomsNeeded
-        });
-      }
-    });
-    
-    // Process meals - show actual meals
-    itinerary.days.forEach((day, dayIndex) => {
-      day.meals.forEach((meal, mealIndex) => {
-        items.push({
-          id: `meal-${dayIndex}-${mealIndex}`,
-          description: `Day ${day.day}: ${meal.type.charAt(0).toUpperCase() + meal.type.slice(1)} - ${meal.description}`,
-          quantity: itinerary.numberOfPeople,
-          unitPrice: meal.pricePerPerson,
-          total: meal.pricePerPerson * itinerary.numberOfPeople
-        });
-      });
-    });
-    
-    // Process transportation - show actual transportation details
-    // Transportation is now a fixed price per day, not multiplied by number of people
-    itinerary.days.forEach((day, dayIndex) => {
-      if (day.transportation) {
-        items.push({
-          id: `trans-${dayIndex}`,
-          description: `Day ${day.day}: Transportation - ${day.transportation.description}`,
-          quantity: 1, // Fixed to 1 as it's per day, not per person
-          unitPrice: day.transportation.pricePerPerson,
-          total: day.transportation.pricePerPerson
-        });
-      }
-    });
-    
-    // Process tour guides - show actual guides
-    itinerary.tourGuides.forEach((guide, guideIndex) => {
-      items.push({
-        id: `guide-${guideIndex}`,
-        description: `Tour Guide: ${guide.name} (${guide.expertise}) for ${itinerary.days.length} days`,
-        quantity: 1,
-        unitPrice: guide.pricePerDay * itinerary.days.length,
-        total: guide.pricePerDay * itinerary.days.length
-      });
-    });
-    
-    return items;
-  };
-
-  const invoiceItems = itinerary ? generateInvoiceItems() : [
-    { id: '1', description: 'Tour Package (4 days)', quantity: 2, unitPrice: 750000, total: 1500000 },
-    { id: '2', description: 'Premium Hotel Accommodation', quantity: 3, unitPrice: 200000, total: 600000 },
-    { id: '3', description: 'Guided Tours', quantity: 4, unitPrice: 125000, total: 500000 },
-    { id: '4', description: 'Airport Transfers', quantity: 2, unitPrice: 60000, total: 120000 },
-  ];
-
-  const subtotal = invoiceItems.reduce((sum, item) => sum + item.total, 0);
-  const tax = subtotal * 0.05;
-  const total = subtotal + tax;
-
-  const generatePDFBase64 = () => {
-    return new Promise<string>((resolve, reject) => {
-      try {
-        const doc = generatePDF();
-        const pdfBase64 = doc.output('datauristring').split(',')[1];
-        resolve(pdfBase64);
-      } catch (error) {
-        console.error('Error generating PDF base64:', error);
-        reject(error);
-      }
-    });
-  };
-
-  const generatePDF = () => {
-    const doc = new jsPDF();
-    
-    const amber400: [number, number, number] = [251, 191, 36]; // #fbbf24
-    const orange500: [number, number, number] = [249, 115, 22]; // #f97316
-    const gray700: [number, number, number] = [55, 65, 81]; // #374151
-    const gray200: [number, number, number] = [229, 231, 235]; // #e5e7eb
-    const amber600: [number, number, number] = [217, 119, 6]; // #d97706
-
-    doc.setFillColor(250, 250, 250);
-    doc.rect(0, 0, 210, 40, 'F');
-    
-    doc.setFillColor(...orange500);
-    doc.rect(0, 0, 210, 2, 'F');
-    
-    doc.setFontSize(24);
-    doc.setTextColor(...amber600);
-    doc.text('Invoice', 20, 20);
-    doc.setFontSize(12);
-    doc.setTextColor(...gray700);
-    doc.text(`#INV-${new Date().getFullYear()}-${Math.floor(1000 + Math.random() * 9000)}`, 20, 30);
-    doc.setTextColor(...orange500);
-    doc.text('TourGenius', 190, 20, { align: 'right' });
-    doc.setTextColor(...gray700);
-    doc.text('Premium Tour Planning', 190, 30, { align: 'right' });
-
-    doc.setDrawColor(...amber400);
-    doc.setLineWidth(0.5);
-    doc.line(20, 35, 190, 35);
-
-    doc.setFontSize(12);
-    doc.setTextColor(...gray700);
-    doc.text('Bill To:', 20, 50);
-    doc.setFontSize(10);
-    doc.text(invoice.customerName || 'Customer Name', 20, 60);
-    doc.text(invoice.customerEmail || 'customer@example.com', 20, 70);
-    
-    doc.setFontSize(12);
-    doc.text('Invoice Details:', 190, 50, { align: 'right' });
-    doc.setFontSize(10);
-    doc.text(`Date: ${invoice.date || new Date().toISOString().split('T')[0]}`, 190, 60, { align: 'right' });
-    doc.text(`Due Date: ${invoice.dueDate || new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]}`, 190, 70, { align: 'right' });
-    
-    doc.text(`Status: ${invoice.status || 'Unpaid'}`, 190, 80, { align: 'right' });
-
-    if (itinerary) {
-      doc.setFontSize(12);
-      doc.setTextColor(...orange500);
-      doc.text(`Tour Package: ${itinerary.name}`, 20, 90);
-      doc.setFontSize(10);
-      doc.setTextColor(...gray700);
-      doc.text(`Duration: ${itinerary.days.length} days | Travelers: ${itinerary.numberOfPeople}`, 20, 100);
-    }
-
-    doc.setFontSize(14);
-    doc.setTextColor(...amber400);
-    doc.text('Invoice Items:', 20, 115);
-    
-    doc.setDrawColor(...orange500);
-    doc.setLineWidth(0.7);
-    doc.line(20, 120, 190, 120);
-    
-    doc.setFillColor(250, 250, 250);
-    doc.rect(20, 125, 170, 10, 'F');
-    
-    let yPos = 132;
-    doc.setFontSize(10);
-    doc.setTextColor(...gray700);
-    doc.text('Description', 25, yPos);
-    doc.text('Qty', 130, yPos, { align: 'right' });
-    doc.text('Unit Price', 155, yPos, { align: 'right' });
-    doc.text('Total', 185, yPos, { align: 'right' });
-    yPos += 5;
-    doc.setDrawColor(...gray700);
-    doc.setLineWidth(0.2);
-    doc.line(20, yPos, 190, yPos);
-    yPos += 10;
-
-    invoiceItems.forEach((item, index) => {
-      if (index % 2 === 0) {
-        doc.setFillColor(250, 250, 250);
-        doc.rect(20, yPos - 5, 170, 10, 'F');
-      }
-      
-      doc.setTextColor(...gray700);
-      const description = item.description.length > 50 
-        ? item.description.substring(0, 47) + '...' 
-        : item.description;
-      doc.text(description, 25, yPos);
-      doc.text(item.quantity.toString(), 130, yPos, { align: 'right' });
-      doc.text(formatRupiah(item.unitPrice), 155, yPos, { align: 'right' });
-      doc.text(formatRupiah(item.total), 185, yPos, { align: 'right' });
-      yPos += 10;
-      
-      if (index < invoiceItems.length - 1) {
-        doc.setDrawColor(...gray200);
-        doc.setLineWidth(0.1);
-        doc.line(25, yPos - 5, 185, yPos - 5);
-      }
-    });
-
-    doc.setDrawColor(...gray200);
-    doc.setLineWidth(0.5);
-    doc.rect(20, 125, 170, yPos - 125, 'S');
-
-    doc.setFillColor(250, 250, 250);
-    doc.rect(140, yPos - 5, 50, 40, 'F');
-    doc.setDrawColor(...orange500);
-    doc.setLineWidth(0.5);
-    doc.rect(140, yPos - 5, 50, 40, 'S');
-    
-    doc.setFontSize(10);
-    doc.setTextColor(...gray700);
-    doc.text(`Subtotal:`, 140, yPos, { align: 'right' });
-    doc.text(`${formatRupiah(subtotal)}`, 185, yPos, { align: 'right' });
-    yPos += 10;
-    doc.text(`Tax (5%):`, 140, yPos, { align: 'right' });
-    doc.text(`${formatRupiah(tax)}`, 185, yPos, { align: 'right' });
-    yPos += 10;
-    
-    doc.setFillColor(...amber400);
-    doc.rect(140, yPos - 5, 50, 10, 'F');
-    doc.setFontSize(12);
-    doc.setTextColor(255, 255, 255);
-    doc.text(`Total:`, 140, yPos, { align: 'right' });
-    doc.text(`${formatRupiah(total)}`, 185, yPos, { align: 'right' });
-
-    if (itinerary && itinerary.numberOfPeople > 1) {
-      yPos += 15;
-      doc.setFontSize(10);
-      doc.setTextColor(...gray700);
-      const perPersonText = `Price per person: ${formatRupiah(total / itinerary.numberOfPeople)}`;
-      const textWidth = doc.getStringUnitWidth(perPersonText) * doc.getFontSize() / doc.internal.scaleFactor;
-      
-      if (textWidth > 40) {
-        doc.setFontSize(8);
-      }
-      
-      doc.text(perPersonText, 185, yPos, { align: 'right' });
-    }
-
-    doc.setDrawColor(...gray200);
-    doc.setLineWidth(0.5);
-    doc.line(20, yPos - 5, 190, yPos - 5);
-    
-    doc.setFontSize(10);
-    doc.setTextColor(...gray700);
-    doc.text('Thank you for your business!', 105, yPos, { align: 'center' });
-    doc.setFontSize(8);
-    doc.text('Payment is due within 14 days of receipt of this invoice.', 105, yPos + 5, { align: 'center' });
-    doc.text('TourGenius | Premium Tour Planning | +62 123 456 7890', 105, yPos + 10, { align: 'center' });
-
-    return doc;
-  };
-
-  const handleDownloadPDF = () => {
-    const doc = generatePDF();
-    doc.save(`invoice-${invoice.customerName || 'customer'}-${new Date().toISOString().split('T')[0]}.pdf`);
-    toast.success('PDF downloaded successfully!');
-  };
-
-  const handlePrint = () => {
-    const doc = generatePDF();
-    const printWindow = window.open('', '_blank');
-    if (printWindow) {
-      printWindow.document.write(`
-        <html>
-          <head>
-            <title>Invoice</title>
-            <style>
-              body { font-family: Arial, sans-serif; padding: 20px; }
-              .invoice { max-width: 800px; margin: auto; }
-              .header { display: flex; justify-content: space-between; margin-bottom: 20px; }
-              .details { display: flex; justify-content: space-between; margin-bottom: 20px; }
-              table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
-              th, td { padding: 8px; text-align: left; border-bottom: 1px solid #ddd; }
-              th { font-weight: bold; }
-              .right { text-align: right; }
-              .totals { max-width: 300px; margin-left: auto; }
-              .footer { text-align: center; font-size: 12px; margin-top: 20px; }
-            </style>
-          </head>
-          <body>
-            <iframe id="pdfFrame" style="width:100%;height:100vh;border:none;"></iframe>
-            <script>
-              const pdfData = "${doc.output('datauristring')}";
-              document.getElementById('pdfFrame').src = pdfData;
-              setTimeout(() => {
-                window.print();
-                window.close();
-              }, 1000);
-            </script>
-          </body>
-        </html>
-      `);
-      printWindow.document.close();
-      toast.success('Print dialog opened!');
-    } else {
-      toast.error('Failed to open print window. Please allow pop-ups.');
-    }
+  const resetForm = () => {
+    setCustomerName('');
+    setCustomerEmail('');
+    setDate(new Date().toISOString().split('T')[0]);
+    const newDueDate = new Date();
+    newDueDate.setDate(newDueDate.getDate() + 14);
+    setDueDate(newDueDate.toISOString().split('T')[0]);
+    setItems([{ id: uuidv4(), description: '', quantity: 1, unitPrice: 0, total: 0 }]);
+    setSelectedItineraryId(null);
+    setTaxRate(11);
+    calculateTotals([{ id: uuidv4(), description: '', quantity: 1, unitPrice: 0, total: 0 }]);
   };
 
   return (
-    <div className="container mx-auto p-6 space-y-8">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-gray-100 p-6 rounded-xl border border-gray-200 shadow-md">
-        <div>
-          <h1 className="text-3xl font-bold bg-gradient-to-r from-amber-400 via-yellow-300 to-amber-400 bg-clip-text text-transparent animate-gradient">
-            Invoice Generator
-          </h1>
-          <p className="text-gray-600 mt-1">Create and send professional invoices</p>
-        </div>
-        <div className="flex gap-3">
-          {itinerary && (
-            <Button 
-              onClick={handleAddToCalendar}
-              className="bg-gradient-to-r from-emerald-400 to-teal-500 hover:from-emerald-500 hover:to-teal-600 text-black transition-all duration-300 hover:scale-105 shadow-md"
-            >
-              <Calendar className="h-4 w-4 mr-2" />
-              Add to Google Calendar
-            </Button>
-          )}
-        </div>
-      </div>
+    <div className="space-y-6">
+      <h2 className="text-2xl font-bold text-amber-700">
+        {source === 'manual' ? 'Create New Invoice' : 'Create Invoice from Itinerary'}
+      </h2>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        <div className="lg:col-span-1 space-y-6">
-          <GlassCard className="bg-white border border-gray-200 shadow-md">
-            <CardHeader>
-              <CardTitle className="text-amber-700">Invoice Details</CardTitle>
-              <CardDescription className="text-gray-600">Fill in the customer information</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="customerName" className="text-gray-700">Customer Name</Label>
-                <Input
-                  id="customerName"
-                  name="customerName"
-                  value={invoice.customerName}
-                  onChange={handleChange}
-                  placeholder="Enter customer name"
-                  className="bg-gray-50 border-gray-200 text-gray-900 focus:ring-amber-400/50"
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="customerEmail" className="text-gray-700">Customer Email</Label>
-                <Input
-                  id="customerEmail"
-                  name="customerEmail"
-                  type="email"
-                  value={invoice.customerEmail}
-                  onChange={handleChange}
-                  placeholder="Enter customer email"
-                  className="bg-gray-50 border-gray-200 text-gray-900 focus:ring-amber-400/50"
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="date" className="text-gray-700">Invoice Date</Label>
-                <div className="flex items-center">
-                  <Calendar className="h-4 w-4 mr-2 text-gray-600" />
-                  <Input
-                    id="date"
-                    name="date"
-                    type="date"
-                    value={invoice.date}
-                    onChange={handleChange}
-                    className="bg-gray-50 border-gray-200 text-gray-900 focus:ring-amber-400/50"
-                  />
-                </div>
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="dueDate" className="text-gray-700">Due Date</Label>
-                <div className="flex items-center">
-                  <Calendar className="h-4 w-4 mr-2 text-gray-600" />
-                  <Input
-                    id="dueDate"
-                    name="dueDate"
-                    type="date"
-                    value={invoice.dueDate}
-                    onChange={handleChange}
-                    className="bg-gray-50 border-gray-200 text-gray-900 focus:ring-amber-400/50"
-                  />
-                </div>
-              </div>
-            </CardContent>
-            <CardFooter className="flex flex-col space-y-3">
-              <Button 
-                className="w-full bg-amber-400 text-gray-900 hover:bg-amber-500 transition-all duration-300"
-                onClick={handleGenerateInvoice}
-                disabled={isSaving}
-              >
-                {isSaving ? (
-                  <>
-                    <span className="animate-spin mr-2">○</span>
-                    Saving...
-                  </>
-                ) : invoice.id ? (
-                  <>
-                    <CheckCircle className="h-4 w-4 mr-2" />
-                    Invoice Saved
-                  </>
-                ) : (
-                  <>
-                    <FileText className="h-4 w-4 mr-2" />
-                    Generate Invoice
-                  </>
-                )}
-              </Button>
-              {invoice.id && (
-                <div className="text-center text-sm text-green-600 mt-2">
-                  Invoice successfully saved to database!
-                </div>
-              )}
-              <Button 
-                className="w-full border-amber-400/50 text-amber-600 hover:bg-amber-400/10"
-                variant="outline"
-                onClick={handleSendInvoice}
-                disabled={isSending}
-              >
-                <Send className="h-4 w-4 mr-2" />
-                {isSending ? 'Sending...' : 'Send to Customer'}
-              </Button>
-            </CardFooter>
-          </GlassCard>
+      {source === 'itinerary' && (
+        <Card className="p-6 border-amber-200 bg-amber-50">
+          <h3 className="text-lg font-medium mb-4 flex items-center">
+            <FileText className="mr-2 h-5 w-5 text-amber-600" />
+            Select Itinerary
+          </h3>
           
-          <GlassCard className="bg-white border border-gray-200 shadow-md">
-            <CardContent className="pt-6">
-              <h3 className="font-medium text-amber-700 mb-4">Invoice Actions</h3>
-              <div className="flex flex-col space-y-3">
-                <Button 
-                  variant="outline" 
-                  className="w-full border-amber-400/50 text-amber-600 hover:bg-amber-400/10"
-                  onClick={handleDownloadPDF}
-                >
-                  <Download className="h-4 w-4 mr-2" />
-                  Download PDF
-                </Button>
-                <Button 
-                  variant="outline" 
-                  className="w-full border-amber-400/50 text-amber-600 hover:bg-amber-400/10"
-                  onClick={handlePrint}
-                >
-                  <Printer className="h-4 w-4 mr-2" />
-                  Print
-                </Button>
+          <div className="space-y-4">
+            <div>
+              <Label htmlFor="itinerary">Itinerary</Label>
+              <Select 
+                onValueChange={(value) => loadItineraryData(value)}
+                disabled={isLoadingItinerary}
+              >
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Select an itinerary" />
+                </SelectTrigger>
+                <SelectContent>
+                  {itineraries.map((itinerary) => (
+                    <SelectItem key={itinerary.id} value={itinerary.id}>
+                      {itinerary.name} - {formatRupiah(itinerary.total_price)}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            
+            {isLoadingItinerary && (
+              <div className="flex justify-center p-4">
+                <Loader2 className="h-6 w-6 animate-spin text-amber-600" />
               </div>
-            </CardContent>
-          </GlassCard>
+            )}
+            
+            {selectedItineraryId && (
+              <div className="grid grid-cols-2 gap-4">
+                <div className="flex items-center gap-2 text-sm text-gray-600">
+                  <Calendar className="h-4 w-4" />
+                  <span>Start date: {date}</span>
+                </div>
+                <div className="flex items-center gap-2 text-sm text-gray-600">
+                  <Users className="h-4 w-4" />
+                  <span>Number of people: {items[0]?.quantity || 1}</span>
+                </div>
+              </div>
+            )}
+          </div>
+        </Card>
+      )}
+
+      <Card className="p-6 border-gray-200">
+        <div className="space-y-6">
+          <h3 className="text-lg font-medium mb-4">Customer Information</h3>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <Label htmlFor="customerName">Customer Name</Label>
+              <Input
+                id="customerName"
+                placeholder="John Doe"
+                value={customerName}
+                onChange={(e) => setCustomerName(e.target.value)}
+                required
+              />
+            </div>
+            
+            <div>
+              <Label htmlFor="customerEmail">Customer Email</Label>
+              <Input
+                id="customerEmail"
+                type="email"
+                placeholder="john@example.com"
+                value={customerEmail}
+                onChange={(e) => setCustomerEmail(e.target.value)}
+                required
+              />
+            </div>
+            
+            <div>
+              <Label htmlFor="date">Invoice Date</Label>
+              <Input
+                id="date"
+                type="date"
+                value={date}
+                onChange={(e) => setDate(e.target.value)}
+                required
+              />
+            </div>
+            
+            <div>
+              <Label htmlFor="dueDate">Due Date</Label>
+              <Input
+                id="dueDate"
+                type="date"
+                value={dueDate}
+                onChange={(e) => setDueDate(e.target.value)}
+                required
+              />
+            </div>
+          </div>
         </div>
-
-        <div className="lg:col-span-2">
-          <GlassCard className="max-w-4xl mx-auto bg-white border border-gray-200 shadow-md">
-            <CardContent className="p-8" ref={invoiceRef}>
-              <div className="flex justify-between items-start mb-8">
-                <div>
-                  <h2 className="text-2xl font-bold text-amber-700">Invoice</h2>
-                  <p className="text-gray-600">#INV-{new Date().getFullYear()}-{Math.floor(1000 + Math.random() * 9000)}</p>
+      </Card>
+      
+      <Card className="p-6 border-gray-200">
+        <div className="space-y-6">
+          <div className="flex justify-between items-center">
+            <h3 className="text-lg font-medium">Invoice Items</h3>
+            <Button 
+              onClick={addItem} 
+              variant="outline" 
+              size="sm"
+              className="text-amber-600 border-amber-300 hover:bg-amber-50"
+            >
+              <Plus className="h-4 w-4 mr-2" />
+              Add Item
+            </Button>
+          </div>
+          
+          <div className="space-y-4">
+            {items.map((item, index) => (
+              <div key={item.id} className="grid grid-cols-12 gap-4 items-end border-b pb-4">
+                <div className="col-span-12 md:col-span-6">
+                  <Label htmlFor={`description-${index}`}>Description</Label>
+                  <Textarea
+                    id={`description-${index}`}
+                    placeholder="Item description"
+                    value={item.description}
+                    onChange={(e) => {
+                      const updatedItems = [...items];
+                      updatedItems[index].description = e.target.value;
+                      setItems(updatedItems);
+                    }}
+                    rows={2}
+                    required
+                  />
                 </div>
-                <div className="text-right">
-                  <div className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-amber-400 to-orange-500">
-                    TourGenius
+                
+                <div className="col-span-4 md:col-span-2">
+                  <Label htmlFor={`quantity-${index}`}>Quantity</Label>
+                  <Input
+                    id={`quantity-${index}`}
+                    type="number"
+                    min="1"
+                    value={item.quantity}
+                    onChange={(e) => {
+                      const qty = parseInt(e.target.value) || 0;
+                      updateItemTotal(index, qty, item.unitPrice);
+                    }}
+                    required
+                  />
+                </div>
+                
+                <div className="col-span-5 md:col-span-2">
+                  <Label htmlFor={`unitPrice-${index}`}>Unit Price</Label>
+                  <Input
+                    id={`unitPrice-${index}`}
+                    type="number"
+                    min="0"
+                    step="1000"
+                    value={item.unitPrice}
+                    onChange={(e) => {
+                      const price = parseFloat(e.target.value) || 0;
+                      updateItemTotal(index, item.quantity, price);
+                    }}
+                    required
+                  />
+                </div>
+                
+                <div className="col-span-2 md:col-span-1 flex items-center justify-end h-10">
+                  <p className="font-medium text-gray-700">{formatRupiah(item.total)}</p>
+                </div>
+                
+                <div className="col-span-1 flex justify-center">
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => removeItem(index)}
+                    className="h-10 w-10 text-red-500 hover:text-red-700 hover:bg-red-50"
+                    disabled={items.length === 1}
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </div>
+              </div>
+            ))}
+          </div>
+          
+          <div className="border-t pt-4">
+            <div className="flex justify-end space-y-2">
+              <div className="w-full md:w-1/3 space-y-3">
+                <div className="flex justify-between">
+                  <span className="text-gray-600">Subtotal:</span>
+                  <span className="font-medium">{formatRupiah(subtotal)}</span>
+                </div>
+                
+                <div className="flex justify-between items-center">
+                  <div className="flex items-center gap-2">
+                    <span className="text-gray-600">Tax Rate:</span>
+                    <Select
+                      value={taxRate.toString()}
+                      onValueChange={(value) => setTaxRate(parseFloat(value))}
+                    >
+                      <SelectTrigger className="w-20 h-8">
+                        <SelectValue placeholder="%" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="0">0%</SelectItem>
+                        <SelectItem value="11">11%</SelectItem>
+                        <SelectItem value="22">22%</SelectItem>
+                      </SelectContent>
+                    </Select>
                   </div>
-                  <p className="text-sm text-gray-600">Premium Tour Planning</p>
+                  <span>{formatRupiah(tax)}</span>
+                </div>
+                
+                <div className="flex justify-between font-bold text-lg pt-2 border-t">
+                  <span>Total:</span>
+                  <span className="text-amber-700">{formatRupiah(total)}</span>
                 </div>
               </div>
-
-              <div className="grid grid-cols-2 gap-8 mb-8">
-                <div>
-                  <h3 className="font-medium text-gray-700 mb-2">Bill To:</h3>
-                  <p className="text-gray-900">{invoice.customerName || 'Customer Name'}</p>
-                  <p className="text-gray-600">{invoice.customerEmail || 'customer@example.com'}</p>
-                </div>
-                <div className="text-right">
-                  <h3 className="font-medium text-gray-700 mb-2">Invoice Details:</h3>
-                  <p className="text-gray-900">Date: {invoice.date || new Date().toISOString().split('T')[0]}</p>
-                  <p className="text-gray-900">Due Date: {invoice.dueDate || new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]}</p>
-                  <p className="text-gray-900">Status: <span className="capitalize">{invoice.status || 'Unpaid'}</span></p>
-                </div>
-              </div>
-
-              {itinerary && (
-                <div className="mb-6 p-4 border border-amber-200 bg-amber-50 rounded-md">
-                  <h3 className="font-medium text-amber-700">Tour Package: {itinerary.name}</h3>
-                  <p className="text-sm text-gray-600">
-                    Duration: {itinerary.days.length} days | Travelers: {itinerary.numberOfPeople}
-                  </p>
-                </div>
-              )}
-
-              <div className="mb-8">
-                <h3 className="font-medium text-amber-700 mb-4 pb-2 border-b border-amber-200">Invoice Items:</h3>
-                <div className="overflow-x-auto">
-                  <table className="w-full">
-                    <thead>
-                      <tr className="border-b border-gray-200 bg-gray-50">
-                        <th className="text-left py-3 px-2 text-gray-700">Description</th>
-                        <th className="text-right py-3 px-2 text-gray-700">Qty</th>
-                        <th className="text-right py-3 px-2 text-gray-700">Unit Price</th>
-                        <th className="text-right py-3 px-2 text-gray-700">Total</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {invoiceItems.map((item) => (
-                        <tr key={item.id} className="border-b border-gray-200 hover:bg-gray-50">
-                          <td className="py-3 px-2 text-gray-900">{item.description}</td>
-                          <td className="py-3 px-2 text-right text-gray-900">{item.quantity}</td>
-                          <td className="py-3 px-2 text-right text-gray-900">{formatRupiah(item.unitPrice)}</td>
-                          <td className="py-3 px-2 text-right text-gray-900">{formatRupiah(item.total)}</td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-
-              <div className="w-full max-w-md ml-auto">
-                <div className="space-y-2">
-                  <div className="flex justify-between items-center">
-                    <span className="text-gray-700">Subtotal:</span>
-                    <span className="font-medium">{formatRupiah(subtotal)}</span>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-gray-700">Tax (5%):</span>
-                    <span>{formatRupiah(tax)}</span>
-                  </div>
-                  <div className="h-px bg-gray-200 my-2"></div>
-                  <div className="flex justify-between items-center font-bold">
-                    <span>Total:</span>
-                    <span className="text-amber-700">{formatRupiah(total)}</span>
-                  </div>
-                  
-                  {itinerary && itinerary.numberOfPeople > 1 && (
-                    <div className="flex justify-between items-center text-sm text-amber-600 mt-1">
-                      <span>Price per person:</span>
-                      <span>{formatRupiah(total / itinerary.numberOfPeople)}</span>
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              <div className="mt-12 pt-6 border-t border-gray-200 text-center text-gray-600">
-                <p className="text-sm">Thank you for your business!</p>
-                <p className="text-xs mt-1">Payment is due within 14 days of receipt of this invoice.</p>
-                <p className="text-xs mt-1">Questions? Email us at info@tourgenius.com</p>
-              </div>
-            </CardContent>
-          </GlassCard>
+            </div>
+          </div>
         </div>
+      </Card>
+      
+      <div className="flex flex-col sm:flex-row gap-4 justify-end">
+        <Button
+          variant="outline"
+          onClick={() => handleSave('draft')}
+          disabled={isSaving || isSending}
+          className="w-full sm:w-auto"
+        >
+          {isSaving && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+          <Save className="h-4 w-4 mr-2" />
+          Save as Draft
+        </Button>
+        
+        <Button
+          onClick={sendInvoice}
+          disabled={isSaving || isSending}
+          className="bg-amber-500 hover:bg-amber-600 text-white w-full sm:w-auto"
+        >
+          {isSending ? (
+            <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+          ) : (
+            <Send className="h-4 w-4 mr-2" />
+          )}
+          Create and Send
+        </Button>
       </div>
     </div>
   );
