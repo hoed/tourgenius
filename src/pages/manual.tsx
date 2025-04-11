@@ -12,11 +12,11 @@ const Manual = () => {
     <div className="min-h-screen bg-gray-50">
       <div className="container mx-auto py-8 px-4">
         <div className="flex justify-between items-center mb-8">
-          <h1 className="text-3xl font-bold">User Manual</h1>
+          <h1 className="text-3xl font-bold">Manual Pengguna</h1>
           <Button asChild variant="outline" className="flex items-center gap-2">
-            <Link to="/">
+            <Link to="/dashboard">
               <ArrowLeft className="h-4 w-4" />
-              Back to Home
+              Kembali ke Dashboard
             </Link>
           </Button>
         </div>
@@ -25,83 +25,83 @@ const Manual = () => {
           <TabsList className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-2 mb-8">
             <TabsTrigger value="overview" className="flex items-center gap-2">
               <Compass className="h-4 w-4" />
-              <span className="hidden md:inline">Overview</span>
+              <span className="hidden md:inline">Ikhtisar</span>
             </TabsTrigger>
             <TabsTrigger value="dashboard" className="flex items-center gap-2">
               <Map className="h-4 w-4" />
-              <span className="hidden md:inline">Dashboard</span>
+              <span className="hidden md:inline">Dasbor</span>
             </TabsTrigger>
             <TabsTrigger value="customers" className="flex items-center gap-2">
               <Users className="h-4 w-4" />
-              <span className="hidden md:inline">Customers</span>
+              <span className="hidden md:inline">Pelanggan</span>
             </TabsTrigger>
             <TabsTrigger value="itineraries" className="flex items-center gap-2">
               <Calendar className="h-4 w-4" />
-              <span className="hidden md:inline">Itineraries</span>
+              <span className="hidden md:inline">Rencana Perjalanan</span>
             </TabsTrigger>
             <TabsTrigger value="tourplans" className="flex items-center gap-2">
               <Map className="h-4 w-4" />
-              <span className="hidden md:inline">Tour Plans</span>
+              <span className="hidden md:inline">Paket Wisata</span>
             </TabsTrigger>
             <TabsTrigger value="invoices" className="flex items-center gap-2">
               <Receipt className="h-4 w-4" />
-              <span className="hidden md:inline">Invoices</span>
+              <span className="hidden md:inline">Faktur</span>
             </TabsTrigger>
             <TabsTrigger value="settings" className="flex items-center gap-2">
               <Settings className="h-4 w-4" />
-              <span className="hidden md:inline">Settings</span>
+              <span className="hidden md:inline">Pengaturan</span>
             </TabsTrigger>
           </TabsList>
 
           <TabsContent value="overview" className="space-y-6">
             <Card>
               <CardHeader>
-                <CardTitle>Welcome to Tourism Management System</CardTitle>
+                <CardTitle>Selamat Datang di Sistem Manajemen Pariwisata</CardTitle>
                 <CardDescription>
-                  A comprehensive tool for managing your tourism business
+                  Alat komprehensif untuk mengelola bisnis pariwisata Anda
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <p>
-                  The Tourism Management System helps you streamline your tourism business operations by providing tools to manage customers, create travel itineraries, generate invoices, and more.
+                  Sistem Manajemen Pariwisata membantu Anda merampingkan operasi bisnis pariwisata dengan menyediakan alat untuk mengelola pelanggan, membuat rencana perjalanan, menghasilkan faktur, dan lainnya.
                 </p>
-                <h3 className="text-xl font-semibold mt-4">Key Features</h3>
+                <h3 className="text-xl font-semibold mt-4">Fitur Utama</h3>
                 <ul className="list-disc pl-6 space-y-2">
-                  <li>Customer management</li>
-                  <li>Itinerary creation and planning</li>
-                  <li>Tour plan templates</li>
-                  <li>Invoice generation and tracking</li>
-                  <li>Business analytics and reporting</li>
+                  <li>Manajemen pelanggan</li>
+                  <li>Pembuatan dan perencanaan rencana perjalanan</li>
+                  <li>Template paket wisata</li>
+                  <li>Pembuatan dan pelacakan faktur</li>
+                  <li>Analitik bisnis dan pelaporan</li>
                 </ul>
               </CardContent>
             </Card>
 
             <Card>
               <CardHeader>
-                <CardTitle>Getting Started</CardTitle>
+                <CardTitle>Memulai</CardTitle>
                 <CardDescription>
-                  Basic steps to get started with the system
+                  Langkah-langkah dasar untuk memulai dengan sistem
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <ol className="list-decimal pl-6 space-y-3">
                   <li>
-                    <strong>Sign Up/Login:</strong> Create an account or log in to access the dashboard.
+                    <strong>Daftar/Masuk:</strong> Buat akun atau masuk untuk mengakses dasbor.
                   </li>
                   <li>
-                    <strong>Set Up Your Profile:</strong> Update your business details in the settings section.
+                    <strong>Siapkan Profil Anda:</strong> Perbarui detail bisnis Anda di bagian pengaturan.
                   </li>
                   <li>
-                    <strong>Add Customers:</strong> Start building your customer database.
+                    <strong>Tambahkan Pelanggan:</strong> Mulai membangun database pelanggan Anda.
                   </li>
                   <li>
-                    <strong>Create Tour Plans:</strong> Design reusable tour templates.
+                    <strong>Buat Paket Wisata:</strong> Desain template tur yang dapat digunakan kembali.
                   </li>
                   <li>
-                    <strong>Build Itineraries:</strong> Create detailed travel plans for your customers.
+                    <strong>Buat Rencana Perjalanan:</strong> Buat rencana perjalanan detail untuk pelanggan Anda.
                   </li>
                   <li>
-                    <strong>Generate Invoices:</strong> Create and send professional invoices to your customers.
+                    <strong>Hasilkan Faktur:</strong> Buat dan kirim faktur profesional kepada pelanggan Anda.
                   </li>
                 </ol>
               </CardContent>
@@ -111,32 +111,32 @@ const Manual = () => {
           <TabsContent value="dashboard" className="space-y-6">
             <Card>
               <CardHeader>
-                <CardTitle>Dashboard Overview</CardTitle>
+                <CardTitle>Ikhtisar Dasbor</CardTitle>
                 <CardDescription>
-                  Understanding your main control center
+                  Memahami pusat kontrol utama Anda
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <p>
-                  The dashboard provides a quick overview of your tourism business performance and access to all system features.
+                  Dasbor memberikan gambaran cepat tentang performa bisnis pariwisata Anda dan akses ke semua fitur sistem.
                 </p>
                 <Accordion type="single" collapsible className="w-full">
                   <AccordionItem value="dashboard-1">
-                    <AccordionTrigger>Key Metrics</AccordionTrigger>
+                    <AccordionTrigger>Metrik Utama</AccordionTrigger>
                     <AccordionContent>
-                      The dashboard shows important metrics like recent sales, upcoming tours, pending invoices, and customer statistics to help you track your business performance at a glance.
+                      Dasbor menampilkan metrik penting seperti penjualan terbaru, tur yang akan datang, faktur tertunda, dan statistik pelanggan untuk membantu Anda melacak performa bisnis secara sekilas.
                     </AccordionContent>
                   </AccordionItem>
                   <AccordionItem value="dashboard-2">
-                    <AccordionTrigger>Navigation</AccordionTrigger>
+                    <AccordionTrigger>Navigasi</AccordionTrigger>
                     <AccordionContent>
-                      The sidebar menu gives you quick access to all features including customers, itineraries, tour plans, invoices, and settings.
+                      Menu sidebar memberi Anda akses cepat ke semua fitur termasuk pelanggan, rencana perjalanan, paket wisata, faktur, dan pengaturan.
                     </AccordionContent>
                   </AccordionItem>
                   <AccordionItem value="dashboard-3">
-                    <AccordionTrigger>Quick Actions</AccordionTrigger>
+                    <AccordionTrigger>Tindakan Cepat</AccordionTrigger>
                     <AccordionContent>
-                      The dashboard provides quick action buttons to create new itineraries, add customers, generate invoices, and more.
+                      Dasbor menyediakan tombol tindakan cepat untuk membuat rencana perjalanan baru, menambahkan pelanggan, menghasilkan faktur, dan lainnya.
                     </AccordionContent>
                   </AccordionItem>
                 </Accordion>
@@ -147,32 +147,32 @@ const Manual = () => {
           <TabsContent value="customers" className="space-y-6">
             <Card>
               <CardHeader>
-                <CardTitle>Customer Management</CardTitle>
+                <CardTitle>Manajemen Pelanggan</CardTitle>
                 <CardDescription>
-                  Managing your customer database
+                  Mengelola database pelanggan Anda
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <p>
-                  The customer management section allows you to add, edit, and track your customers' information and booking history.
+                  Bagian manajemen pelanggan memungkinkan Anda menambahkan, mengedit, dan melacak informasi pelanggan Anda dan riwayat pemesanan.
                 </p>
                 <Accordion type="single" collapsible className="w-full">
                   <AccordionItem value="customers-1">
-                    <AccordionTrigger>Adding New Customers</AccordionTrigger>
+                    <AccordionTrigger>Menambahkan Pelanggan Baru</AccordionTrigger>
                     <AccordionContent>
-                      Click the "Add Customer" button to open the form. Fill in the customer details including name, email, phone, and address. Save the information to add the customer to your database.
+                      Klik tombol "Tambah Pelanggan" untuk membuka formulir. Isi detail pelanggan termasuk nama, email, telepon, dan alamat. Simpan informasi untuk menambahkan pelanggan ke database Anda.
                     </AccordionContent>
                   </AccordionItem>
                   <AccordionItem value="customers-2">
-                    <AccordionTrigger>Editing Customer Information</AccordionTrigger>
+                    <AccordionTrigger>Mengedit Informasi Pelanggan</AccordionTrigger>
                     <AccordionContent>
-                      To edit a customer's information, find them in the customer list and click the edit button. Update the required fields and save your changes.
+                      Untuk mengedit informasi pelanggan, temukan mereka dalam daftar pelanggan dan klik tombol edit. Perbarui kolom yang diperlukan dan simpan perubahan Anda.
                     </AccordionContent>
                   </AccordionItem>
                   <AccordionItem value="customers-3">
-                    <AccordionTrigger>Customer History</AccordionTrigger>
+                    <AccordionTrigger>Riwayat Pelanggan</AccordionTrigger>
                     <AccordionContent>
-                      View a customer's booking history, previous itineraries, and invoice records by clicking on their profile. This helps you provide more personalized service.
+                      Lihat riwayat pemesanan pelanggan, rencana perjalanan sebelumnya, dan catatan faktur dengan mengklik profil mereka. Ini membantu Anda memberikan layanan yang lebih personal.
                     </AccordionContent>
                   </AccordionItem>
                 </Accordion>
@@ -183,38 +183,38 @@ const Manual = () => {
           <TabsContent value="itineraries" className="space-y-6">
             <Card>
               <CardHeader>
-                <CardTitle>Itinerary Management</CardTitle>
+                <CardTitle>Manajemen Rencana Perjalanan</CardTitle>
                 <CardDescription>
-                  Creating and managing travel itineraries
+                  Membuat dan mengelola rencana perjalanan
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <p>
-                  The itinerary section allows you to create detailed travel plans with day-by-day activities, accommodations, and transportation.
+                  Bagian rencana perjalanan memungkinkan Anda membuat rencana perjalanan detail dengan aktivitas hari per hari, akomodasi, dan transportasi.
                 </p>
                 <Accordion type="single" collapsible className="w-full">
                   <AccordionItem value="itineraries-1">
-                    <AccordionTrigger>Creating New Itineraries</AccordionTrigger>
+                    <AccordionTrigger>Membuat Rencana Perjalanan Baru</AccordionTrigger>
                     <AccordionContent>
-                      Click "Create Itinerary" to start a new travel plan. Add basic details like name, dates, and number of people. You can build from scratch or use an existing tour plan as a template.
+                      Klik "Buat Rencana Perjalanan" untuk memulai rencana perjalanan baru. Tambahkan detail dasar seperti nama, tanggal, dan jumlah orang. Anda dapat membangun dari awal atau menggunakan paket wisata yang ada sebagai template.
                     </AccordionContent>
                   </AccordionItem>
                   <AccordionItem value="itineraries-2">
-                    <AccordionTrigger>Adding Daily Activities</AccordionTrigger>
+                    <AccordionTrigger>Menambahkan Aktivitas Harian</AccordionTrigger>
                     <AccordionContent>
-                      For each day, add destinations, accommodations, meals, and transportation. The system will calculate costs automatically based on your inputs.
+                      Untuk setiap hari, tambahkan destinasi, akomodasi, makanan, dan transportasi. Sistem akan menghitung biaya secara otomatis berdasarkan input Anda.
                     </AccordionContent>
                   </AccordionItem>
                   <AccordionItem value="itineraries-3">
-                    <AccordionTrigger>Assigning Tour Guides</AccordionTrigger>
+                    <AccordionTrigger>Menetapkan Pemandu Wisata</AccordionTrigger>
                     <AccordionContent>
-                      Add tour guides to your itinerary by selecting from your guide database. You can assign specific guides based on expertise, languages, and availability.
+                      Tambahkan pemandu wisata ke rencana perjalanan Anda dengan memilih dari database pemandu Anda. Anda dapat menetapkan pemandu tertentu berdasarkan keahlian, bahasa, dan ketersediaan.
                     </AccordionContent>
                   </AccordionItem>
                   <AccordionItem value="itineraries-4">
-                    <AccordionTrigger>Generating Invoices</AccordionTrigger>
+                    <AccordionTrigger>Menghasilkan Faktur</AccordionTrigger>
                     <AccordionContent>
-                      Once an itinerary is complete, you can directly generate an invoice by clicking the "Create Invoice" button. This will transfer all the relevant pricing details.
+                      Setelah rencana perjalanan selesai, Anda dapat langsung menghasilkan faktur dengan mengklik tombol "Buat Faktur". Ini akan mentransfer semua detail harga yang relevan.
                     </AccordionContent>
                   </AccordionItem>
                 </Accordion>
@@ -225,32 +225,32 @@ const Manual = () => {
           <TabsContent value="tourplans" className="space-y-6">
             <Card>
               <CardHeader>
-                <CardTitle>Tour Plan Management</CardTitle>
+                <CardTitle>Manajemen Paket Wisata</CardTitle>
                 <CardDescription>
-                  Creating reusable tour templates
+                  Membuat template tur yang dapat digunakan kembali
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <p>
-                  Tour plans serve as templates that can be quickly converted into full itineraries, saving you time when creating similar trips.
+                  Paket wisata berfungsi sebagai template yang dapat dengan cepat dikonversi menjadi rencana perjalanan lengkap, menghemat waktu Anda saat membuat perjalanan serupa.
                 </p>
                 <Accordion type="single" collapsible className="w-full">
                   <AccordionItem value="tourplans-1">
-                    <AccordionTrigger>Creating Tour Plans</AccordionTrigger>
+                    <AccordionTrigger>Membuat Paket Wisata</AccordionTrigger>
                     <AccordionContent>
-                      Click "Create Tour Plan" and fill in the basic details like title, description, and price. You can also add a cover image to make it visually appealing.
+                      Klik "Buat Paket Wisata" dan isi detail dasar seperti judul, deskripsi, dan harga. Anda juga dapat menambahkan gambar sampul untuk membuatnya menarik secara visual.
                     </AccordionContent>
                   </AccordionItem>
                   <AccordionItem value="tourplans-2">
-                    <AccordionTrigger>Adding Itinerary Details</AccordionTrigger>
+                    <AccordionTrigger>Menambahkan Detail Rencana Perjalanan</AccordionTrigger>
                     <AccordionContent>
-                      Switch to the Itinerary Details tab to add information about start dates, number of people, and other specifics that will be used when converting to a full itinerary.
+                      Beralih ke tab Detail Rencana Perjalanan untuk menambahkan informasi tentang tanggal mulai, jumlah orang, dan spesifik lainnya yang akan digunakan saat mengkonversi ke rencana perjalanan lengkap.
                     </AccordionContent>
                   </AccordionItem>
                   <AccordionItem value="tourplans-3">
-                    <AccordionTrigger>Converting to Itinerary</AccordionTrigger>
+                    <AccordionTrigger>Mengkonversi ke Rencana Perjalanan</AccordionTrigger>
                     <AccordionContent>
-                      To convert a tour plan into a full itinerary, click the "Convert to Itinerary" button on the tour plan card. This will create a new itinerary with all the details from your tour plan.
+                      Untuk mengkonversi paket wisata menjadi rencana perjalanan lengkap, klik tombol "Konversi ke Rencana Perjalanan" pada kartu paket wisata. Ini akan membuat rencana perjalanan baru dengan semua detail dari paket wisata Anda.
                     </AccordionContent>
                   </AccordionItem>
                 </Accordion>
@@ -261,38 +261,38 @@ const Manual = () => {
           <TabsContent value="invoices" className="space-y-6">
             <Card>
               <CardHeader>
-                <CardTitle>Invoice Management</CardTitle>
+                <CardTitle>Manajemen Faktur</CardTitle>
                 <CardDescription>
-                  Creating and tracking customer invoices
+                  Membuat dan melacak faktur pelanggan
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <p>
-                  The invoice section allows you to create, manage, and track payments for your travel services.
+                  Bagian faktur memungkinkan Anda membuat, mengelola, dan melacak pembayaran untuk layanan perjalanan Anda.
                 </p>
                 <Accordion type="single" collapsible className="w-full">
                   <AccordionItem value="invoices-1">
-                    <AccordionTrigger>Creating Invoices Manually</AccordionTrigger>
+                    <AccordionTrigger>Membuat Faktur Secara Manual</AccordionTrigger>
                     <AccordionContent>
-                      Select "Manual Input" when creating a new invoice. Fill in customer details, add line items for services, specify prices, and set payment terms.
+                      Pilih "Input Manual" saat membuat faktur baru. Isi detail pelanggan, tambahkan item baris untuk layanan, tentukan harga, dan atur ketentuan pembayaran.
                     </AccordionContent>
                   </AccordionItem>
                   <AccordionItem value="invoices-2">
-                    <AccordionTrigger>Creating Invoices from Itineraries</AccordionTrigger>
+                    <AccordionTrigger>Membuat Faktur dari Rencana Perjalanan</AccordionTrigger>
                     <AccordionContent>
-                      Select "From Itinerary" to automatically generate an invoice based on an existing itinerary. The system will pull all relevant details and pricing.
+                      Pilih "Dari Rencana Perjalanan" untuk secara otomatis menghasilkan faktur berdasarkan rencana perjalanan yang ada. Sistem akan menarik semua detail dan harga yang relevan.
                     </AccordionContent>
                   </AccordionItem>
                   <AccordionItem value="invoices-3">
-                    <AccordionTrigger>Tracking Payment Status</AccordionTrigger>
+                    <AccordionTrigger>Melacak Status Pembayaran</AccordionTrigger>
                     <AccordionContent>
-                      Monitor invoice status (draft, sent, paid, unpaid) and update it as payments are received. The system provides a clear overview of outstanding and completed payments.
+                      Pantau status faktur (draft, terkirim, dibayar, belum dibayar) dan perbarui saat pembayaran diterima. Sistem memberikan gambaran yang jelas tentang pembayaran yang tertunda dan selesai.
                     </AccordionContent>
                   </AccordionItem>
                   <AccordionItem value="invoices-4">
-                    <AccordionTrigger>Downloading and Printing</AccordionTrigger>
+                    <AccordionTrigger>Mengunduh dan Mencetak</AccordionTrigger>
                     <AccordionContent>
-                      Generate PDF versions of invoices that can be downloaded, printed, or sent directly to customers via email.
+                      Hasilkan versi PDF dari faktur yang dapat diunduh, dicetak, atau dikirim langsung ke pelanggan melalui email.
                     </AccordionContent>
                   </AccordionItem>
                 </Accordion>
@@ -303,32 +303,32 @@ const Manual = () => {
           <TabsContent value="settings" className="space-y-6">
             <Card>
               <CardHeader>
-                <CardTitle>Account Settings</CardTitle>
+                <CardTitle>Pengaturan Akun</CardTitle>
                 <CardDescription>
-                  Managing your account and preferences
+                  Mengelola akun dan preferensi Anda
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <p>
-                  The settings section allows you to customize your account, update business information, and manage system preferences.
+                  Bagian pengaturan memungkinkan Anda menyesuaikan akun Anda, memperbarui informasi bisnis, dan mengelola preferensi sistem.
                 </p>
                 <Accordion type="single" collapsible className="w-full">
                   <AccordionItem value="settings-1">
-                    <AccordionTrigger>Profile Management</AccordionTrigger>
+                    <AccordionTrigger>Manajemen Profil</AccordionTrigger>
                     <AccordionContent>
-                      Update your personal and business information, including company name, logo, contact details, and business address.
+                      Perbarui informasi pribadi dan bisnis Anda, termasuk nama perusahaan, logo, detail kontak, dan alamat bisnis.
                     </AccordionContent>
                   </AccordionItem>
                   <AccordionItem value="settings-2">
-                    <AccordionTrigger>Security Settings</AccordionTrigger>
+                    <AccordionTrigger>Pengaturan Keamanan</AccordionTrigger>
                     <AccordionContent>
-                      Change your password, enable two-factor authentication, and manage login preferences to keep your account secure.
+                      Ubah kata sandi Anda, aktifkan otentikasi dua faktor, dan kelola preferensi login untuk menjaga keamanan akun Anda.
                     </AccordionContent>
                   </AccordionItem>
                   <AccordionItem value="settings-3">
-                    <AccordionTrigger>Notification Preferences</AccordionTrigger>
+                    <AccordionTrigger>Preferensi Notifikasi</AccordionTrigger>
                     <AccordionContent>
-                      Customize which notifications you receive about new bookings, invoice payments, and system updates.
+                      Sesuaikan notifikasi mana yang Anda terima tentang pemesanan baru, pembayaran faktur, dan pembaruan sistem.
                     </AccordionContent>
                   </AccordionItem>
                 </Accordion>
@@ -341,12 +341,12 @@ const Manual = () => {
           <div className="flex items-start gap-4">
             <HelpCircle className="h-6 w-6 text-amber-600 shrink-0 mt-1" />
             <div>
-              <h3 className="text-lg font-medium text-amber-800">Need Additional Help?</h3>
+              <h3 className="text-lg font-medium text-amber-800">Butuh Bantuan Tambahan?</h3>
               <p className="text-amber-700 mt-2">
-                If you need further assistance or have specific questions about using the system, please contact our support team.
+                Jika Anda memerlukan bantuan lebih lanjut atau memiliki pertanyaan spesifik tentang penggunaan sistem, silakan hubungi tim dukungan kami.
               </p>
               <Button className="mt-4 bg-amber-500 hover:bg-amber-600 text-white">
-                Contact Support
+                Hubungi Dukungan
               </Button>
             </div>
           </div>

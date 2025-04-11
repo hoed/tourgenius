@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -99,7 +100,7 @@ const Navbar = () => {
               Home
             </Link>
             <Link
-              to="/#features"
+              to="/features"
               className={`font-medium hover:text-primary transition-colors ${
                 isScrolled ? 'text-black' : ''
               }`}
@@ -108,7 +109,7 @@ const Navbar = () => {
               Features
             </Link>
             <Link
-              to="/#testimonials"
+              to="/testimonials"
               className={`font-medium hover:text-primary transition-colors ${
                 isScrolled ? 'text-black' : ''
               }`}
@@ -117,7 +118,7 @@ const Navbar = () => {
               Testimonials
             </Link>
             <Link
-              to="/#pricing"
+              to="/pricing"
               className={`font-medium hover:text-primary transition-colors ${
                 isScrolled ? 'text-black' : ''
               }`}
