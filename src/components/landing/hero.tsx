@@ -38,7 +38,7 @@ const Hero = () => {
           <div className="lg:w-1/2 animate-fade-in animation-delay-500">
             <GlassCard className="relative overflow-hidden border border-blue-400/20 bg-blue-950/30 backdrop-blur-sm">
               <img
-                src="https://images.unsplash.com/photo-1576153192621-7a3be10b356e?ixlib=rb-1.2.1&auto=format&fit=crop&w=1000&q=80"
+                src="/tourgenius.jpeg"
                 alt="Dashboard Preview"
                 className="w-full h-auto rounded object-cover shadow-lg"
               />
