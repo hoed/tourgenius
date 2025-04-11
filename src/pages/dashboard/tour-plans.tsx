@@ -145,6 +145,46 @@ const TourPlansPage = () => {
     }
   };
 
+  // Function to convert tour plan to itinerary
+  const convertToItinerary = async (tourPlan: TourPlan) => {
+    try {
+      const { data: session } = await supabase.auth.getSession();
+      
+      if (!session?.session) {
+        toast.error('Please log in to create an itinerary');
+        return;
+      }
+      
+      // Create a basic itinerary from tour plan
+      const newItinerary = {
+        name: tourPlan.title,
+        start_date: new Date().toISOString().split('T')[0],
+        tour_guides: JSON.stringify([]),
+        days: JSON.stringify([]),
+        number_of_people: 2,
+        total_price: tourPlan.price,
+        user_id: session.session.user.id,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      };
+      
+      const { data, error } = await supabase
+        .from('itineraries')
+        .insert([newItinerary])
+        .select();
+      
+      if (error) throw error;
+      
+      if (data && data.length > 0) {
+        toast.success('Tour plan converted to itinerary successfully');
+        window.location.href = `/dashboard/itinerary?id=${data[0].id}`;
+      }
+    } catch (error) {
+      console.error('Error converting tour plan to itinerary:', error);
+      toast.error('Failed to convert tour plan to itinerary');
+    }
+  };
+
   const renderTourPlans = () => {
     if (loading) {
       return Array(4).fill(0).map((_, i) => (

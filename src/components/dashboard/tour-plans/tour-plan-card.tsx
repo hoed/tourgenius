@@ -1,10 +1,11 @@
+
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
 import { Edit, Trash2, PlusCircle, Image } from 'lucide-react';
 import { TourPlan } from '@/lib/types';
-import { formatRupiah } from '@/components/dashboard/itinerary/itinerary-utils';
+import { formatRupiah } from '@/lib/utils';
 import { supabase } from '@/integrations/supabase/client';
 
 // Mock auth context (replace with your actual auth setup)
