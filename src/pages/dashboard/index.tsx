@@ -18,6 +18,7 @@ const Dashboard = () => {
   const [customerCount, setCustomerCount] = useState(0);
   const [tourPlans, setTourPlans] = useState<TourPlan[]>([]);
   const [tourPlansLoading, setTourPlansLoading] = useState(true);
+  const [tourPlanCount, setTourPlanCount] = useState(0);
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -30,7 +31,6 @@ const Dashboard = () => {
 
       try {
         setLoading(true);
-        // Fetch itineraries
         const { data: itinerariesData, error: itinerariesError } = await supabase
           .from('itineraries')
           .select('*')
@@ -42,7 +42,6 @@ const Dashboard = () => {
           throw itinerariesError;
         }
 
-        // Parse itineraries data
         const parsedItineraries = itinerariesData?.map(item => {
           let parsedDays, parsedGuides;
           
@@ -76,7 +75,6 @@ const Dashboard = () => {
 
         setItineraries(parsedItineraries);
 
-        // Fetch customer count
         const { count, error: customerError } = await supabase
           .from('customers')
           .select('*', { count: 'exact', head: true })
@@ -89,7 +87,18 @@ const Dashboard = () => {
 
         setCustomerCount(count || 0);
         
-        // Fetch tour plans
+        const { count: tourPlansCount, error: tourPlansCountError } = await supabase
+          .from('tour_plans')
+          .select('*', { count: 'exact', head: true })
+          .eq('user_id', session.user.id);
+          
+        if (tourPlansCountError) {
+          console.error('Error fetching tour plans count:', tourPlansCountError);
+          throw tourPlansCountError;
+        }
+        
+        setTourPlanCount(tourPlansCount || 0);
+        
         setTourPlansLoading(true);
         const { data: tourPlansData, error: tourPlansError } = await supabase
           .from('tour_plans')
@@ -116,7 +125,6 @@ const Dashboard = () => {
     checkAuth();
   }, [navigate]);
 
-  // Format date to display nicely
   const formatDate = (dateString?: string) => {
     if (!dateString) return 'Not set';
     const date = new Date(dateString);
@@ -127,7 +135,6 @@ const Dashboard = () => {
     });
   };
 
-  // Format currency in Rupiah
   const formatRupiah = (amount: number) => {
     return new Intl.NumberFormat('id-ID', { 
       style: 'currency', 
@@ -247,7 +254,6 @@ const Dashboard = () => {
       
       <div className="container mx-auto px-4 py-6 space-y-8">
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4 md:gap-6">
-          {/* Stats Cards */}
           <Card className="bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-100 shadow-md">
             <CardHeader className="pb-2">
               <CardTitle className="text-lg font-medium text-blue-700">Itineraries</CardTitle>
@@ -266,7 +272,7 @@ const Dashboard = () => {
 
           <Card className="bg-gradient-to-br from-green-50 to-emerald-50 border border-green-100 shadow-md">
             <CardHeader className="pb-2">
-              <CardTitle className="text-lg font-medium text-green-700">Tour Days</CardTitle>
+              <CardTitle className="text-lg font-medium text-green-700">Tour Plans</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="flex justify-between items-center">
@@ -274,12 +280,15 @@ const Dashboard = () => {
                   {loading ? (
                     <Skeleton className="h-8 w-16" />
                   ) : (
-                    itineraries.reduce((sum, itinerary) => sum + (itinerary.days?.length || 0), 0)
+                    tourPlanCount
                   )}
                 </span>
-                <CalendarDays className="h-8 w-8 text-green-300" />
+                <Map className="h-8 w-8 text-green-300" />
               </div>
-              <p className="text-green-600 text-sm mt-2">Days of adventure planned</p>
+              <p className="text-green-600 text-sm mt-2">Available tour plans</p>
+              <Link to="/dashboard/tour-plans" className="text-green-500 text-xs mt-2 hover:underline inline-block">
+                View all tour plans →
+              </Link>
             </CardContent>
           </Card>
 
@@ -322,7 +331,6 @@ const Dashboard = () => {
           </Card>
         </div>
 
-        {/* Tour Plans Section */}
         <div className="flex justify-between items-center">
           <h2 className="text-2xl font-bold text-gray-800">Tour Plans</h2>
           <Button onClick={() => navigate('/dashboard/tour-plans')} className="bg-amber-500 text-black hover:bg-amber-600">
@@ -334,7 +342,6 @@ const Dashboard = () => {
           {renderTourPlans()}
         </div>
 
-        {/* Itineraries Section */}
         <div className="flex justify-between items-center">
           <h2 className="text-2xl font-bold text-gray-800">Your Itineraries</h2>
           <Button onClick={() => navigate('/dashboard/itinerary')} className="bg-amber-500 text-black hover:bg-amber-600">

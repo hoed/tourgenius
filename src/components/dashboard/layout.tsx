@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -14,7 +15,8 @@ import {
   Users,
   X,
   Globe,
-  Map
+  Map,
+  BookOpen
 } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { toast } from 'sonner';
@@ -122,7 +124,8 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
       settings: 'Settings',
       logout: 'Logout',
       tourGenius: 'TourGenius',
-      tourPlans: 'Tour Plans'
+      tourPlans: 'Tour Plans',
+      manual: 'User Manual'
     },
     id: {
       dashboard: 'Dasbor',
@@ -132,7 +135,8 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
       settings: 'Pengaturan',
       logout: 'Keluar',
       tourGenius: 'TourGenius',
-      tourPlans: 'Paket Wisata'
+      tourPlans: 'Paket Wisata',
+      manual: 'Manual Pengguna'
     }
   };
 
@@ -145,6 +149,7 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
     { path: '/dashboard/invoices', label: t.invoices, icon: <FileText className="h-5 w-5" /> },
     { path: '/dashboard/customers', label: t.customers, icon: <Users className="h-5 w-5" /> },
     { path: '/dashboard/settings', label: t.settings, icon: <Settings className="h-5 w-5" /> },
+    { path: '/manual', label: t.manual, icon: <BookOpen className="h-5 w-5" /> },
   ];
   
   const isActivePath = (path: string) => {

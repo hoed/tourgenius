@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -201,7 +200,7 @@ const InvoiceGenerator = ({ source = 'manual' }: InvoiceGeneratorProps) => {
         customer_email: customerEmail,
         date,
         due_date: dueDate,
-        items, // This will be converted to JSONB in Supabase
+        items: JSON.stringify(items), // Convert items array to JSON string for storage
         subtotal,
         tax,
         total,
