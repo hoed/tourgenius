@@ -22,7 +22,7 @@ import ContactUs from "./pages/ContactUs";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 import TermsOfService from "./pages/TermsOfService";
 import CookiePolicy from "./pages/CookiePolicy";
-import Manual from "./pages/Manual";
+import Manual from "./pages/manual";
 
 const queryClient = new QueryClient();
 

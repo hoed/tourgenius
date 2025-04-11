@@ -194,13 +194,13 @@ const InvoiceGenerator = ({ source = 'manual' }: InvoiceGeneratorProps) => {
         return;
       }
       
-      const invoice: Partial<Invoice> = {
+      const invoice = {
         id: uuidv4(),
-        itineraryId: selectedItineraryId || undefined,
-        customerName,
-        customerEmail,
+        itinerary_id: selectedItineraryId || null,
+        customer_name: customerName,
+        customer_email: customerEmail,
         date,
-        dueDate,
+        due_date: dueDate,
         items, // This will be converted to JSONB in Supabase
         subtotal,
         tax,
@@ -214,7 +214,7 @@ const InvoiceGenerator = ({ source = 'manual' }: InvoiceGeneratorProps) => {
       // Insert to database
       const { error } = await supabase
         .from('invoices')
-        .insert([invoice]);
+        .insert(invoice);
       
       if (error) throw error;
       

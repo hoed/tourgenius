@@ -6,7 +6,7 @@ import InvoiceList from '@/components/dashboard/invoices/invoice-list';
 import { Toaster } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
-import { PlusCircle, FileText, FileImport, FileEdit } from 'lucide-react';
+import { PlusCircle, FileText, FileDown, FileEdit } from 'lucide-react';
 
 const InvoicesPage = () => {
   const [showGenerator, setShowGenerator] = useState(false);
@@ -55,7 +55,7 @@ const InvoicesPage = () => {
                   <span>Manual Input</span>
                 </TabsTrigger>
                 <TabsTrigger value="itinerary" className="flex items-center gap-2">
-                  <FileImport className="h-4 w-4" />
+                  <FileDown className="h-4 w-4" />
                   <span>From Itinerary</span>
                 </TabsTrigger>
               </TabsList>
