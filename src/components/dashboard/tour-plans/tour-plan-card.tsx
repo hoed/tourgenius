@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
-import { Edit, Trash2, PlusCircle, Image } from 'lucide-react';
+import { Edit, Trash2, PlusCircle, Image, Calendar, Users, MapPin } from 'lucide-react';
 import { TourPlan } from '@/lib/types';
 import { formatRupiah } from '@/lib/utils';
 import { supabase } from '@/integrations/supabase/client';
@@ -53,11 +53,19 @@ interface TourPlanCardProps {
   tourPlan?: TourPlan;
   onEdit?: (tourPlan: TourPlan) => void;
   onDelete?: (id: string) => void;
+  onConvertToItinerary?: (tourPlan: TourPlan) => void;
   isNew?: boolean;
   onClick?: () => void;
 }
 
-const TourPlanCard = ({ tourPlan, onEdit, onDelete, isNew = false, onClick }: TourPlanCardProps) => {
+const TourPlanCard = ({ 
+  tourPlan, 
+  onEdit, 
+  onDelete, 
+  onConvertToItinerary,
+  isNew = false, 
+  onClick 
+}: TourPlanCardProps) => {
   const [imageError, setImageError] = useState(false);
   const [signedImageUrl, setSignedImageUrl] = useState<string | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -109,6 +117,11 @@ const TourPlanCard = ({ tourPlan, onEdit, onDelete, isNew = false, onClick }: To
   // Check if the current user can edit (creator or admin)
   const canEdit = currentUser && (currentUser.id === tourPlan.user_id || currentUser.role === 'admin');
 
+  // Format date if available
+  const formattedDate = tourPlan.start_date 
+    ? new Date(tourPlan.start_date).toLocaleDateString() 
+    : null;
+
   return (
     <>
       <Card
@@ -141,6 +154,25 @@ const TourPlanCard = ({ tourPlan, onEdit, onDelete, isNew = false, onClick }: To
         </CardHeader>
         <CardContent>
           <p className="text-sm line-clamp-3 mb-3 text-gray-600">{tourPlan.description}</p>
+          
+          {/* Display itinerary details if available */}
+          {(formattedDate || tourPlan.numberOfPeople) && (
+            <div className="mb-3 space-y-1">
+              {formattedDate && (
+                <div className="flex items-center text-xs text-gray-500">
+                  <Calendar className="h-3 w-3 mr-1" /> 
+                  Starts: {formattedDate}
+                </div>
+              )}
+              {tourPlan.numberOfPeople && (
+                <div className="flex items-center text-xs text-gray-500">
+                  <Users className="h-3 w-3 mr-1" /> 
+                  For {tourPlan.numberOfPeople} people
+                </div>
+              )}
+            </div>
+          )}
+          
           <p className="text-lg font-semibold text-amber-600">{formatRupiah(tourPlan.price)}</p>
         </CardContent>
         <CardFooter className="flex justify-between pt-0">
@@ -197,17 +229,45 @@ const TourPlanCard = ({ tourPlan, onEdit, onDelete, isNew = false, onClick }: To
               <h3 className="text-lg font-semibold text-gray-700">Description</h3>
               <p className="text-gray-600">{tourPlan.description || 'No description available'}</p>
             </div>
+            
+            {/* Display itinerary details */}
+            {formattedDate && (
+              <div>
+                <h3 className="text-lg font-semibold text-gray-700">Start Date</h3>
+                <p className="text-gray-600 flex items-center">
+                  <Calendar className="h-4 w-4 mr-1" />
+                  {formattedDate}
+                </p>
+              </div>
+            )}
+            
+            {tourPlan.numberOfPeople && (
+              <div>
+                <h3 className="text-lg font-semibold text-gray-700">Group Size</h3>
+                <p className="text-gray-600 flex items-center">
+                  <Users className="h-4 w-4 mr-1" />
+                  {tourPlan.numberOfPeople} people
+                </p>
+              </div>
+            )}
+            
             <div>
               <h3 className="text-lg font-semibold text-gray-700">Price</h3>
               <p className="text-amber-600 text-xl font-bold">{formatRupiah(tourPlan.price)}</p>
+              {tourPlan.numberOfPeople && (
+                <p className="text-amber-500 text-sm">
+                  Total for {tourPlan.numberOfPeople} people: {formatRupiah(tourPlan.price * tourPlan.numberOfPeople)}
+                </p>
+              )}
             </div>
+            
             <div>
               <h3 className="text-lg font-semibold text-gray-700">Created</h3>
               <p className="text-gray-600">{new Date(tourPlan.created_at || '').toLocaleDateString()}</p>
             </div>
           </div>
-          {canEdit && (
-            <DialogFooter>
+          <DialogFooter className="flex flex-col sm:flex-row gap-2">
+            {canEdit && (
               <Button
                 variant="outline"
                 onClick={() => {
@@ -219,8 +279,19 @@ const TourPlanCard = ({ tourPlan, onEdit, onDelete, isNew = false, onClick }: To
                 <Edit className="h-4 w-4" />
                 Edit Tour Plan
               </Button>
-            </DialogFooter>
-          )}
+            )}
+            <Button
+              variant="default"
+              onClick={() => {
+                onConvertToItinerary && tourPlan && onConvertToItinerary(tourPlan);
+                setIsDialogOpen(false); // Close dialog after clicking Convert
+              }}
+              className="bg-amber-500 hover:bg-amber-600 text-white flex gap-1 items-center"
+            >
+              <MapPin className="h-4 w-4" />
+              Convert to Itinerary
+            </Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
     </>

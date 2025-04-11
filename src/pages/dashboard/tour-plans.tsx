@@ -127,7 +127,12 @@ const TourPlansPage = () => {
         description: tourPlan.description,
         price: tourPlan.price,
         image_path: tourPlan.image_path,
-        user_id: tourPlan.user_id
+        user_id: tourPlan.user_id,
+        start_date: tourPlan.start_date,
+        number_of_people: tourPlan.numberOfPeople,
+        // Store tour guides and days as JSON strings
+        tour_guides: tourPlan.tourGuides ? JSON.stringify(tourPlan.tourGuides) : JSON.stringify([]),
+        days: tourPlan.days ? JSON.stringify(tourPlan.days) : JSON.stringify([])
       };
 
       const { error } = isNewTourPlan
@@ -155,13 +160,13 @@ const TourPlansPage = () => {
         return;
       }
       
-      // Create a basic itinerary from tour plan
+      // Create a basic itinerary from tour plan with proper structure
       const newItinerary = {
         name: tourPlan.title,
-        start_date: new Date().toISOString().split('T')[0],
-        tour_guides: JSON.stringify([]),
-        days: JSON.stringify([]),
-        number_of_people: 2,
+        start_date: tourPlan.start_date || new Date().toISOString().split('T')[0],
+        tour_guides: tourPlan.tourGuides ? JSON.stringify(tourPlan.tourGuides) : JSON.stringify([]),
+        days: tourPlan.days ? JSON.stringify(tourPlan.days) : JSON.stringify([]),
+        number_of_people: tourPlan.numberOfPeople || 2,
         total_price: tourPlan.price,
         user_id: session.session.user.id,
         created_at: new Date().toISOString(),
@@ -206,6 +211,7 @@ const TourPlansPage = () => {
               tourPlan={tourPlan}
               onEdit={handleEditTourPlan}
               onDelete={handleDeleteTourPlan}
+              onConvertToItinerary={convertToItinerary}
             />
           </div>
         ))}
