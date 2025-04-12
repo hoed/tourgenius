@@ -275,7 +275,7 @@ const Chatbot: React.FC<ChatbotProps> = ({ position = 'bottom-right' }) => {
                       <MessageCircle className="h-5 w-5 text-white" />
                     </AvatarFallback>
                   </Avatar>
-                  <span className="text-base sm:text-lg font-semibold">TourGenius Asisten</span>
+                  <span className="text-base sm:text-lg font-semibold">TourGenius Assitant</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <Button
