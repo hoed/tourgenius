@@ -1,11 +1,11 @@
 
 // Gemini AI integration using Google GenAI library
-import { GoogleGenAI } from "@google/genai";
+import { GoogleGenerativeAI } from "@google/genai";
 
 const GEMINI_API_KEY = "AIzaSyCMHA5m4CLdcIok9OOto5q-HbNiKn27GJU";
 
-// Initialize the Google GenAI client
-const genAI = new GoogleGenAI(GEMINI_API_KEY);
+// Initialize the Google GenAI client with proper API key format
+const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
 
 // Knowledge base context extracted from the manual page
 const knowledgeBase = `
@@ -55,7 +55,7 @@ export interface ChatMessage {
 
 export async function sendChatMessage(messages: ChatMessage[]): Promise<string> {
   try {
-    // Get the Gemini-2.0-flash model
+    // Get the Gemini-2.0-flash model - corrected method name
     const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
     
     // Prepare the system context with knowledge base
