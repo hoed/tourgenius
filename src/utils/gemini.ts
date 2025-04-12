@@ -1,8 +1,11 @@
 
-// Gemini AI integration
+// Gemini AI integration using Google GenAI library
+import { GoogleGenAI } from "@google/genai";
+
 const GEMINI_API_KEY = "AIzaSyCMHA5m4CLdcIok9OOto5q-HbNiKn27GJU";
-// Updated API endpoint to use gemini-1.0-pro instead of gemini-pro
-const GEMINI_API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.0-pro:generateContent";
+
+// Initialize the Google GenAI client
+const genAI = new GoogleGenAI(GEMINI_API_KEY);
 
 // Knowledge base context extracted from the manual page
 const knowledgeBase = `
@@ -52,23 +55,32 @@ export interface ChatMessage {
 
 export async function sendChatMessage(messages: ChatMessage[]): Promise<string> {
   try {
-    // Prepare the context with knowledge base for the first message
+    // Get the Gemini-2.0-flash model
+    const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
+    
+    // Prepare the system context with knowledge base
     const systemContext = `Anda adalah asisten virtual untuk aplikasi TourGenius. Gunakan informasi berikut untuk membantu pengguna:
 
 ${knowledgeBase}
 
 Berikan jawaban yang sopan dan singkat dalam Bahasa Indonesia. Jika Anda tidak tahu jawabannya, katakan saja Anda tidak tahu dan menyarankan mereka untuk menghubungi dukungan.`;
 
-    // Prepare the payload for the API
-    const payload = {
-      contents: [
-        {
-          parts: [
-            { text: systemContext }
-          ],
-          role: "user"
-        }
-      ],
+    // Format the conversation for the Gemini chat model
+    const formattedMessages = [
+      { role: 'user', parts: [{ text: systemContext }] },
+    ];
+
+    // Add the conversation history
+    for (const message of messages) {
+      formattedMessages.push({
+        role: message.role === 'user' ? 'user' : 'model',
+        parts: [{ text: message.content }]
+      });
+    }
+
+    // Generate content using the Gemini model
+    const result = await model.generateContent({
+      contents: formattedMessages,
       generationConfig: {
         temperature: 0.7,
         topK: 40,
@@ -93,39 +105,12 @@ Berikan jawaban yang sopan dan singkat dalam Bahasa Indonesia. Jika Anda tidak t
           threshold: "BLOCK_MEDIUM_AND_ABOVE"
         }
       ]
-    };
-
-    // Add the conversation history
-    for (const message of messages) {
-      payload.contents.push({
-        parts: [{ text: message.content }],
-        role: message.role === 'user' ? 'user' : 'model'
-      });
-    }
-
-    // Updated to use fetch with proper error handling
-    const response = await fetch(`${GEMINI_API_URL}?key=${GEMINI_API_KEY}`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(payload),
     });
 
-    if (!response.ok) {
-      const errorData = await response.json();
-      console.error('Gemini API error:', errorData);
-      return "Maaf, terjadi kesalahan saat memproses permintaan Anda. Silakan coba lagi nanti.";
-    }
+    // Extract the response text
+    const response = result.response;
+    return response.text();
     
-    const data = await response.json();
-    
-    if (data.error) {
-      console.error('Gemini API error:', data.error);
-      return "Maaf, terjadi kesalahan saat memproses permintaan Anda. Silakan coba lagi nanti.";
-    }
-    
-    return data.candidates[0].content.parts[0].text || "Maaf, saya tidak dapat memproses respons.";
   } catch (error) {
     console.error('Error calling Gemini API:', error);
     return "Maaf, terjadi kesalahan teknis. Silakan coba lagi nanti.";
