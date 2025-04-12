@@ -1,10 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate, Link } from 'react-router-dom';
-import { Menu, X, Users, Calendar, Receipt, Map, FileText, Settings, LogOut } from 'lucide-react';
+import { Menu, X, Users, Calendar, Receipt, Map, FileText, Settings, LogOut, User } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import Chatbot from '@/components/chatbot/Chatbot';
 import { supabase } from '@/integrations/supabase/client';
 import { Toaster, toast } from 'sonner';
+import type { User as SupabaseUser } from '@supabase/supabase-js';
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -12,8 +13,27 @@ interface LayoutProps {
 
 const Layout: React.FC<LayoutProps> = ({ children }) => {
   const [isSidebarOpen, setIsSidebarOpen] = useState<boolean>(false);
+  const [currentUser, setCurrentUser] = useState<SupabaseUser | null>(null);
   const location = useLocation();
   const navigate = useNavigate();
+
+  // Fetch user data on mount and listen for auth changes
+  useEffect(() => {
+    const fetchUser = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      setCurrentUser(user);
+    };
+
+    fetchUser();
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event: string, session) => {
+      setCurrentUser(session?.user ?? null);
+    });
+
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, []);
 
   const toggleSidebar = (): void => {
     setIsSidebarOpen((prev) => !prev);
@@ -61,7 +81,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
           </Link>
         </div>
         <div className="flex items-center space-x-4">
-          {/* User profile - logout is in sidebar */}
+          {/* User profile - moved to sidebar */}
         </div>
       </header>
 
@@ -157,6 +177,14 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                   <span>Manual</span>
                 </Link>
               </li>
+              {/* User Info */}
+              <li className="border-t border-gray-700 mt-4 pt-4">
+                <div className="flex items-center space-x-3 p-3 text-gray-300">
+                  <User className="h-5 w-5" />
+                  <span>{currentUser?.email || 'User'}</span>
+                </div>
+              </li>
+              {/* Logout */}
               <li>
                 <button
                   onClick={handleLogout}
