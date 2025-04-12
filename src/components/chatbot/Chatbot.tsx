@@ -36,8 +36,8 @@ const Chatbot: React.FC<ChatbotProps> = ({ position = 'bottom-right' }) => {
   const closeSoundRef = useRef<HTMLAudioElement | null>(null);
 
   useEffect(() => {
-    openSoundRef.current = new Audio('/sounds/open.mp3');
-    closeSoundRef.current = new Audio('/sounds/close.mp3');
+    openSoundRef.current = new Audio('/open.mp3');
+    closeSoundRef.current = new Audio('/close.mp3');
     openSoundRef.current.volume = 0.3;
     closeSoundRef.current.volume = 0.3;
   }, []);
