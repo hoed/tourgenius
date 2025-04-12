@@ -96,7 +96,7 @@ const InvoiceGenerator = ({ source = 'manual' }: InvoiceGeneratorProps) => {
         // Generate invoice items based on itinerary
         const newItems: InvoiceItem[] = [];
         
-        // Add main tour price
+        // Add main tour package
         newItems.push({
           id: uuidv4(),
           description: `Tour Package: ${data.name}`,
@@ -105,13 +105,13 @@ const InvoiceGenerator = ({ source = 'manual' }: InvoiceGeneratorProps) => {
           total: data.total_price
         });
         
-        // Add additional items if needed (optional)
-        // For example, you could add guide fees, special activities, etc.
+        // Add guides with phone numbers if available
         if (parsedGuides && parsedGuides.length > 0) {
           parsedGuides.forEach((guide: any) => {
+            const phoneInfo = guide.phoneNumber ? ` (${guide.phoneNumber})` : '';
             newItems.push({
               id: uuidv4(),
-              description: `Tour Guide: ${guide.name} (${guide.expertise})`,
+              description: `Tour Guide: ${guide.name} - ${guide.expertise}${phoneInfo}`,
               quantity: 1,
               unitPrice: guide.pricePerDay,
               total: guide.pricePerDay

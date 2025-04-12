@@ -1,7 +1,7 @@
 
 // Gemini AI integration
 const GEMINI_API_KEY = "AIzaSyCMHA5m4CLdcIok9OOto5q-HbNiKn27GJU";
-const GEMINI_API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent";
+const GEMINI_API_URL = "https://generativelanguage.googleapis.com/v1/models/gemini-pro:generateContent";
 
 // Knowledge base context extracted from the manual page
 const knowledgeBase = `
@@ -58,54 +58,56 @@ ${knowledgeBase}
 
 Berikan jawaban yang sopan dan singkat dalam Bahasa Indonesia. Jika Anda tidak tahu jawabannya, katakan saja Anda tidak tahu dan menyarankan mereka untuk menghubungi dukungan.`;
 
-    // Prepare the conversation for the API
-    const apiMessages = [
-      {
-        role: "user",
-        parts: [{ text: systemContext }]
-      }
-    ];
+    // Prepare the payload for the API
+    const payload = {
+      contents: [
+        {
+          parts: [
+            { text: systemContext }
+          ],
+          role: "user"
+        }
+      ],
+      generationConfig: {
+        temperature: 0.7,
+        topK: 40,
+        topP: 0.95,
+        maxOutputTokens: 1024,
+      },
+      safetySettings: [
+        {
+          category: "HARM_CATEGORY_HARASSMENT",
+          threshold: "BLOCK_MEDIUM_AND_ABOVE"
+        },
+        {
+          category: "HARM_CATEGORY_HATE_SPEECH",
+          threshold: "BLOCK_MEDIUM_AND_ABOVE"
+        },
+        {
+          category: "HARM_CATEGORY_SEXUALLY_EXPLICIT",
+          threshold: "BLOCK_MEDIUM_AND_ABOVE"
+        },
+        {
+          category: "HARM_CATEGORY_DANGEROUS_CONTENT",
+          threshold: "BLOCK_MEDIUM_AND_ABOVE"
+        }
+      ]
+    };
 
-    // Add user messages
-    messages.forEach((message) => {
-      apiMessages.push({
-        role: message.role === 'user' ? 'user' : 'model',
-        parts: [{ text: message.content }]
+    // Add the conversation history
+    for (const message of messages) {
+      payload.contents.push({
+        parts: [{ text: message.content }],
+        role: message.role === 'user' ? 'user' : 'model'
       });
-    });
+    }
 
     const response = await fetch(`${GEMINI_API_URL}?key=${GEMINI_API_KEY}`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({
-        contents: apiMessages,
-        generationConfig: {
-          temperature: 0.7,
-          topK: 40,
-          topP: 0.95,
-          maxOutputTokens: 1024,
-        },
-        safetySettings: [
-          {
-            category: "HARM_CATEGORY_HARASSMENT",
-            threshold: "BLOCK_MEDIUM_AND_ABOVE"
-          },
-          {
-            category: "HARM_CATEGORY_HATE_SPEECH",
-            threshold: "BLOCK_MEDIUM_AND_ABOVE"
-          },
-          {
-            category: "HARM_CATEGORY_SEXUALLY_EXPLICIT",
-            threshold: "BLOCK_MEDIUM_AND_ABOVE"
-          },
-          {
-            category: "HARM_CATEGORY_DANGEROUS_CONTENT",
-            threshold: "BLOCK_MEDIUM_AND_ABOVE"
-          }
-        ]
-      }),
+      body: JSON.stringify(payload),
     });
 
     const data = await response.json();

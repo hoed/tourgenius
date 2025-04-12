@@ -1,3 +1,4 @@
+
 export interface User {
   id: string;
   email: string;
@@ -11,6 +12,7 @@ export interface TourGuide {
   languages: string[];
   pricePerDay: number;
   image?: string;
+  phoneNumber?: string; // Add phone number field
 }
 
 export interface Destination {
