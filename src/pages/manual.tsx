@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -7,13 +6,20 @@ import { Button } from '@/components/ui/button';
 import { ArrowLeft, Compass, Users, Calendar, Receipt, Map, FileText, Settings, HelpCircle } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
-const Manual = () => {
+const Manual: React.FC = () => {
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="container mx-auto py-8 px-4">
-        <div className="flex justify-between items-center mb-8">
-          <h1 className="text-3xl font-bold">Manual Pengguna</h1>
-          <Button asChild variant="outline" className="flex items-center gap-2">
+    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100">
+      <div className="container mx-auto px-4 py-6 sm:py-8 lg:py-12">
+        {/* Header */}
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 sm:mb-8 gap-4">
+          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-800">
+            Manual Pengguna
+          </h1>
+          <Button
+            asChild
+            variant="outline"
+            className="flex items-center gap-2 border-gray-300 hover:bg-gray-100 transition-colors"
+          >
             <Link to="/dashboard">
               <ArrowLeft className="h-4 w-4" />
               Kembali ke Dashboard
@@ -21,51 +27,45 @@ const Manual = () => {
           </Button>
         </div>
 
+        {/* Tabs */}
         <Tabs defaultValue="overview" className="w-full">
-          <TabsList className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-2 mb-8">
-            <TabsTrigger value="overview" className="flex items-center gap-2">
-              <Compass className="h-4 w-4" />
-              <span className="hidden md:inline">Ikhtisar</span>
-            </TabsTrigger>
-            <TabsTrigger value="dashboard" className="flex items-center gap-2">
-              <Map className="h-4 w-4" />
-              <span className="hidden md:inline">Dasbor</span>
-            </TabsTrigger>
-            <TabsTrigger value="customers" className="flex items-center gap-2">
-              <Users className="h-4 w-4" />
-              <span className="hidden md:inline">Pelanggan</span>
-            </TabsTrigger>
-            <TabsTrigger value="itineraries" className="flex items-center gap-2">
-              <Calendar className="h-4 w-4" />
-              <span className="hidden md:inline">Rencana Perjalanan</span>
-            </TabsTrigger>
-            <TabsTrigger value="tourplans" className="flex items-center gap-2">
-              <Map className="h-4 w-4" />
-              <span className="hidden md:inline">Paket Wisata</span>
-            </TabsTrigger>
-            <TabsTrigger value="invoices" className="flex items-center gap-2">
-              <Receipt className="h-4 w-4" />
-              <span className="hidden md:inline">Faktur</span>
-            </TabsTrigger>
-            <TabsTrigger value="settings" className="flex items-center gap-2">
-              <Settings className="h-4 w-4" />
-              <span className="hidden md:inline">Pengaturan</span>
-            </TabsTrigger>
+          <TabsList className="flex flex-wrap justify-start gap-2 mb-6 sm:mb-8 bg-gray-200/50 p-2 rounded-lg">
+            {[
+              { value: 'overview', icon: Compass, label: 'Ikhtisar' },
+              { value: 'dashboard', icon: Map, label: 'Dasbor' },
+              { value: 'customers', icon: Users, label: 'Pelanggan' },
+              { value: 'itineraries', icon: Calendar, label: 'Rencana Perjalanan' },
+              { value: 'tourplans', icon: Map, label: 'Paket Wisata' },
+              { value: 'invoices', icon: Receipt, label: 'Faktur' },
+              { value: 'settings', icon: Settings, label: 'Pengaturan' },
+            ].map(({ value, icon: Icon, label }) => (
+              <TabsTrigger
+                key={value}
+                value={value}
+                className="flex items-center gap-2 px-3 py-2 rounded-md text-gray-700 data-[state=active]:bg-blue-600 data-[state=active]:text-white hover:bg-blue-100 transition-all duration-200 text-sm sm:text-base flex-1 sm:flex-none min-w-[80px]"
+              >
+                <Icon className="h-4 w-4 sm:h-5 sm:w-5" />
+                <span className="hidden sm:inline">{label}</span>
+              </TabsTrigger>
+            ))}
           </TabsList>
 
+          {/* Overview Tab */}
           <TabsContent value="overview" className="space-y-6">
-            <Card>
+            <Card className="shadow-lg hover:shadow-xl transition-shadow duration-300">
               <CardHeader>
-                <CardTitle>Selamat Datang di Sistem Manajemen Pariwisata</CardTitle>
-                <CardDescription>
+                <CardTitle className="text-xl sm:text-2xl text-gray-800">
+                  Selamat Datang di Sistem Manajemen Pariwisata
+                </CardTitle>
+                <CardDescription className="text-gray-600">
                   Alat komprehensif untuk mengelola bisnis pariwisata Anda
                 </CardDescription>
               </CardHeader>
-              <CardContent className="space-y-4">
-                <p>
+              <CardContent className="space-y-4 text-gray-700">
+                <p className="leading-relaxed">
                   Sistem Manajemen Pariwisata membantu Anda merampingkan operasi bisnis pariwisata dengan menyediakan alat untuk mengelola pelanggan, membuat rencana perjalanan, menghasilkan faktur, dan lainnya.
                 </p>
-                <h3 className="text-xl font-semibold mt-4">Fitur Utama</h3>
+                <h3 className="text-lg sm:text-xl font-semibold mt-4">Fitur Utama</h3>
                 <ul className="list-disc pl-6 space-y-2">
                   <li>Manajemen pelanggan</li>
                   <li>Pembuatan dan perencanaan rencana perjalanan</li>
@@ -76,14 +76,14 @@ const Manual = () => {
               </CardContent>
             </Card>
 
-            <Card>
+            <Card className="shadow-lg hover:shadow-xl transition-shadow duration-300">
               <CardHeader>
-                <CardTitle>Memulai</CardTitle>
-                <CardDescription>
+                <CardTitle className="text-xl sm:text-2xl text-gray-800">Memulai</CardTitle>
+                <CardDescription className="text-gray-600">
                   Langkah-langkah dasar untuk memulai dengan sistem
                 </CardDescription>
               </CardHeader>
-              <CardContent className="space-y-4">
+              <CardContent className="space-y-4 text-gray-700">
                 <ol className="list-decimal pl-6 space-y-3">
                   <li>
                     <strong>Daftar/Masuk:</strong> Buat akun atau masuk untuk mengakses dasbor.
@@ -108,245 +108,333 @@ const Manual = () => {
             </Card>
           </TabsContent>
 
+          {/* Dashboard Tab */}
           <TabsContent value="dashboard" className="space-y-6">
-            <Card>
+            <Card className="shadow-lg hover:shadow-xl transition-shadow duration-300">
               <CardHeader>
-                <CardTitle>Ikhtisar Dasbor</CardTitle>
-                <CardDescription>
+                <CardTitle className="text-xl sm:text-2xl text-gray-800">Ikhtisar Dasbor</CardTitle>
+                <CardDescription className="text-gray-600">
                   Memahami pusat kontrol utama Anda
                 </CardDescription>
               </CardHeader>
-              <CardContent className="space-y-4">
-                <p>
+              <CardContent className="space-y-4 text-gray-700">
+                <p className="leading-relaxed">
                   Dasbor memberikan gambaran cepat tentang performa bisnis pariwisata Anda dan akses ke semua fitur sistem.
                 </p>
                 <Accordion type="single" collapsible className="w-full">
-                  <AccordionItem value="dashboard-1">
-                    <AccordionTrigger>Metrik Utama</AccordionTrigger>
-                    <AccordionContent>
-                      Dasbor menampilkan metrik penting seperti penjualan terbaru, tur yang akan datang, faktur tertunda, dan statistik pelanggan untuk membantu Anda melacak performa bisnis secara sekilas.
-                    </AccordionContent>
-                  </AccordionItem>
-                  <AccordionItem value="dashboard-2">
-                    <AccordionTrigger>Navigasi</AccordionTrigger>
-                    <AccordionContent>
-                      Menu sidebar memberi Anda akses cepat ke semua fitur termasuk pelanggan, rencana perjalanan, paket wisata, faktur, dan pengaturan.
-                    </AccordionContent>
-                  </AccordionItem>
-                  <AccordionItem value="dashboard-3">
-                    <AccordionTrigger>Tindakan Cepat</AccordionTrigger>
-                    <AccordionContent>
-                      Dasbor menyediakan tombol tindakan cepat untuk membuat rencana perjalanan baru, menambahkan pelanggan, menghasilkan faktur, dan lainnya.
-                    </AccordionContent>
-                  </AccordionItem>
+                  {[
+                    {
+                      id: 'dashboard-1',
+                      trigger: 'Metrik Utama',
+                      content:
+                        'Dasbor menampilkan metrik penting seperti penjualan terbaru, tur yang akan datang, faktur tertunda, dan statistik pelanggan untuk membantu Anda melacak performa bisnis secara sekilas.',
+                    },
+                    {
+                      id: 'dashboard-2',
+                      trigger: 'Navigasi',
+                      content:
+                        'Menu sidebar memberi Anda akses cepat ke semua fitur termasuk pelanggan, rencana perjalanan, paket wisata, faktur, dan pengaturan.',
+                    },
+                    {
+                      id: 'dashboard-3',
+                      trigger: 'Tindakan Cepat',
+                      content:
+                        'Dasbor menyediakan tombol tindakan cepat untuk membuat rencana perjalanan baru, menambahkan pelanggan, menghasilkan faktur, dan lainnya.',
+                    },
+                  ].map(({ id, trigger, content }) => (
+                    <AccordionItem key={id} value={id}>
+                      <AccordionTrigger className="text-base sm:text-lg hover:text-blue-600">
+                        {trigger}
+                      </AccordionTrigger>
+                      <AccordionContent className="text-gray-600 leading-relaxed">
+                        {content}
+                      </AccordionContent>
+                    </AccordionItem>
+                  ))}
                 </Accordion>
               </CardContent>
             </Card>
           </TabsContent>
 
+          {/* Customers Tab */}
           <TabsContent value="customers" className="space-y-6">
-            <Card>
+            <Card className="shadow-lg hover:shadow-xl transition-shadow duration-300">
               <CardHeader>
-                <CardTitle>Manajemen Pelanggan</CardTitle>
-                <CardDescription>
+                <CardTitle className="text-xl sm:text-2xl text-gray-800">
+                  Manajemen Pelanggan
+                </CardTitle>
+                <CardDescription className="text-gray-600">
                   Mengelola database pelanggan Anda
                 </CardDescription>
               </CardHeader>
-              <CardContent className="space-y-4">
-                <p>
+              <CardContent className="space-y-4 text-gray-700">
+                <p className="leading-relaxed">
                   Bagian manajemen pelanggan memungkinkan Anda menambahkan, mengedit, dan melacak informasi pelanggan Anda dan riwayat pemesanan.
                 </p>
                 <Accordion type="single" collapsible className="w-full">
-                  <AccordionItem value="customers-1">
-                    <AccordionTrigger>Menambahkan Pelanggan Baru</AccordionTrigger>
-                    <AccordionContent>
-                      Klik tombol "Tambah Pelanggan" untuk membuka formulir. Isi detail pelanggan termasuk nama, email, telepon, dan alamat. Simpan informasi untuk menambahkan pelanggan ke database Anda.
-                    </AccordionContent>
-                  </AccordionItem>
-                  <AccordionItem value="customers-2">
-                    <AccordionTrigger>Mengedit Informasi Pelanggan</AccordionTrigger>
-                    <AccordionContent>
-                      Untuk mengedit informasi pelanggan, temukan mereka dalam daftar pelanggan dan klik tombol edit. Perbarui kolom yang diperlukan dan simpan perubahan Anda.
-                    </AccordionContent>
-                  </AccordionItem>
-                  <AccordionItem value="customers-3">
-                    <AccordionTrigger>Riwayat Pelanggan</AccordionTrigger>
-                    <AccordionContent>
-                      Lihat riwayat pemesanan pelanggan, rencana perjalanan sebelumnya, dan catatan faktur dengan mengklik profil mereka. Ini membantu Anda memberikan layanan yang lebih personal.
-                    </AccordionContent>
-                  </AccordionItem>
+                  {[
+                    {
+                      id: 'customers-1',
+                      trigger: 'Menambahkan Pelanggan Baru',
+                      content:
+                        'Klik tombol "Tambah Pelanggan" untuk membuka formulir. Isi detail pelanggan termasuk nama, email, telepon, dan alamat. Simpan informasi untuk menambahkan pelanggan ke database Anda.',
+                    },
+                    {
+                      id: 'customers-2',
+                      trigger: 'Mengedit Informasi Pelanggan',
+                      content:
+                        'Untuk mengedit informasi pelanggan, temukan mereka dalam daftar pelanggan dan klik tombol edit. Perbarui kolom yang diperlukan dan simpan perubahan Anda.',
+                    },
+                    {
+                      id: 'customers-3',
+                      trigger: 'Riwayat Pelanggan',
+                      content:
+                        'Lihat riwayat pemesanan pelanggan, rencana perjalanan sebelumnya, dan catatan faktur dengan mengklik profil mereka. Ini membantu Anda memberikan layanan yang lebih personal.',
+                    },
+                  ].map(({ id, trigger, content }) => (
+                    <AccordionItem key={id} value={id}>
+                      <AccordionTrigger className="text-base sm:text-lg hover:text-blue-600">
+                        {trigger}
+                      </AccordionTrigger>
+                      <AccordionContent className="text-gray-600 leading-relaxed">
+                        {content}
+                      </AccordionContent>
+                    </AccordionItem>
+                  ))}
                 </Accordion>
               </CardContent>
             </Card>
           </TabsContent>
 
+          {/* Itineraries Tab */}
           <TabsContent value="itineraries" className="space-y-6">
-            <Card>
+            <Card className="shadow-lg hover:shadow-xl transition-shadow duration-300">
               <CardHeader>
-                <CardTitle>Manajemen Rencana Perjalanan</CardTitle>
-                <CardDescription>
+                <CardTitle className="text-xl sm:text-2xl text-gray-800">
+                  Manajemen Rencana Perjalanan
+                </CardTitle>
+                <CardDescription className="text-gray-600">
                   Membuat dan mengelola rencana perjalanan
                 </CardDescription>
               </CardHeader>
-              <CardContent className="space-y-4">
-                <p>
+              <CardContent className="space-y-4 text-gray-700">
+                <p className="leading-relaxed">
                   Bagian rencana perjalanan memungkinkan Anda membuat rencana perjalanan detail dengan aktivitas hari per hari, akomodasi, dan transportasi.
                 </p>
                 <Accordion type="single" collapsible className="w-full">
-                  <AccordionItem value="itineraries-1">
-                    <AccordionTrigger>Membuat Rencana Perjalanan Baru</AccordionTrigger>
-                    <AccordionContent>
-                      Klik "Buat Rencana Perjalanan" untuk memulai rencana perjalanan baru. Tambahkan detail dasar seperti nama, tanggal, dan jumlah orang. Anda dapat membangun dari awal atau menggunakan paket wisata yang ada sebagai template.
-                    </AccordionContent>
-                  </AccordionItem>
-                  <AccordionItem value="itineraries-2">
-                    <AccordionTrigger>Menambahkan Aktivitas Harian</AccordionTrigger>
-                    <AccordionContent>
-                      Untuk setiap hari, tambahkan destinasi, akomodasi, makanan, dan transportasi. Sistem akan menghitung biaya secara otomatis berdasarkan input Anda.
-                    </AccordionContent>
-                  </AccordionItem>
-                  <AccordionItem value="itineraries-3">
-                    <AccordionTrigger>Menetapkan Pemandu Wisata</AccordionTrigger>
-                    <AccordionContent>
-                      Tambahkan pemandu wisata ke rencana perjalanan Anda dengan memilih dari database pemandu Anda. Anda dapat menetapkan pemandu tertentu berdasarkan keahlian, bahasa, dan ketersediaan.
-                    </AccordionContent>
-                  </AccordionItem>
-                  <AccordionItem value="itineraries-4">
-                    <AccordionTrigger>Menghasilkan Faktur</AccordionTrigger>
-                    <AccordionContent>
-                      Setelah rencana perjalanan selesai, Anda dapat langsung menghasilkan faktur dengan mengklik tombol "Buat Faktur". Ini akan mentransfer semua detail harga yang relevan.
-                    </AccordionContent>
-                  </AccordionItem>
+                  {[
+                    {
+                      id: 'itineraries-1',
+                      trigger: 'Membuat Rencana Perjalanan Baru',
+                      content:
+                        'Klik "Buat Rencana Perjalanan" untuk memulai rencana perjalanan baru. Tambahkan detail dasar seperti nama, tanggal, dan jumlah orang. Anda dapat membangun dari awal atau menggunakan paket wisata yang ada sebagai template.',
+                    },
+                    {
+                      id: 'itineraries-2',
+                      trigger: 'Menambahkan Aktivitas Harian',
+                      content:
+                        'Untuk setiap hari, tambahkan destinasi, akomodasi, makanan, dan transportasi. Sistem akan menghitung biaya secara otomatis berdasarkan input Anda.',
+                    },
+                    {
+                      id: 'itineraries-3',
+                      trigger: 'Menetapkan Pemandu Wisata',
+                      content:
+                        'Tambahkan pemandu wisata ke rencana perjalanan Anda dengan memilih dari database pemandu Anda. Anda dapat menetapkan pemandu tertentu berdasarkan keahlian, bahasa, dan ketersediaan.',
+                    },
+                    {
+                      id: 'itineraries-4',
+                      trigger: 'Menghasilkan Faktur',
+                      content:
+                        'Setelah rencana perjalanan selesai, Anda dapat langsung menghasilkan faktur dengan mengklik tombol "Buat Faktur". Ini akan mentransfer semua detail harga yang relevan.',
+                    },
+                  ].map(({ id, trigger, content }) => (
+                    <AccordionItem key={id} value={id}>
+                      <AccordionTrigger className="text-base sm:text-lg hover:text-blue-600">
+                        {trigger}
+                      </AccordionTrigger>
+                      <AccordionContent className="text-gray-600 leading-relaxed">
+                        {content}
+                      </AccordionContent>
+                    </AccordionItem>
+                  ))}
                 </Accordion>
               </CardContent>
             </Card>
           </TabsContent>
 
+          {/* Tour Plans Tab */}
           <TabsContent value="tourplans" className="space-y-6">
-            <Card>
+            <Card className="shadow-lg hover:shadow-xl transition-shadow duration-300">
               <CardHeader>
-                <CardTitle>Manajemen Paket Wisata</CardTitle>
-                <CardDescription>
+                <CardTitle className="text-xl sm:text-2xl text-gray-800">
+                  Manajemen Paket Wisata
+                </CardTitle>
+                <CardDescription className="text-gray-600">
                   Membuat template tur yang dapat digunakan kembali
                 </CardDescription>
               </CardHeader>
-              <CardContent className="space-y-4">
-                <p>
+              <CardContent className="space-y-4 text-gray-700">
+                <p className="leading-relaxed">
                   Paket wisata berfungsi sebagai template yang dapat dengan cepat dikonversi menjadi rencana perjalanan lengkap, menghemat waktu Anda saat membuat perjalanan serupa.
                 </p>
                 <Accordion type="single" collapsible className="w-full">
-                  <AccordionItem value="tourplans-1">
-                    <AccordionTrigger>Membuat Paket Wisata</AccordionTrigger>
-                    <AccordionContent>
-                      Klik "Buat Paket Wisata" dan isi detail dasar seperti judul, deskripsi, dan harga. Anda juga dapat menambahkan gambar sampul untuk membuatnya menarik secara visual.
-                    </AccordionContent>
-                  </AccordionItem>
-                  <AccordionItem value="tourplans-2">
-                    <AccordionTrigger>Menambahkan Detail Rencana Perjalanan</AccordionTrigger>
-                    <AccordionContent>
-                      Beralih ke tab Detail Rencana Perjalanan untuk menambahkan informasi tentang tanggal mulai, jumlah orang, dan spesifik lainnya yang akan digunakan saat mengkonversi ke rencana perjalanan lengkap.
-                    </AccordionContent>
-                  </AccordionItem>
-                  <AccordionItem value="tourplans-3">
-                    <AccordionTrigger>Mengkonversi ke Rencana Perjalanan</AccordionTrigger>
-                    <AccordionContent>
-                      Untuk mengkonversi paket wisata menjadi rencana perjalanan lengkap, klik tombol "Konversi ke Rencana Perjalanan" pada kartu paket wisata. Ini akan membuat rencana perjalanan baru dengan semua detail dari paket wisata Anda.
-                    </AccordionContent>
-                  </AccordionItem>
+                  {[
+                    {
+                      id: 'tourplans-1',
+                      trigger: 'Membuat Paket Wisata',
+                      content:
+                        'Klik "Buat Paket Wisata" dan isi detail dasar seperti judul, deskripsi, dan harga. Anda juga dapat menambahkan gambar sampul untuk membuatnya menarik secara visual.',
+                    },
+                    {
+                      id: 'tourplans-2',
+                      trigger: 'Menambahkan Detail Rencana Perjalanan',
+                      content:
+                        'Beralih ke tab Detail Rencana Perjalanan untuk menambahkan informasi tentang tanggal mulai, jumlah orang, dan spesifik lainnya yang akan digunakan saat mengkonversi ke rencana perjalanan lengkap.',
+                    },
+                    {
+                      id: 'tourplans-3',
+                      trigger: 'Mengkonversi ke Rencana Perjalanan',
+                      content:
+                        'Untuk mengkonversi paket wisata menjadi rencana perjalanan lengkap, klik tombol "Konversi ke Rencana Perjalanan" pada kartu paket wisata. Ini akan membuat rencana perjalanan baru dengan semua detail dari paket wisata Anda.',
+                    },
+                  ].map(({ id, trigger, content }) => (
+                    <AccordionItem key={id} value={id}>
+                      <AccordionTrigger className="text-base sm:text-lg hover:text-blue-600">
+                        {trigger}
+                      </AccordionTrigger>
+                      <AccordionContent className="text-gray-600 leading-relaxed">
+                        {content}
+                      </AccordionContent>
+                    </AccordionItem>
+                  ))}
                 </Accordion>
               </CardContent>
             </Card>
           </TabsContent>
 
+          {/* Invoices Tab */}
           <TabsContent value="invoices" className="space-y-6">
-            <Card>
+            <Card className="shadow-lg hover:shadow-xl transition-shadow duration-300">
               <CardHeader>
-                <CardTitle>Manajemen Faktur</CardTitle>
-                <CardDescription>
+                <CardTitle className="text-xl sm:text-2xl text-gray-800">
+                  Manajemen Faktur
+                </CardTitle>
+                <CardDescription className="text-gray-600">
                   Membuat dan melacak faktur pelanggan
                 </CardDescription>
               </CardHeader>
-              <CardContent className="space-y-4">
-                <p>
+              <CardContent className="space-y-4 text-gray-700">
+                <p className="leading-relaxed">
                   Bagian faktur memungkinkan Anda membuat, mengelola, dan melacak pembayaran untuk layanan perjalanan Anda.
                 </p>
                 <Accordion type="single" collapsible className="w-full">
-                  <AccordionItem value="invoices-1">
-                    <AccordionTrigger>Membuat Faktur Secara Manual</AccordionTrigger>
-                    <AccordionContent>
-                      Pilih "Input Manual" saat membuat faktur baru. Isi detail pelanggan, tambahkan item baris untuk layanan, tentukan harga, dan atur ketentuan pembayaran.
-                    </AccordionContent>
-                  </AccordionItem>
-                  <AccordionItem value="invoices-2">
-                    <AccordionTrigger>Membuat Faktur dari Rencana Perjalanan</AccordionTrigger>
-                    <AccordionContent>
-                      Pilih "Dari Rencana Perjalanan" untuk secara otomatis menghasilkan faktur berdasarkan rencana perjalanan yang ada. Sistem akan menarik semua detail dan harga yang relevan.
-                    </AccordionContent>
-                  </AccordionItem>
-                  <AccordionItem value="invoices-3">
-                    <AccordionTrigger>Melacak Status Pembayaran</AccordionTrigger>
-                    <AccordionContent>
-                      Pantau status faktur (draft, terkirim, dibayar, belum dibayar) dan perbarui saat pembayaran diterima. Sistem memberikan gambaran yang jelas tentang pembayaran yang tertunda dan selesai.
-                    </AccordionContent>
-                  </AccordionItem>
-                  <AccordionItem value="invoices-4">
-                    <AccordionTrigger>Mengunduh dan Mencetak</AccordionTrigger>
-                    <AccordionContent>
-                      Hasilkan versi PDF dari faktur yang dapat diunduh, dicetak, atau dikirim langsung ke pelanggan melalui email.
-                    </AccordionContent>
-                  </AccordionItem>
+                  {[
+                    {
+                      id: 'invoices-1',
+                      trigger: 'Membuat Faktur Secara Manual',
+                      content:
+                        'Pilih "Input Manual" saat membuat faktur baru. Isi detail pelanggan, tambahkan item baris untuk layanan, tentukan harga, dan atur ketentuan pembayaran.',
+                    },
+                    {
+                      id: 'invoices-2',
+                      trigger: 'Membuat Faktur dari Rencana Perjalanan',
+                      content:
+                        'Pilih "Dari Rencana Perjalanan" untuk secara otomatis menghasilkan faktur berdasarkan rencana perjalanan yang ada. Sistem akan menarik semua detail dan harga yang relevan.',
+                    },
+                    {
+                      id: 'invoices-3',
+                      trigger: 'Melacak Status Pembayaran',
+                      content:
+                        'Pantau status faktur (draft, terkirim, dibayar, belum dibayar) dan perbarui saat pembayaran diterima. Sistem memberikan gambaran yang jelas tentang pembayaran yang tertunda dan selesai.',
+                    },
+                    {
+                      id: 'invoices-4',
+                      trigger: 'Mengunduh dan Mencetak',
+                      content:
+                        'Hasilkan versi PDF dari faktur yang dapat diunduh, dicetak, atau dikirim langsung ke pelanggan melalui email.',
+                    },
+                  ].map(({ id, trigger, content }) => (
+                    <AccordionItem key={id} value={id}>
+                      <AccordionTrigger className="text-base sm:text-lg hover:text-blue-600">
+                        {trigger}
+                      </AccordionTrigger>
+                      <AccordionContent className="text-gray-600 leading-relaxed">
+                        {content}
+                      </AccordionContent>
+                    </AccordionItem>
+                  ))}
                 </Accordion>
               </CardContent>
             </Card>
           </TabsContent>
 
+          {/* Settings Tab */}
           <TabsContent value="settings" className="space-y-6">
-            <Card>
+            <Card className="shadow-lg hover:shadow-xl transition-shadow duration-300">
               <CardHeader>
-                <CardTitle>Pengaturan Akun</CardTitle>
-                <CardDescription>
+                <CardTitle className="text-xl sm:text-2xl text-gray-800">
+                  Pengaturan Akun
+                </CardTitle>
+                <CardDescription className="text-gray-600">
                   Mengelola akun dan preferensi Anda
                 </CardDescription>
               </CardHeader>
-              <CardContent className="space-y-4">
-                <p>
+              <CardContent className="space-y-4 text-gray-700">
+                <p className="leading-relaxed">
                   Bagian pengaturan memungkinkan Anda menyesuaikan akun Anda, memperbarui informasi bisnis, dan mengelola preferensi sistem.
                 </p>
                 <Accordion type="single" collapsible className="w-full">
-                  <AccordionItem value="settings-1">
-                    <AccordionTrigger>Manajemen Profil</AccordionTrigger>
-                    <AccordionContent>
-                      Perbarui informasi pribadi dan bisnis Anda, termasuk nama perusahaan, logo, detail kontak, dan alamat bisnis.
-                    </AccordionContent>
-                  </AccordionItem>
-                  <AccordionItem value="settings-2">
-                    <AccordionTrigger>Pengaturan Keamanan</AccordionTrigger>
-                    <AccordionContent>
-                      Ubah kata sandi Anda, aktifkan otentikasi dua faktor, dan kelola preferensi login untuk menjaga keamanan akun Anda.
-                    </AccordionContent>
-                  </AccordionItem>
-                  <AccordionItem value="settings-3">
-                    <AccordionTrigger>Preferensi Notifikasi</AccordionTrigger>
-                    <AccordionContent>
-                      Sesuaikan notifikasi mana yang Anda terima tentang pemesanan baru, pembayaran faktur, dan pembaruan sistem.
-                    </AccordionContent>
-                  </AccordionItem>
+                  {[
+                    {
+                      id: 'settings-1',
+                      trigger: 'Manajemen Profil',
+                      content:
+                        'Perbarui informasi pribadi dan bisnis Anda, termasuk nama perusahaan, logo, detail kontak, dan alamat bisnis.',
+                    },
+                    {
+                      id: 'settings-2',
+                      trigger: 'Pengaturan Keamanan',
+                      content:
+                        'Ubah kata sandi Anda, aktifkan otentikasi dua faktor, dan kelola preferensi login untuk menjaga keamanan akun Anda.',
+                    },
+                    {
+                      id: 'settings-3',
+                      trigger: 'Preferensi Notifikasi',
+                      content:
+                        'Sesuaikan notifikasi mana yang Anda terima tentang pemesanan baru, pembayaran faktur, dan pembaruan sistem.',
+                    },
+                  ].map(({ id, trigger, content }) => (
+                    <AccordionItem key={id} value={id}>
+                      <AccordionTrigger className="text-base sm:text-lg hover:text-blue-600">
+                        {trigger}
+                      </AccordionTrigger>
+                      <AccordionContent className="text-gray-600 leading-relaxed">
+                        {content}
+                      </AccordionContent>
+                    </AccordionItem>
+                  ))}
                 </Accordion>
               </CardContent>
             </Card>
           </TabsContent>
         </Tabs>
 
-        <div className="mt-12 bg-amber-50 border border-amber-200 rounded-lg p-6">
-          <div className="flex items-start gap-4">
-            <HelpCircle className="h-6 w-6 text-amber-600 shrink-0 mt-1" />
-            <div>
-              <h3 className="text-lg font-medium text-amber-800">Butuh Bantuan Tambahan?</h3>
-              <p className="text-amber-700 mt-2">
+        {/* Help Section */}
+        <div className="mt-8 sm:mt-12 bg-gradient-to-r from-blue-50 to-blue-100 border border-blue-200 rounded-lg p-4 sm:p-6 shadow-md">
+          <div className="flex flex-col sm:flex-row items-start gap-4">
+            <HelpCircle className="h-6 w-6 text-blue-600 shrink-0 mt-1" />
+            <div className="flex-1">
+              <h3 className="text-lg sm:text-xl font-medium text-blue-800">
+                Butuh Bantuan Tambahan?
+              </h3>
+              <p className="text-blue-700 mt-2 leading-relaxed">
                 Jika Anda memerlukan bantuan lebih lanjut atau memiliki pertanyaan spesifik tentang penggunaan sistem, silakan hubungi tim dukungan kami.
               </p>
-              <Button className="mt-4 bg-amber-500 hover:bg-amber-600 text-white">
-                Hubungi Dukungan
+              <Button
+                className="mt-4 bg-blue-600 hover:bg-blue-700 text-white transition-colors"
+                asChild
+              >
+                <a href="mailto:support@tourgenius.com">Hubungi Dukungan</a>
               </Button>
             </div>
           </div>
