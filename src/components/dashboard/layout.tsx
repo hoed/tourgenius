@@ -1,39 +1,58 @@
-
 import React, { useState } from 'react';
 import { useLocation, useNavigate, Link } from 'react-router-dom';
 import { Menu, X, Users, Calendar, Receipt, Map, FileText, Settings, LogOut } from 'lucide-react';
-import { Button } from "@/components/ui/button"
+import { Button } from '@/components/ui/button';
 import Chatbot from '@/components/chatbot/Chatbot';
+import { supabase } from '@/integrations/supabase/client';
+import { Toaster, toast } from 'sonner';
 
-const Layout = ({ children }: { children: React.ReactNode }) => {
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+interface LayoutProps {
+  children: React.ReactNode;
+}
+
+const Layout: React.FC<LayoutProps> = ({ children }) => {
+  const [isSidebarOpen, setIsSidebarOpen] = useState<boolean>(false);
   const location = useLocation();
   const navigate = useNavigate();
 
-  const toggleSidebar = () => {
-    setIsSidebarOpen(!isSidebarOpen);
+  const toggleSidebar = (): void => {
+    setIsSidebarOpen((prev) => !prev);
   };
 
-  const closeSidebar = () => {
+  const closeSidebar = (): void => {
     setIsSidebarOpen(false);
   };
 
-  const isActive = (path: string) => {
+  const isActive = (path: string): boolean => {
     return location.pathname === path;
   };
 
-  const handleLogout = async () => {
-    navigate('/auth');
+  const handleLogout = async (): Promise<void> => {
+    try {
+      const { error } = await supabase.auth.signOut();
+      if (error) {
+        console.error('Error logging out:', error);
+        toast.error('Failed to log out. Please try again.');
+        return;
+      }
+      toast.success('Successfully logged out');
+      navigate('/auth');
+    } catch (error: unknown) {
+      console.error('Unexpected error during logout:', error);
+      toast.error('An unexpected error occurred');
+    }
   };
 
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
+      <Toaster position="top-center" richColors />
       {/* Header */}
       <header className="fixed top-0 left-0 right-0 z-40 bg-white shadow-md h-16 flex items-center justify-between px-6">
         <div className="flex items-center">
           <button
             onClick={toggleSidebar}
             className="md:hidden text-gray-700 focus:outline-none focus:shadow-outline"
+            aria-label={isSidebarOpen ? 'Close sidebar' : 'Open sidebar'}
           >
             {isSidebarOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
           </button>
@@ -42,17 +61,16 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
           </Link>
         </div>
         <div className="flex items-center space-x-4">
-          {/* User profile - removed logout from here */}
+          {/* User profile - logout is in sidebar */}
         </div>
       </header>
-      
+
       <div className="flex flex-1 pt-16">
         {/* Sidebar */}
         <div
           className={`fixed inset-y-0 z-30 transition-all duration-300 transform bg-gray-900 text-white w-64 
                     pt-16 md:translate-x-0 ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}
         >
-          {/* Sidebar content */}
           <nav className="flex flex-col h-full">
             <ul className="space-y-2 p-4">
               <li>
@@ -139,7 +157,6 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
                   <span>Manual</span>
                 </Link>
               </li>
-              {/* Added logout button to sidebar */}
               <li>
                 <button
                   onClick={handleLogout}
@@ -154,14 +171,12 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
         </div>
 
         {/* Main content */}
-        <div className={`flex-1 transition-all duration-300 ml-0 md:ml-64`}>
-          <main className="p-6">
-            {children}
-          </main>
+        <div className="flex-1 transition-all duration-300 ml-0 md:ml-64">
+          <main className="p-6">{children}</main>
         </div>
       </div>
-      
-      {/* Add Chatbot */}
+
+      {/* Chatbot */}
       <div className="z-50">
         <Chatbot position="bottom-right" />
       </div>

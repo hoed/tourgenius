@@ -1,43 +1,55 @@
-
 import React, { useState, useEffect } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
-import { Link } from 'react-router-dom';
+import { useNavigate, Link, useSearchParams } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { FcGoogle } from 'react-icons/fc';
+import { Toaster, toast } from 'sonner';
 import AuthForm from '@/components/auth/auth-form';
+import type { Session } from '@supabase/supabase-js';
 
-const Auth = () => {
+const Auth: React.FC = () => {
   const navigate = useNavigate();
-  const location = useLocation();
-  const [loading, setLoading] = useState(true);
-  const [initialCheckDone, setInitialCheckDone] = useState(false);
-  const [isSignUp, setIsSignUp] = useState(location.search.includes('signup=true'));
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [loading, setLoading] = useState<boolean>(true);
+  const [initialCheckDone, setInitialCheckDone] = useState<boolean>(false);
+  const [isSignUp, setIsSignUp] = useState<boolean>(searchParams.get('signup') === 'true');
 
   useEffect(() => {
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event, session) => {
-        if (session?.user && initialCheckDone) {
+    let mounted = true;
+
+    const checkSession = async (): Promise<void> => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (mounted) {
+        if (session?.user) {
           navigate('/dashboard');
-        } else if (initialCheckDone) {
+        } else {
           setLoading(false);
+        }
+        setInitialCheckDone(true);
+      }
+    };
+
+    checkSession();
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (event: string, session: Session | null) => {
+        if (mounted && initialCheckDone) {
+          if (session?.user) {
+            navigate('/dashboard');
+          } else {
+            setLoading(false);
+          }
         }
       }
     );
 
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (session?.user) {
-        navigate('/dashboard');
-      } else {
-        setLoading(false);
-      }
-      setInitialCheckDone(true);
-    });
-
-    return () => subscription.unsubscribe();
+    return () => {
+      mounted = false;
+      subscription.unsubscribe();
+    };
   }, [navigate, initialCheckDone]);
 
-  const handleGoogleLogin = async () => {
+  const handleGoogleLogin = async (): Promise<void> => {
     try {
       setLoading(true);
       const { error } = await supabase.auth.signInWithOAuth({
@@ -47,14 +59,18 @@ const Auth = () => {
         },
       });
       if (error) throw error;
-    } catch (error) {
-      alert('Failed to sign in with Google. Please try again.');
+    } catch (error: unknown) {
+      console.error('Google sign-in error:', error);
+      toast.error('Failed to sign in with Google. Please try again.');
       setLoading(false);
     }
   };
 
-  const toggleAuthMode = () => {
-    setIsSignUp(!isSignUp);
+  const toggleAuthMode = (): void => {
+    setIsSignUp((prev) => {
+      setSearchParams({ signup: (!prev).toString() });
+      return !prev;
+    });
   };
 
   if (loading) {
@@ -67,6 +83,7 @@ const Auth = () => {
 
   return (
     <div className="min-h-screen bg-blue-950 flex flex-col">
+      <Toaster position="top-center" richColors />
       <header className="p-6 border-b border-blue-400/20">
         <div className="container mx-auto flex items-center justify-between">
           <Link to="/" className="flex items-center space-x-2">
@@ -83,7 +100,7 @@ const Auth = () => {
             <h1 className="text-2xl font-bold text-white mb-6 text-center pt-6">
               {isSignUp ? 'Buat Akun Baru' : 'Selamat Datang di TourGenius'}
             </h1>
-            
+
             <div className="px-6 pb-6">
               <Button
                 onClick={handleGoogleLogin}
