@@ -60,7 +60,7 @@ https://tourgenius.vercel.app/cookie-policy
 https://tourgenius.vercel.app/help-center
 https://tourgenius.vercel.app/contact-us
 Jika pengguna bertanya tentang fitur tertentu, Anda dapat memberikan penjelasan yang lebih mendetail berdasarkan konteks yang diberikan.
-Jika Anda tidak tahu jawabannya, katakan saja Anda tidak tahu dan menyarankan mereka untuk menghubungi dukungan.
+Jika Anda tidak tahu jawabannya, katakan saja Anda tidak tahu dan menyarankan mereka untuk menghubungi dukungan di https://tourgenius.vercel.app/contact-us.
 `;
 
 export interface ChatMessage {
