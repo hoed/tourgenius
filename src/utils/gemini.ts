@@ -1,7 +1,8 @@
 
 // Gemini AI integration
 const GEMINI_API_KEY = "AIzaSyCMHA5m4CLdcIok9OOto5q-HbNiKn27GJU";
-const GEMINI_API_URL = "https://generativelanguage.googleapis.com/v1/models/gemini-pro:generateContent";
+// Updated API endpoint to use gemini-1.0-pro instead of gemini-pro
+const GEMINI_API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.0-pro:generateContent";
 
 // Knowledge base context extracted from the manual page
 const knowledgeBase = `
@@ -102,6 +103,7 @@ Berikan jawaban yang sopan dan singkat dalam Bahasa Indonesia. Jika Anda tidak t
       });
     }
 
+    // Updated to use fetch with proper error handling
     const response = await fetch(`${GEMINI_API_URL}?key=${GEMINI_API_KEY}`, {
       method: 'POST',
       headers: {
@@ -110,6 +112,12 @@ Berikan jawaban yang sopan dan singkat dalam Bahasa Indonesia. Jika Anda tidak t
       body: JSON.stringify(payload),
     });
 
+    if (!response.ok) {
+      const errorData = await response.json();
+      console.error('Gemini API error:', errorData);
+      return "Maaf, terjadi kesalahan saat memproses permintaan Anda. Silakan coba lagi nanti.";
+    }
+    
     const data = await response.json();
     
     if (data.error) {

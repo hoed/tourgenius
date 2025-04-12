@@ -8,6 +8,7 @@ import { Avatar } from '@/components/ui/avatar';
 import { MessageCircle, Send, X, Loader2, MoveUpRight } from 'lucide-react';
 import { sendChatMessage, ChatMessage } from '@/utils/gemini';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 
 interface ChatbotProps {
   position?: 'bottom-right' | 'bottom-left';
@@ -80,14 +81,86 @@ const Chatbot: React.FC<ChatbotProps> = ({ position = 'bottom-right' }) => {
     ? 'bottom-4 right-4'
     : 'bottom-4 left-4';
 
-  // Calculate dynamic width based on screen size
-  const chatWidth = isMobile ? 'w-[calc(100vw-32px)]' : 'w-[350px]';
-  const chatHeight = isMobile ? 'h-[420px]' : 'h-[350px]';
+  // For mobile, use a sheet component instead
+  if (isMobile) {
+    return (
+      <div className={`fixed ${positionClasses} z-50`}>
+        <Sheet open={isOpen} onOpenChange={setIsOpen}>
+          <SheetTrigger asChild>
+            <Button 
+              onClick={() => setIsOpen(true)} 
+              className="h-14 w-14 rounded-full shadow-lg bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 transition-all p-0 flex items-center justify-center group"
+            >
+              <MessageCircle size={24} className="text-white group-hover:scale-110 transition-transform" />
+              <span className="absolute -top-1 -right-1 w-3 h-3 bg-green-400 rounded-full animate-pulse"></span>
+            </Button>
+          </SheetTrigger>
+          <SheetContent 
+            side="bottom" 
+            className="p-0 h-[60vh] rounded-t-xl flex flex-col overflow-hidden border-t border-purple-200" 
+          >
+            <SheetHeader className="bg-gradient-to-r from-blue-900 to-purple-800 text-white py-3 px-4 flex flex-row justify-between items-center">
+              <div className="flex items-center gap-2">
+                <Avatar className="h-8 w-8 bg-blue-700">
+                  <MessageCircle size={16} />
+                </Avatar>
+                <SheetTitle className="text-white">TourGenius Asisten</SheetTitle>
+              </div>
+            </SheetHeader>
+            
+            <ScrollArea className="flex-1 p-4 bg-gray-50">
+              <div className="space-y-4">
+                {messages.map((message, index) => (
+                  <div 
+                    key={index} 
+                    className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
+                  >
+                    <div 
+                      className={`max-w-[80%] px-4 py-2 rounded-lg text-sm
+                        ${message.role === 'user' 
+                          ? 'bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-tr-none shadow-md' 
+                          : 'bg-white text-gray-800 rounded-tl-none border border-gray-200 shadow-sm'
+                        }`}
+                    >
+                      {message.content}
+                    </div>
+                  </div>
+                ))}
+                <div ref={messagesEndRef} />
+              </div>
+            </ScrollArea>
+            
+            <div className="p-2 border-t bg-white">
+              <form onSubmit={handleSubmit} className="flex w-full gap-2">
+                <Input
+                  ref={inputRef}
+                  placeholder="Ketik pesan Anda di sini..."
+                  value={inputValue}
+                  onChange={handleInputChange}
+                  disabled={isLoading}
+                  className="flex-1 border-gray-300 focus:border-purple-400 focus:ring-purple-300"
+                />
+                <Button 
+                  type="submit" 
+                  size="icon" 
+                  disabled={isLoading || !inputValue.trim()}
+                  className="bg-blue-600 hover:bg-blue-700 text-white"
+                >
+                  {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
+                </Button>
+              </form>
+            </div>
+          </SheetContent>
+        </Sheet>
+      </div>
+    );
+  }
 
+  // Desktop version
   return (
     <div className={`fixed ${positionClasses} z-50 transition-all duration-300 ease-in-out`}>
       {isOpen ? (
-        <Card className={`${chatWidth} shadow-xl border border-purple-200 animate-in slide-in-from-bottom-5 duration-300 bg-white`}>
+        <Card className="w-[350px] shadow-xl border border-purple-200 animate-in slide-in-from-bottom-5 duration-300 bg-white">
           <CardHeader className="bg-gradient-to-r from-blue-900 to-purple-800 text-white py-3 px-4 flex flex-row justify-between items-center">
             <div className="flex items-center gap-2">
               <Avatar className="h-8 w-8 bg-blue-700">
@@ -100,7 +173,7 @@ const Chatbot: React.FC<ChatbotProps> = ({ position = 'bottom-right' }) => {
             </Button>
           </CardHeader>
           
-          <ScrollArea className={`${chatHeight} p-4 bg-gray-50`}>
+          <ScrollArea className="h-[350px] p-4 bg-gray-50">
             <div className="space-y-4">
               {messages.map((message, index) => (
                 <div 
