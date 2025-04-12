@@ -1,6 +1,7 @@
+
 import React, { useState } from 'react';
 import { useLocation, useNavigate, Link } from 'react-router-dom';
-import { Menu, X, Users, Calendar, Receipt, Map, FileText, Settings } from 'lucide-react';
+import { Menu, X, Users, Calendar, Receipt, Map, FileText, Settings, LogOut } from 'lucide-react';
 import { Button } from "@/components/ui/button"
 import Chatbot from '@/components/chatbot/Chatbot';
 
@@ -21,6 +22,10 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
     return location.pathname === path;
   };
 
+  const handleLogout = async () => {
+    navigate('/auth');
+  };
+
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
       {/* Header */}
@@ -37,8 +42,7 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
           </Link>
         </div>
         <div className="flex items-center space-x-4">
-          {/* User profile or any other header content */}
-          <Button onClick={() => navigate('/auth')} variant="outline">Logout</Button>
+          {/* User profile - removed logout from here */}
         </div>
       </header>
       
@@ -135,8 +139,17 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
                   <span>Manual</span>
                 </Link>
               </li>
+              {/* Added logout button to sidebar */}
+              <li>
+                <button
+                  onClick={handleLogout}
+                  className="flex w-full items-center space-x-3 p-3 rounded-md hover:bg-gray-800 transition-colors text-left"
+                >
+                  <LogOut className="h-5 w-5" />
+                  <span>Logout</span>
+                </button>
+              </li>
             </ul>
-            {/* Add more links as needed */}
           </nav>
         </div>
 
