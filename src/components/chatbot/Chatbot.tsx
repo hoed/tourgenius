@@ -40,6 +40,10 @@ const Chatbot: React.FC<ChatbotProps> = ({ position = 'bottom-right' }) => {
     closeSoundRef.current = new Audio('/close.mp3');
     openSoundRef.current.volume = 0.3;
     closeSoundRef.current.volume = 0.3;
+
+    // Preload to catch errors early
+    openSoundRef.current.load();
+    closeSoundRef.current.load();
   }, []);
 
   useEffect(() => {
@@ -275,7 +279,7 @@ const Chatbot: React.FC<ChatbotProps> = ({ position = 'bottom-right' }) => {
                       <MessageCircle className="h-5 w-5 text-white" />
                     </AvatarFallback>
                   </Avatar>
-                  <span className="text-base sm:text-lg font-semibold">TourGenius Assitant</span>
+                  <span className="text-base sm:text-lg font-semibold">TourGenius Asisten</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <Button
