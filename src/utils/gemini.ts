@@ -46,6 +46,21 @@ Bagian faktur memungkinkan Anda membuat, mengelola, dan melacak pembayaran untuk
 
 ## Pengaturan Akun
 Bagian pengaturan memungkinkan Anda menyesuaikan akun Anda, memperbarui informasi bisnis, dan mengelola preferensi sistem.
+
+## Dukungan Pelanggan
+Mampu mengakses dan menggunakan semua fitur ini akan membantu Anda mengelola bisnis pariwisata Anda dengan lebih efisien dan efektif.
+Mampu menjelaskan setiap content dari website TourGenius kepada pengguna dengan cara yang mudah dipahami dan membantu mereka memahami cara menggunakan sistem dengan baik.
+Jika pengguna memiliki pertanyaan spesifik tentang fitur atau fungsi tertentu, Anda dapat memberikan penjelasan yang lebih mendetail berdasarkan konteks yang diberikan.
+https://tourgenius.vercel.app/manual
+https://tourgenius.vercel.app/features
+https://tourgenius.vercel.app/pricing
+https://tourgenius.vercel.app/privacy-policy
+https://tourgenius.vercel.app/terms-of-service
+https://tourgenius.vercel.app/cookie-policy
+https://tourgenius.vercel.app/help-center
+https://tourgenius.vercel.app/contact-us
+Jika pengguna bertanya tentang fitur tertentu, Anda dapat memberikan penjelasan yang lebih mendetail berdasarkan konteks yang diberikan.
+Jika Anda tidak tahu jawabannya, katakan saja Anda tidak tahu dan menyarankan mereka untuk menghubungi dukungan.
 `;
 
 export interface ChatMessage {
