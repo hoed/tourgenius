@@ -13,8 +13,8 @@ const Footer = () => {
               </span>
             </Link>
             <p className="text-white mb-4 leading-relaxed">
-              Create extraordinary travel experiences in Indonesia with precision and style.
-              Plan, customize, and manage tour itineraries with our powerful platform.
+            Ciptakan pengalaman tur yang luar biasa dengan presisi dan gaya. 
+            Rencanakan, sesuaikan, dan kelola rencana perjalanan wisata dengan platform yang canggih.
             </p>
             <div className="flex space-x-4">
               <a href="https://facebook.com" target="_blank" rel="noopener noreferrer" className="text-white hover:text-blue-300 transition-colors">
