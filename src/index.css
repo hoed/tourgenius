@@ -97,6 +97,35 @@
   animation: gradient 3s ease infinite;
 }
 
+/* Animation delays for the box fade animations */
+.animation-delay-500 {
+  animation-delay: 0.5s;
+}
+.animation-delay-1000 {
+  animation-delay: 1s;
+}
+.animation-delay-1500 {
+  animation-delay: 1.5s;
+}
+.animation-delay-2000 {
+  animation-delay: 2s;
+}
+.animation-delay-2500 {
+  animation-delay: 2.5s;
+}
+.animation-delay-3000 {
+  animation-delay: 3s;
+}
+.animation-delay-3500 {
+  animation-delay: 3.5s;
+}
+.animation-delay-4000 {
+  animation-delay: 4s;
+}
+.animation-delay-4500 {
+  animation-delay: 4.5s;
+}
+
 @layer base {
   * {
     @apply border-border;
