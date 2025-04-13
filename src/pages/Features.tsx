@@ -3,48 +3,59 @@ import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import Navbar from '@/components/landing/navbar';
 import Footer from '@/components/landing/footer';
+import { Calendar, Star, Users, FileText, Map, DollarSign, Settings, Globe } from 'lucide-react';
 
 const Features = () => {
   const features = [
     { 
       title: 'Perencanaan Rencana Perjalanan', 
       description: 'Rancang rencana perjalanan tur yang mendetail dan dapat disesuaikan dengan mudah.',
-      icon: '📅' 
+      icon: <Calendar className="h-8 w-8 text-amber-400" />
     },
     { 
       title: 'Pembuatan Faktur', 
       description: 'Buat faktur profesional dengan rincian biaya otomatis.',
-      icon: '📄' 
+      icon: <FileText className="h-8 w-8 text-amber-400" />
     },
     { 
       title: 'Kolaborasi Real-Time', 
       description: 'Bekerja dengan tim Anda secara lancar dalam waktu nyata.',
-      icon: '👥' 
+      icon: <Users className="h-8 w-8 text-amber-400" />
     },
     { 
       title: 'Manajemen Pelanggan', 
       description: 'Lacak detail dan preferensi klien secara efisien.',
-      icon: '👤' 
+      icon: <Users className="h-8 w-8 text-amber-400" />
     },
     {
       title: 'Template Paket Wisata',
       description: 'Buat dan gunakan kembali template paket tur untuk penawaran yang sering diminta.',
-      icon: '🗺️'
+      icon: <Map className="h-8 w-8 text-amber-400" />
     },
     {
       title: 'Analitik Bisnis',
       description: 'Visualisasikan performa bisnis Anda dan pantau tren penjualan untuk pengambilan keputusan yang lebih baik.',
-      icon: '📊'
+      icon: <DollarSign className="h-8 w-8 text-amber-400" />
     },
     {
       title: 'Multi-bahasa',
       description: 'Dukungan untuk bahasa Inggris dan Indonesia untuk melayani pasar internasional dan lokal.',
-      icon: '🌐'
+      icon: <Globe className="h-8 w-8 text-amber-400" />
     },
     {
       title: 'Desain Responsif',
       description: 'Akses dan kelola bisnis Anda dari perangkat apa pun - desktop, tablet, atau ponsel.',
-      icon: '📱'
+      icon: <Settings className="h-8 w-8 text-amber-400" />
+    },
+    {
+      title: 'Integrasi Google Calendar',
+      description: 'Sinkronkan semua tur dan jadwal Anda dengan Google Calendar untuk memudahkan pengelolaan dan pengingat otomatis.',
+      icon: <Calendar className="h-8 w-8 text-amber-400" />
+    },
+    {
+      title: 'Sistem Penilaian Pelanggan',
+      description: 'Kumpulkan dan tampilkan ulasan pelanggan untuk meningkatkan kepercayaan dan mendapatkan masukan yang berharga untuk layanan Anda.',
+      icon: <Star className="h-8 w-8 text-amber-400" />
     }
   ];
 
@@ -60,11 +71,11 @@ const Features = () => {
             </p>
           </div>
           
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {features.map((feature, index) => (
               <Card key={index} className="bg-white/10 backdrop-blur-sm border border-white/20 text-white hover:bg-white/20 transition-all duration-300">
                 <CardHeader>
-                  <div className="text-3xl mb-3">{feature.icon}</div>
+                  <div className="mb-3">{feature.icon}</div>
                   <CardTitle className="text-xl text-amber-400">{feature.title}</CardTitle>
                 </CardHeader>
                 <CardContent>
