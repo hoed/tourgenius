@@ -1,19 +1,18 @@
 
 import React, { useState } from 'react';
+import Navbar from '@/components/landing/navbar';
+import Footer from '@/components/landing/footer';
+import { Mail, Phone, MapPin } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
-import Navbar from '@/components/landing/navbar';
-import Footer from '@/components/landing/footer';
-import { useToast } from '@/components/ui/use-toast';
+import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
-import { Loader2 } from 'lucide-react';
 
 const ContactUs = () => {
-  const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState({
-    fullName: '',
+    name: '',
     email: '',
     subject: '',
     message: ''
@@ -26,121 +25,175 @@ const ContactUs = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    if (!formData.fullName || !formData.email || !formData.subject || !formData.message) {
-      toast({
-        title: "Formulir tidak lengkap",
-        description: "Harap isi semua kolom yang diperlukan",
-        variant: "destructive"
-      });
-      return;
-    }
-
     setIsSubmitting(true);
 
     try {
-      const { error } = await supabase.functions.invoke('send-contact-form', {
-        body: {
-          name: formData.fullName,
-          email: formData.email,
-          subject: formData.subject,
-          message: formData.message
+      const { name, email, subject, message } = formData;
+      
+      if (!name || !email || !subject || !message) {
+        toast.error('Mohon isi semua bidang yang diperlukan');
+        setIsSubmitting(false);
+        return;
+      }
+
+      const response = await fetch(
+        'https://uhksouubmomfegsoeltl.supabase.co/functions/v1/send-contact-form',
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(formData),
         }
-      });
+      );
 
-      if (error) throw error;
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Terjadi kesalahan saat mengirim formulir');
+      }
 
-      toast({
-        title: "Pesan Terkirim!",
-        description: "Terima kasih telah menghubungi kami. Kami akan segera membalas.",
-        variant: "default"
-      });
-
-      // Reset form
+      toast.success('Pesan Anda telah berhasil dikirim!');
       setFormData({
-        fullName: '',
+        name: '',
         email: '',
         subject: '',
         message: ''
       });
     } catch (error) {
       console.error('Error submitting form:', error);
-      toast({
-        title: "Gagal mengirim pesan",
-        description: "Terjadi kesalahan saat mengirim pesan Anda. Silakan coba lagi nanti.",
-        variant: "destructive"
-      });
+      toast.error(error instanceof Error ? error.message : 'Terjadi kesalahan saat mengirim formulir');
     } finally {
       setIsSubmitting(false);
     }
   };
 
   return (
-    <div className="flex flex-col min-h-screen bg-gray-100">
+    <div className="flex flex-col min-h-screen bg-gradient-to-b from-blue-950 via-indigo-900 to-purple-950">
       <Navbar />
-      <main className="flex-1 p-6 pt-20">
-        <div className="container mx-auto">
-          <h1 className="text-4xl font-bold text-amber-700 mb-8 text-center">Hubungi Kami</h1>
-          <p className="text-gray-600 mb-12 text-center max-w-2xl mx-auto">
-            Tim dukungan kami yang berdedikasi siap membantu Anda dengan pertanyaan, masalah teknis, atau umpan balik. Hubungi kami untuk memastikan perencanaan tur Anda berjalan lancar.
-          </p>
-          <div className="max-w-lg mx-auto bg-white p-6 rounded-xl border border-gray-200 shadow-md">
-            <form className="space-y-4" onSubmit={handleSubmit}>
-              <div>
-                <label className="text-gray-700 font-medium">Nama Lengkap</label>
-                <Input 
-                  name="fullName"
-                  value={formData.fullName}
-                  onChange={handleChange}
-                  placeholder="Masukkan nama lengkap Anda" 
-                  className="bg-gray-50 border-gray-200" 
-                />
+      <main className="flex-1 p-6 pt-28">
+        <div className="container mx-auto max-w-6xl">
+          <div className="text-center mb-16">
+            <h1 className="text-4xl md:text-5xl font-bold text-white mb-6">Hubungi Kami</h1>
+            <p className="text-xl text-blue-100 max-w-3xl mx-auto">
+              Kami siap menjawab pertanyaan Anda tentang TourGenius. Jangan ragu untuk menghubungi kami.
+            </p>
+          </div>
+          
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
+            <div className="bg-white/10 backdrop-blur-sm p-8 rounded-xl border border-white/20">
+              <h2 className="text-2xl font-bold text-amber-400 mb-6">Kirim Pesan</h2>
+              <form onSubmit={handleSubmit}>
+                <div className="space-y-4">
+                  <div>
+                    <label htmlFor="name" className="block text-white mb-2">Nama</label>
+                    <Input 
+                      id="name" 
+                      name="name" 
+                      value={formData.name}
+                      onChange={handleChange}
+                      className="bg-white/10 border-white/20 text-white placeholder:text-white/50"
+                      placeholder="Nama Anda" 
+                    />
+                  </div>
+                  <div>
+                    <label htmlFor="email" className="block text-white mb-2">Email</label>
+                    <Input 
+                      id="email" 
+                      name="email" 
+                      type="email"
+                      value={formData.email}
+                      onChange={handleChange}
+                      className="bg-white/10 border-white/20 text-white placeholder:text-white/50"
+                      placeholder="alamat@email.com" 
+                    />
+                  </div>
+                  <div>
+                    <label htmlFor="subject" className="block text-white mb-2">Subjek</label>
+                    <Input 
+                      id="subject" 
+                      name="subject" 
+                      value={formData.subject}
+                      onChange={handleChange}
+                      className="bg-white/10 border-white/20 text-white placeholder:text-white/50"
+                      placeholder="Subjek pesan Anda" 
+                    />
+                  </div>
+                  <div>
+                    <label htmlFor="message" className="block text-white mb-2">Pesan</label>
+                    <Textarea 
+                      id="message" 
+                      name="message" 
+                      value={formData.message}
+                      onChange={handleChange}
+                      className="bg-white/10 border-white/20 text-white placeholder:text-white/50 min-h-[150px]"
+                      placeholder="Ketik pesan Anda di sini..." 
+                    />
+                  </div>
+                  <Button 
+                    type="submit" 
+                    className="w-full bg-amber-500 hover:bg-amber-600 text-gray-900 font-medium"
+                    disabled={isSubmitting}
+                  >
+                    {isSubmitting ? 'Mengirim...' : 'Kirim Pesan'}
+                  </Button>
+                </div>
+              </form>
+            </div>
+            
+            <div>
+              <div className="bg-white/10 backdrop-blur-sm p-8 rounded-xl border border-white/20 mb-6">
+                <h2 className="text-2xl font-bold text-amber-400 mb-6">Informasi Kontak</h2>
+                <div className="space-y-6">
+                  <div className="flex items-start gap-4">
+                    <Mail className="h-6 w-6 text-amber-400 mt-1" />
+                    <div>
+                      <h3 className="text-xl text-white font-medium">Email</h3>
+                      <p className="text-blue-100 mt-1">info@tourgenius.id</p>
+                      <p className="text-blue-100">support@tourgenius.id</p>
+                    </div>
+                  </div>
+                  
+                  <div className="flex items-start gap-4">
+                    <Phone className="h-6 w-6 text-amber-400 mt-1" />
+                    <div>
+                      <h3 className="text-xl text-white font-medium">Telepon</h3>
+                      <p className="text-blue-100 mt-1">+62 812 3456 7890</p>
+                      <p className="text-blue-100">+62 878 9012 3456</p>
+                    </div>
+                  </div>
+                  
+                  <div className="flex items-start gap-4">
+                    <MapPin className="h-6 w-6 text-amber-400 mt-1" />
+                    <div>
+                      <h3 className="text-xl text-white font-medium">Alamat</h3>
+                      <p className="text-blue-100 mt-1">
+                        Jalan Raya Seminyak No. 45<br />
+                        Kuta, Bali 80361<br />
+                        Indonesia
+                      </p>
+                    </div>
+                  </div>
+                </div>
               </div>
-              <div>
-                <label className="text-gray-700 font-medium">Alamat Email</label>
-                <Input 
-                  name="email"
-                  value={formData.email}
-                  onChange={handleChange}
-                  type="email" 
-                  placeholder="Masukkan email Anda" 
-                  className="bg-gray-50 border-gray-200" 
-                />
+              
+              <div className="bg-white/10 backdrop-blur-sm p-8 rounded-xl border border-white/20">
+                <h2 className="text-2xl font-bold text-amber-400 mb-6">Jam Operasional</h2>
+                <div className="space-y-2">
+                  <div className="flex justify-between">
+                    <span className="text-white">Senin - Jumat:</span>
+                    <span className="text-blue-100">09:00 - 17:00 WITA</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-white">Sabtu:</span>
+                    <span className="text-blue-100">09:00 - 15:00 WITA</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-white">Minggu:</span>
+                    <span className="text-blue-100">Tutup</span>
+                  </div>
+                </div>
               </div>
-              <div>
-                <label className="text-gray-700 font-medium">Subjek</label>
-                <Input 
-                  name="subject"
-                  value={formData.subject}
-                  onChange={handleChange}
-                  placeholder="mis., Dukungan Teknis" 
-                  className="bg-gray-50 border-gray-200" 
-                />
-              </div>
-              <div>
-                <label className="text-gray-700 font-medium">Pesan</label>
-                <Textarea 
-                  name="message"
-                  value={formData.message}
-                  onChange={handleChange}
-                  placeholder="Jelaskan pertanyaan atau masalah Anda" 
-                  className="bg-gray-50 border-gray-200" 
-                  rows={5} 
-                />
-              </div>
-              <Button 
-                type="submit" 
-                className="w-full bg-amber-400 text-gray-900 hover:bg-amber-500"
-                disabled={isSubmitting}
-              >
-                {isSubmitting ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Mengirim...
-                  </>
-                ) : "Kirim Pesan"}
-              </Button>
-            </form>
+            </div>
           </div>
         </div>
       </main>

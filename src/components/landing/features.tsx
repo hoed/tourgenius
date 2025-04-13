@@ -1,6 +1,7 @@
+
 import React from 'react';
 import GlassCard from '@/components/ui/glass-card';
-import { Calendar, DollarSign, FileText, Map, Settings, Users } from 'lucide-react';
+import { Calendar, DollarSign, FileText, Map, Settings, Users, Star } from 'lucide-react';
 
 const features = [
   {
@@ -27,6 +28,16 @@ const features = [
     icon: <FileText className="h-10 w-10 text-blue-900" />,
     title: 'Faktur Profesional',
     description: 'Buat faktur bermerek dan terperinci yang dapat dikirim langsung ke klien dengan opsi pembayaran.'
+  },
+  {
+    icon: <Calendar className="h-10 w-10 text-blue-900" />,
+    title: 'Integrasi Google Calendar',
+    description: 'Sinkronkan semua tur dan jadwal Anda dengan Google Calendar untuk kemudahan manajemen dan pengingat otomatis.'
+  },
+  {
+    icon: <Star className="h-10 w-10 text-blue-900" />,
+    title: 'Penilaian Pelanggan',
+    description: 'Kumpulkan dan kelola ulasan pelanggan untuk meningkatkan layanan dan membangun kepercayaan dengan klien prospektif.'
   },
   {
     icon: <Settings className="h-10 w-10 text-blue-900" />,
