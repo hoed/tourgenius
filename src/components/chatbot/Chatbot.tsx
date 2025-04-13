@@ -1,3 +1,4 @@
+
 import React, { useState, useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -95,7 +96,7 @@ const Chatbot: React.FC<ChatbotProps> = ({ position = 'bottom-right' }) => {
           </SheetTrigger>
           <SheetContent
             side="bottom"
-            className="p-0 h-[50vh] sm:h-[60vh] md:h-[70vh] rounded-t-2xl flex flex-col overflow-hidden bg-gray-50 border-t border-blue-200 shadow-lg"
+            className="p-0 h-[50vh] sm:h-[60vh] md:h-[70vh] rounded-t-2xl flex flex-col overflow-hidden bg-gray-50 border-t border-blue-200 shadow-lg animate-in slide-in-from-bottom duration-300"
           >
             <SheetHeader className="bg-gradient-to-r from-blue-900 to-purple-900 text-white py-3 px-4 sm:px-6 flex flex-row justify-between items-center">
               <div className="flex items-center gap-3">
@@ -179,7 +180,7 @@ const Chatbot: React.FC<ChatbotProps> = ({ position = 'bottom-right' }) => {
   return (
     <div className={`fixed ${positionClasses} z-50 transition-all duration-300 ease-in-out`}>
       {isOpen ? (
-        <Card className="w-[320px] sm:w-[360px] lg:w-[400px] shadow-xl border border-blue-200 animate-in slide-in-from-bottom-10 duration-300 bg-white">
+        <Card className="w-[320px] sm:w-[360px] lg:w-[400px] shadow-xl border border-blue-200 animate-in zoom-in-95 slide-in-from-bottom-5 duration-300 bg-white">
           <CardHeader className="bg-gradient-to-r from-blue-900 to-purple-900 text-white py-3 px-4 sm:px-5 flex flex-row justify-between items-center">
             <div className="flex items-center gap-3">
               <Avatar className="h-9 w-9 bg-blue-600 transform hover:scale-105 transition-transform duration-200">
@@ -259,7 +260,7 @@ const Chatbot: React.FC<ChatbotProps> = ({ position = 'bottom-right' }) => {
       ) : (
         <Button
           onClick={toggleChat}
-          className="h-12 w-12 sm:h-14 sm:w-14 rounded-full shadow-xl bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 transition-all duration-300 p-0 flex items-center justify-center group relative overflow-hidden"
+          className="h-12 w-12 sm:h-14 sm:w-14 rounded-full shadow-xl bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 transition-all duration-300 p-0 flex items-center justify-center group relative overflow-hidden animate-in zoom-in-95 duration-300"
           aria-label="Open chatbot"
         >
           <MessageCircle className="h-6 w-6 text-white group-hover:scale-110 transition-transform duration-200" />

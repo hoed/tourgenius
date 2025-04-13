@@ -2,29 +2,21 @@ import React from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
-import { Button } from '@/components/ui/button';
-import { ArrowLeft, Compass, Users, Calendar, Receipt, Map, FileText, Settings, HelpCircle } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Compass, Users, Calendar, Receipt, Map, FileText, Settings, HelpCircle } from 'lucide-react';
+import DashboardLayout from '@/components/dashboard/layout';
 
 const Manual: React.FC = () => {
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100">
-      <div className="container mx-auto px-4 py-6 sm:py-8 lg:py-12">
+    <DashboardLayout>
+      <div className="space-y-6 max-w-7xl mx-auto">
         {/* Header */}
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 sm:mb-8 gap-4">
+        <div className="mb-6 sm:mb-8">
           <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-800">
             Manual Pengguna
           </h1>
-          <Button
-            asChild
-            variant="outline"
-            className="flex items-center gap-2 border-gray-300 hover:bg-gray-100 transition-colors"
-          >
-            <Link to="/dashboard">
-              <ArrowLeft className="h-4 w-4" />
-              Kembali ke Dashboard
-            </Link>
-          </Button>
+          <p className="text-gray-600 mt-2">
+            Panduan lengkap untuk menggunakan platform TourGenius
+          </p>
         </div>
 
         {/* Tabs */}
@@ -440,7 +432,7 @@ const Manual: React.FC = () => {
           </div>
         </div>
       </div>
-    </div>
+    </DashboardLayout>
   );
 };
 

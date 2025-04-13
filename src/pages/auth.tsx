@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate, Link, useSearchParams } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
@@ -84,13 +85,36 @@ const Auth: React.FC = () => {
   return (
     <div className="min-h-screen bg-blue-950 flex flex-col">
       <Toaster position="top-center" richColors />
-      <header className="p-6 border-b border-blue-400/20">
+      
+      {/* Enhanced Navigation Bar */}
+      <header className="p-4 sm:p-6 border-b border-blue-400/20">
         <div className="container mx-auto flex items-center justify-between">
           <Link to="/" className="flex items-center space-x-2">
-            <span className="text-2xl font-bold bg-gradient-to-r from-blue-300 via-purple-300 to-cyan-300 bg-clip-text text-transparent">
+            <span className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-blue-300 via-purple-300 to-cyan-300 bg-clip-text text-transparent">
               TourGenius
             </span>
           </Link>
+          
+          <nav className="hidden md:flex items-center space-x-6">
+            <Link to="/features" className="text-blue-200 hover:text-white transition-colors duration-200">
+              Features
+            </Link>
+            <Link to="/pricing" className="text-blue-200 hover:text-white transition-colors duration-200">
+              Pricing
+            </Link>
+            <Link to="/testimonials" className="text-blue-200 hover:text-white transition-colors duration-200">
+              Testimonials
+            </Link>
+            <Link to="/contact-us" className="text-blue-200 hover:text-white transition-colors duration-200">
+              Contact
+            </Link>
+          </nav>
+          
+          <div className="flex items-center space-x-3">
+            <Button asChild variant="outline" className="border-blue-400/30 text-blue-200 hover:text-white hover:bg-blue-800/30">
+              <Link to="/">Home</Link>
+            </Button>
+          </div>
         </div>
       </header>
 

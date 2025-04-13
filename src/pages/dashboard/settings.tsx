@@ -11,7 +11,7 @@ import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import GlassCard from '@/components/ui/glass-card';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
-import { UserCircle, Bell, Shield, LogOut } from 'lucide-react';
+import { UserCircle, Bell, Shield, LogOut, LockKeyhole } from 'lucide-react';
 
 const SettingsPage = () => {
   const navigate = useNavigate();
@@ -20,11 +20,14 @@ const SettingsPage = () => {
   const [settings, setSettings] = useState({
     name: '',
     email: '',
+    newPassword: '',
+    confirmPassword: '',
     emailNotifications: true,
     marketingEmails: false,
     darkMode: true,
     highContrast: false
   });
+  const [passwordError, setPasswordError] = useState('');
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -69,6 +72,34 @@ const SettingsPage = () => {
     toast.success('Settings saved successfully!');
   };
 
+  const handlePasswordChange = async () => {
+    if (settings.newPassword !== settings.confirmPassword) {
+      setPasswordError("Passwords don't match");
+      return;
+    }
+    
+    if (settings.newPassword.length < 6) {
+      setPasswordError("Password must be at least 6 characters");
+      return;
+    }
+    
+    setPasswordError('');
+    
+    try {
+      const { error } = await supabase.auth.updateUser({
+        password: settings.newPassword
+      });
+      
+      if (error) throw error;
+      
+      toast.success('Password updated successfully!');
+      setSettings({...settings, newPassword: '', confirmPassword: ''});
+    } catch (error: any) {
+      console.error('Error updating password:', error);
+      toast.error(error.message || 'Failed to update password');
+    }
+  };
+
   if (loading) {
     return (
       <DashboardLayout>
@@ -95,6 +126,10 @@ const SettingsPage = () => {
               <UserCircle className="h-4 w-4 mr-2" />
               Account
             </TabsTrigger>
+            <TabsTrigger value="security" className="data-[state=active]:bg-batik-gold/20">
+              <LockKeyhole className="h-4 w-4 mr-2" />
+              Security
+            </TabsTrigger>
             <TabsTrigger value="notifications" className="data-[state=active]:bg-batik-gold/20">
               <Bell className="h-4 w-4 mr-2" />
               Notifications
@@ -117,11 +152,23 @@ const SettingsPage = () => {
                   <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                     <div className="space-y-2">
                       <Label htmlFor="name">Name</Label>
-                      <Input id="name" value={settings.name} onChange={(e) => setSettings({...settings, name: e.target.value})} className="bg-batik-dark/60 border-white/10" />
+                      <Input 
+                        id="name" 
+                        value={settings.name} 
+                        onChange={(e) => setSettings({...settings, name: e.target.value})} 
+                        className="bg-batik-dark/60 border-white/10" 
+                      />
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="email">Email</Label>
-                      <Input id="email" value={settings.email} readOnly className="bg-batik-dark/60 border-white/10" />
+                      <Input 
+                        id="email" 
+                        value={settings.email} 
+                        readOnly 
+                        disabled
+                        className="bg-batik-dark/40 border-white/10 text-gray-400 cursor-not-allowed" 
+                      />
+                      <p className="text-xs text-gray-400 mt-1">Email cannot be changed</p>
                     </div>
                   </div>
                   <Button onClick={handleSaveSettings} className="bg-batik-gold text-batik-dark hover:bg-batik-gold/90">
@@ -146,6 +193,50 @@ const SettingsPage = () => {
                   <Button variant="destructive" size="sm" onClick={handleLogout}>
                     <LogOut className="h-4 w-4 mr-2" />
                     Log Out
+                  </Button>
+                </div>
+              </div>
+            </GlassCard>
+          </TabsContent>
+
+          <TabsContent value="security">
+            <GlassCard className="bg-batik-dark/40 border border-white/5">
+              <div className="space-y-6 p-6">
+                <div>
+                  <h3 className="text-lg font-medium text-white">Password</h3>
+                  <p className="text-sm text-muted-foreground">Update your password</p>
+                </div>
+                <Separator className="bg-white/10" />
+                <div className="space-y-4">
+                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                    <div className="space-y-2">
+                      <Label htmlFor="new-password">New Password</Label>
+                      <Input 
+                        id="new-password" 
+                        type="password"
+                        value={settings.newPassword} 
+                        onChange={(e) => setSettings({...settings, newPassword: e.target.value})} 
+                        className="bg-batik-dark/60 border-white/10" 
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="confirm-password">Confirm Password</Label>
+                      <Input 
+                        id="confirm-password" 
+                        type="password"
+                        value={settings.confirmPassword} 
+                        onChange={(e) => setSettings({...settings, confirmPassword: e.target.value})} 
+                        className="bg-batik-dark/60 border-white/10" 
+                      />
+                    </div>
+                  </div>
+                  {passwordError && <p className="text-sm text-red-400">{passwordError}</p>}
+                  <Button 
+                    onClick={handlePasswordChange} 
+                    disabled={!settings.newPassword || !settings.confirmPassword}
+                    className="bg-batik-gold text-batik-dark hover:bg-batik-gold/90"
+                  >
+                    Update Password
                   </Button>
                 </div>
               </div>
