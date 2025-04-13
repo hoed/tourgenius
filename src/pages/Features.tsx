@@ -8,23 +8,23 @@ import { Calendar, Star, Users, FileText, Map, DollarSign, Settings, Globe } fro
 const Features = () => {
   const features = [
     { 
-      title: 'Perencanaan Rencana Perjalanan', 
+      title: 'Perencanaan Perjalanan', 
       description: 'Rancang rencana perjalanan tur yang mendetail dan dapat disesuaikan dengan mudah.',
       icon: <Calendar className="h-8 w-8 text-amber-400" />
     },
     { 
       title: 'Pembuatan Faktur', 
-      description: 'Buat faktur profesional dengan rincian biaya otomatis.',
+      description: 'Buat faktur profesional dengan rincian biaya otomatis dan langsung kirim ke klien.',
       icon: <FileText className="h-8 w-8 text-amber-400" />
     },
     { 
       title: 'Kolaborasi Real-Time', 
-      description: 'Bekerja dengan tim Anda secara lancar dalam waktu nyata.',
+      description: 'Bekerja dengan tim Anda secara lancar dalam waktu nyata untuk pembaruan dan perubahan instan.',
       icon: <Users className="h-8 w-8 text-amber-400" />
     },
     { 
       title: 'Manajemen Pelanggan', 
-      description: 'Lacak detail dan preferensi klien secara efisien.',
+      description: 'Lacak detail dan preferensi klien secara efisien untuk pengalaman yang lebih personal.',
       icon: <Users className="h-8 w-8 text-amber-400" />
     },
     {
@@ -51,12 +51,8 @@ const Features = () => {
       title: 'Integrasi Google Calendar',
       description: 'Sinkronkan semua tur dan jadwal Anda dengan Google Calendar untuk memudahkan pengelolaan dan pengingat otomatis.',
       icon: <Calendar className="h-8 w-8 text-amber-400" />
-    },
-    {
-      title: 'Sistem Penilaian Pelanggan',
-      description: 'Kumpulkan dan tampilkan ulasan pelanggan untuk meningkatkan kepercayaan dan mendapatkan masukan yang berharga untuk layanan Anda.',
-      icon: <Star className="h-8 w-8 text-amber-400" />
     }
+
   ];
 
   return (
