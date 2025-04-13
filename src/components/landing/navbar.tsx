@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -36,7 +35,7 @@ const Navbar = () => {
           <Link 
             to="/" 
             className={`font-medium hover:text-primary transition-colors ${
-              isScrolled ? 'text-blue' : ''
+              isScrolled ? 'text-blue-600' : 'text-white'
             }`}
           >
             Home
@@ -44,7 +43,7 @@ const Navbar = () => {
           <Link 
             to="/features" 
             className={`font-medium hover:text-primary transition-colors ${
-              isScrolled ? 'text-blue' : ''
+              isScrolled ? 'text-blue-600' : 'text-white'
             }`}
           >
             Features
@@ -52,7 +51,7 @@ const Navbar = () => {
           <Link 
             to="/testimonials" 
             className={`font-medium hover:text-primary transition-colors ${
-              isScrolled ? 'text-blue' : ''
+              isScrolled ? 'text-blue-600' : 'text-white'
             }`}
           >
             Testimonials
@@ -60,7 +59,7 @@ const Navbar = () => {
           <Link 
             to="/pricing" 
             className={`font-medium hover:text-primary transition-colors ${
-              isScrolled ? 'text-blue' : ''
+              isScrolled ? 'text-blue-600' : 'text-white'
             }`}
           >
             Pricing
@@ -93,7 +92,7 @@ const Navbar = () => {
             <Link
               to="/"
               className={`font-medium hover:text-primary transition-colors ${
-                isScrolled ? 'text-black' : ''
+                isScrolled ? 'text-blue-600' : 'text-white'
               }`}
               onClick={() => setIsMobileMenuOpen(false)}
             >
@@ -102,7 +101,7 @@ const Navbar = () => {
             <Link
               to="/features"
               className={`font-medium hover:text-primary transition-colors ${
-                isScrolled ? 'text-black' : ''
+                isScrolled ? 'text-blue-600' : 'text-white'
               }`}
               onClick={() => setIsMobileMenuOpen(false)}
             >
@@ -111,7 +110,7 @@ const Navbar = () => {
             <Link
               to="/testimonials"
               className={`font-medium hover:text-primary transition-colors ${
-                isScrolled ? 'text-black' : ''
+                isScrolled ? 'text-blue-600' : 'text-white'
               }`}
               onClick={() => setIsMobileMenuOpen(false)}
             >
@@ -120,7 +119,7 @@ const Navbar = () => {
             <Link
               to="/pricing"
               className={`font-medium hover:text-primary transition-colors ${
-                isScrolled ? 'text-black' : ''
+                isScrolled ? 'text-blue-600' : 'text-white'
               }`}
               onClick={() => setIsMobileMenuOpen(false)}
             >
