@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -7,19 +8,19 @@ import Footer from '@/components/landing/footer';
 const HelpCenter = () => {
   const faqCategories = [
     {
-      title: 'Getting Started',
+      title: 'Memulai',
       items: [
-        { question: 'How do I create my first itinerary?', link: '#' },
-        { question: 'What are the steps to set up my team account?', link: '#' },
-        { question: 'How can I customize invoice templates?', link: '#' },
+        { question: 'Bagaimana cara membuat itinerari pertama saya?', link: '#' },
+        { question: 'Apa langkah-langkah untuk mengatur akun tim saya?', link: '#' },
+        { question: 'Bagaimana cara menyesuaikan template faktur?', link: '#' },
       ],
     },
     {
-      title: 'Troubleshooting',
+      title: 'Pemecahan Masalah',
       items: [
-        { question: 'Why can’t I log in to my account?', link: '#' },
-        { question: 'What to do if payment processing fails?', link: '#' },
-        { question: 'How to resolve sync issues in collaboration mode?', link: '#' },
+        { question: 'Mengapa saya tidak bisa masuk ke akun saya?', link: '#' },
+        { question: 'Apa yang harus dilakukan jika pemrosesan pembayaran gagal?', link: '#' },
+        { question: 'Bagaimana mengatasi masalah sinkronisasi dalam mode kolaborasi?', link: '#' },
       ],
     },
   ];
@@ -29,14 +30,14 @@ const HelpCenter = () => {
       <Navbar />
       <main className="flex-1 p-6 pt-20"> {/* Added pt-20 */}
         <div className="container mx-auto">
-          <h1 className="text-4xl font-bold text-amber-700 mb-8 text-center">Help Center</h1>
+          <h1 className="text-4xl font-bold text-amber-700 mb-8 text-center">Pusat Bantuan</h1>
           <p className="text-gray-600 mb-12 text-center max-w-2xl mx-auto">
-            Access comprehensive resources and expert support to maximize your TourGenius experience. Search our knowledge base or reach out for personalized assistance.
+            Akses sumber daya komprehensif dan dukungan ahli untuk memaksimalkan pengalaman TourGenius Anda. Cari basis pengetahuan kami atau hubungi untuk bantuan yang dipersonalisasi.
           </p>
           <div className="max-w-lg mx-auto mb-12">
             <div className="flex gap-2">
-              <Input placeholder="Search help articles (e.g., 'itinerary setup')" className="bg-gray-50 border-gray-200" />
-              <Button className="bg-amber-400 text-gray-900 hover:bg-amber-500">Search</Button>
+              <Input placeholder="Cari artikel bantuan (misalnya, 'pengaturan itinerari')" className="bg-gray-50 border-gray-200" />
+              <Button className="bg-amber-400 text-gray-900 hover:bg-amber-500">Cari</Button>
             </div>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

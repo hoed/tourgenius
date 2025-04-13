@@ -1,3 +1,4 @@
+
 import React from 'react';
 import Navbar from '@/components/landing/navbar';
 import Footer from '@/components/landing/footer';
@@ -8,29 +9,29 @@ const CookiePolicy = () => {
       <Navbar />
       <main className="flex-1 p-6 pt-20"> {/* Added pt-20 */}
         <div className="container mx-auto max-w-3xl">
-          <h1 className="text-4xl font-bold text-amber-700 mb-8 text-center">Cookie Policy</h1>
+          <h1 className="text-4xl font-bold text-amber-700 mb-8 text-center">Kebijakan Cookie</h1>
           <div className="prose text-gray-600">
-            <p className="text-sm italic">Last updated: March 22, 2025</p>
-            <h2 className="text-2xl text-amber-600 mt-6">1. Introduction to Cookies</h2>
+            <p className="text-sm italic">Terakhir diperbarui: 22 Maret 2025</p>
+            <h2 className="text-2xl text-amber-600 mt-6">1. Pengenalan Cookie</h2>
             <p>
-              TourGenius uses cookies—small text files stored on your device—to enhance your experience on our platform. This Cookie Policy explains what cookies we use, why we use them, and how you can manage them.
+              TourGenius menggunakan cookie—file teks kecil yang disimpan di perangkat Anda—untuk meningkatkan pengalaman Anda di platform kami. Kebijakan Cookie ini menjelaskan cookie apa yang kami gunakan, mengapa kami menggunakannya, dan bagaimana Anda dapat mengelolanya.
             </p>
-            <h2 className="text-2xl text-amber-600 mt-6">2. Types of Cookies We Use</h2>
+            <h2 className="text-2xl text-amber-600 mt-6">2. Jenis Cookie yang Kami Gunakan</h2>
             <p>
-              We utilize the following cookies:
+              Kami menggunakan cookie berikut:
               <ul className="list-disc pl-6">
-                <li><strong>Essential Cookies:</strong> Required for core functionality, such as user authentication and session management.</li>
-                <li><strong>Analytics Cookies:</strong> Collect anonymized data to analyze platform usage and improve performance.</li>
-                <li><strong>Marketing Cookies:</strong> Enable personalized content and advertisements (optional, with your consent).</li>
+                <li><strong>Cookie Esensial:</strong> Diperlukan untuk fungsi inti, seperti otentikasi pengguna dan manajemen sesi.</li>
+                <li><strong>Cookie Analitik:</strong> Mengumpulkan data anonim untuk menganalisis penggunaan platform dan meningkatkan kinerja.</li>
+                <li><strong>Cookie Pemasaran:</strong> Memungkinkan konten dan iklan yang dipersonalisasi (opsional, dengan persetujuan Anda).</li>
               </ul>
             </p>
-            <h2 className="text-2xl text-amber-600 mt-6">3. Managing Your Cookie Preferences</h2>
+            <h2 className="text-2xl text-amber-600 mt-6">3. Mengelola Preferensi Cookie Anda</h2>
             <p>
-              You can control cookies through your browser settings, though disabling essential cookies may impair platform functionality. For more control, adjust your preferences in your TourGenius account settings where applicable.
+              Anda dapat mengontrol cookie melalui pengaturan browser Anda, meskipun menonaktifkan cookie esensial dapat mengganggu fungsi platform. Untuk kontrol lebih lanjut, sesuaikan preferensi Anda di pengaturan akun TourGenius Anda jika berlaku.
             </p>
-            <h2 className="text-2xl text-amber-600 mt-6">4. Third-Party Cookies</h2>
+            <h2 className="text-2xl text-amber-600 mt-6">4. Cookie Pihak Ketiga</h2>
             <p>
-              We may integrate third-party services (e.g., analytics providers) that set their own cookies. These are governed by the respective providers’ privacy policies.
+              Kami mungkin mengintegrasikan layanan pihak ketiga (misalnya, penyedia analitik) yang mengatur cookie mereka sendiri. Ini diatur oleh kebijakan privasi masing-masing penyedia.
             </p>
           </div>
         </div>
