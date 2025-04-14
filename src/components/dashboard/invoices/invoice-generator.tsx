@@ -14,9 +14,10 @@ import { Invoice, InvoiceItem } from '@/lib/types';
 
 interface InvoiceGeneratorProps {
   source?: 'manual' | 'itinerary';
+  existingInvoice?: Invoice | null;
 }
 
-const InvoiceGenerator = ({ source = 'manual' }: InvoiceGeneratorProps) => {
+const InvoiceGenerator = ({ source = 'manual', existingInvoice = null }: InvoiceGeneratorProps) => {
   // Basic invoice state
   const [customerName, setCustomerName] = useState('');
   const [customerEmail, setCustomerEmail] = useState('');
@@ -46,6 +47,24 @@ const InvoiceGenerator = ({ source = 'manual' }: InvoiceGeneratorProps) => {
   const [itineraries, setItineraries] = useState<any[]>([]);
   const [selectedItineraryId, setSelectedItineraryId] = useState<string | null>(null);
   const [isLoadingItinerary, setIsLoadingItinerary] = useState(false);
+
+  // Load existing invoice data if provided
+  useEffect(() => {
+    if (existingInvoice) {
+      setCustomerName(existingInvoice.customerName);
+      setCustomerEmail(existingInvoice.customerEmail);
+      setDate(existingInvoice.date);
+      setDueDate(existingInvoice.dueDate);
+      setItems(existingInvoice.items);
+      setSubtotal(existingInvoice.subtotal);
+      setTax(existingInvoice.tax);
+      setTotal(existingInvoice.total);
+      
+      if (existingInvoice.itineraryId) {
+        setSelectedItineraryId(existingInvoice.itineraryId);
+      }
+    }
+  }, [existingInvoice]);
 
   // Fetch itineraries if source is "itinerary"
   useEffect(() => {
@@ -166,7 +185,7 @@ const InvoiceGenerator = ({ source = 'manual' }: InvoiceGeneratorProps) => {
     }
   };
 
-  const handleSave = async (status: 'draft' | 'sent' = 'draft') => {
+  const handleSave = async (status: 'draft' | 'sent' | 'paid' | 'unpaid' = 'draft') => {
     if (!customerName.trim()) {
       toast.error('Please enter customer name');
       return;
@@ -194,7 +213,7 @@ const InvoiceGenerator = ({ source = 'manual' }: InvoiceGeneratorProps) => {
       }
       
       const invoice = {
-        id: uuidv4(),
+        id: existingInvoice?.id || uuidv4(),
         itinerary_id: selectedItineraryId || null,
         customer_name: customerName,
         customer_email: customerEmail,
@@ -206,26 +225,49 @@ const InvoiceGenerator = ({ source = 'manual' }: InvoiceGeneratorProps) => {
         total,
         status,
         user_id: session.session.user.id,
-        created_at: new Date().toISOString(),
         updated_at: new Date().toISOString()
       };
       
-      // Insert to database
-      const { error } = await supabase
-        .from('invoices')
-        .insert(invoice);
+      if (!existingInvoice) {
+        // Add created_at only for new invoices
+        Object.assign(invoice, { created_at: new Date().toISOString() });
+      }
       
-      if (error) throw error;
+      let result;
       
-      toast.success(`Invoice ${status === 'draft' ? 'saved as draft' : 'created and marked as sent'}`);
+      if (existingInvoice) {
+        // Update existing invoice
+        const { error } = await supabase
+          .from('invoices')
+          .update(invoice)
+          .eq('id', invoice.id);
+        
+        if (error) throw error;
+        
+        toast.success(`Invoice updated successfully`);
+        result = { success: true, operation: 'update' };
+      } else {
+        // Insert new invoice
+        const { error } = await supabase
+          .from('invoices')
+          .insert(invoice);
+        
+        if (error) throw error;
+        
+        toast.success(`Invoice ${status === 'draft' ? 'saved as draft' : 'created and marked as sent'}`);
+        result = { success: true, operation: 'insert' };
+      }
       
-      // Reset form after successful save
-      if (status === 'sent') {
+      // Reset form after successful save if it's a new invoice
+      if (!existingInvoice && status === 'sent') {
         resetForm();
       }
+      
+      return result;
     } catch (error) {
       console.error('Error saving invoice:', error);
       toast.error('Failed to save invoice');
+      return { success: false, error };
     } finally {
       setIsSaving(false);
     }
@@ -235,15 +277,19 @@ const InvoiceGenerator = ({ source = 'manual' }: InvoiceGeneratorProps) => {
     setIsSending(true);
     try {
       // First save the invoice as sent
-      await handleSave('sent');
+      const result = await handleSave('sent');
       
-      // Here you would typically integrate with an email service
-      // For now, we'll just simulate sending
-      
-      setTimeout(() => {
-        toast.success(`Invoice sent to ${customerEmail}`);
+      if (result?.success) {
+        // Here you would typically integrate with an email service
+        // For now, we'll just simulate sending
+        
+        setTimeout(() => {
+          toast.success(`Invoice sent to ${customerEmail}`);
+          setIsSending(false);
+        }, 1500);
+      } else {
         setIsSending(false);
-      }, 1500);
+      }
       
       // In a real implementation, you'd call your email sending function or API
       // Example: await sendInvoiceEmail(invoice, customerEmail);

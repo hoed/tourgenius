@@ -10,7 +10,7 @@ import { PlusCircle, FileText, FileDown, FileEdit, ArrowLeft } from 'lucide-reac
 import { useLocation, useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
-import { Invoice } from '@/lib/types';
+import { Invoice, InvoiceItem } from '@/lib/types';
 
 const InvoicesPage = () => {
   const [showGenerator, setShowGenerator] = useState(false);
@@ -45,7 +45,7 @@ const InvoicesPage = () => {
       
       if (data) {
         // Parse items if needed
-        let parsedItems = [];
+        let parsedItems: InvoiceItem[] = [];
         if (typeof data.items === 'string') {
           try {
             parsedItems = JSON.parse(data.items);
@@ -53,9 +53,14 @@ const InvoicesPage = () => {
             console.error('Error parsing invoice items:', e);
             parsedItems = [];
           }
-        } else {
-          parsedItems = data.items;
+        } else if (Array.isArray(data.items)) {
+          parsedItems = data.items as InvoiceItem[];
         }
+        
+        // Ensure status is one of the allowed values
+        const validStatus = ['draft', 'sent', 'paid', 'unpaid'].includes(data.status) 
+          ? data.status as 'draft' | 'sent' | 'paid' | 'unpaid'
+          : 'draft';
         
         const invoice: Invoice = {
           id: data.id,
@@ -68,7 +73,7 @@ const InvoicesPage = () => {
           subtotal: data.subtotal,
           tax: data.tax,
           total: data.total,
-          status: data.status,
+          status: validStatus,
           created_at: data.created_at,
           updated_at: data.updated_at,
           user_id: data.user_id
