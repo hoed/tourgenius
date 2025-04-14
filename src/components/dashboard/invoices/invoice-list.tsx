@@ -4,85 +4,97 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Badge } from '@/components/ui/badge';
-import { Eye, Download, FileText, Printer } from 'lucide-react';
+import { Eye, Download, FileText, Printer, Trash2, Edit, AlertTriangle } from 'lucide-react';
 import { formatRupiah } from '@/lib/utils';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { useNavigate } from 'react-router-dom';
 import jsPDF from 'jspdf';
 import { Invoice, InvoiceItem } from '@/lib/types';
+import { 
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle
+} from '@/components/ui/alert-dialog';
 
 const InvoiceList = () => {
   const [invoices, setInvoices] = useState<Invoice[]>([]);
   const [loading, setLoading] = useState(true);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [invoiceToDelete, setInvoiceToDelete] = useState<string | null>(null);
   const navigate = useNavigate();
 
-  useEffect(() => {
-    const fetchInvoices = async () => {
-      try {
-        const { data, error } = await supabase
-          .from('invoices')
-          .select('*')
-          .order('created_at', { ascending: false });
+  const fetchInvoices = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('invoices')
+        .select('*')
+        .order('created_at', { ascending: false });
 
-        if (error) throw error;
-        
-        // Transform the data to match our Invoice type
-        if (data) {
-          const transformedInvoices: Invoice[] = data.map(item => {
-            // Parse items if they're a string, or process them if they're already an array
-            let parsedItems: InvoiceItem[] = [];
-            
-            if (typeof item.items === 'string') {
-              // If items is a JSON string
-              try {
-                parsedItems = JSON.parse(item.items) as InvoiceItem[];
-              } catch (e) {
-                console.error('Error parsing JSON items:', e);
-              }
-            } else if (Array.isArray(item.items)) {
-              // If items is already an array (possibly of Json objects)
-              parsedItems = item.items.map(itemData => {
-                // Safely access object properties with type checking
-                const itemObj = itemData as Record<string, any>;
-                return {
-                  id: typeof itemObj.id === 'string' ? itemObj.id : String(itemObj.id || ''),
-                  description: String(itemObj.description || ''),
-                  quantity: Number(itemObj.quantity || 0),
-                  unitPrice: Number(itemObj.unitPrice || itemObj.unit_price || 0),
-                  total: Number(itemObj.total || 0)
-                };
-              });
-            }
-            
-            return {
-              id: item.id,
-              itineraryId: item.itinerary_id || undefined,
-              customerName: item.customer_name,
-              customerEmail: item.customer_email,
-              date: item.date,
-              dueDate: item.due_date,
-              items: parsedItems,
-              subtotal: item.subtotal,
-              tax: item.tax,
-              total: item.total,
-              status: item.status as 'draft' | 'sent' | 'paid' | 'unpaid',
-              created_at: item.created_at,
-              updated_at: item.updated_at,
-              user_id: item.user_id
-            };
-          });
+      if (error) throw error;
+      
+      // Transform the data to match our Invoice type
+      if (data) {
+        const transformedInvoices: Invoice[] = data.map(item => {
+          // Parse items if they're a string, or process them if they're already an array
+          let parsedItems: InvoiceItem[] = [];
           
-          setInvoices(transformedInvoices);
-        }
-      } catch (error) {
-        console.error('Error fetching invoices:', error);
-        toast.error('Failed to load invoices');
-      } finally {
-        setLoading(false);
+          if (typeof item.items === 'string') {
+            // If items is a JSON string
+            try {
+              parsedItems = JSON.parse(item.items) as InvoiceItem[];
+            } catch (e) {
+              console.error('Error parsing JSON items:', e);
+            }
+          } else if (Array.isArray(item.items)) {
+            // If items is already an array (possibly of Json objects)
+            parsedItems = item.items.map(itemData => {
+              // Safely access object properties with type checking
+              const itemObj = itemData as Record<string, any>;
+              return {
+                id: typeof itemObj.id === 'string' ? itemObj.id : String(itemObj.id || ''),
+                description: String(itemObj.description || ''),
+                quantity: Number(itemObj.quantity || 0),
+                unitPrice: Number(itemObj.unitPrice || itemObj.unit_price || 0),
+                total: Number(itemObj.total || 0)
+              };
+            });
+          }
+          
+          return {
+            id: item.id,
+            itineraryId: item.itinerary_id || undefined,
+            customerName: item.customer_name,
+            customerEmail: item.customer_email,
+            date: item.date,
+            dueDate: item.due_date,
+            items: parsedItems,
+            subtotal: item.subtotal,
+            tax: item.tax,
+            total: item.total,
+            status: item.status as 'draft' | 'sent' | 'paid' | 'unpaid',
+            created_at: item.created_at,
+            updated_at: item.updated_at,
+            user_id: item.user_id
+          };
+        });
+        
+        setInvoices(transformedInvoices);
       }
-    };
+    } catch (error) {
+      console.error('Error fetching invoices:', error);
+      toast.error('Failed to load invoices');
+    } finally {
+      setLoading(false);
+    }
+  };
 
+  useEffect(() => {
     fetchInvoices();
   }, []);
 
@@ -110,8 +122,43 @@ const InvoiceList = () => {
   };
 
   const handleViewInvoice = (invoice: Invoice) => {
-    // Navigate to a detailed view of the invoice or open a modal
+    // Navigate to a detailed view of the invoice
     navigate(`/dashboard/invoices/${invoice.id}`);
+  };
+
+  const handleEditInvoice = (invoice: Invoice) => {
+    // Navigate to edit page with this invoice
+    navigate(`/dashboard/invoices?edit=${invoice.id}`);
+  };
+
+  const confirmDeleteInvoice = (invoiceId: string) => {
+    setInvoiceToDelete(invoiceId);
+    setDeleteDialogOpen(true);
+  };
+
+  const handleDeleteInvoice = async () => {
+    if (!invoiceToDelete) return;
+    
+    try {
+      setLoading(true);
+      const { error } = await supabase
+        .from('invoices')
+        .delete()
+        .eq('id', invoiceToDelete);
+        
+      if (error) throw error;
+      
+      // Update local state after successful deletion
+      setInvoices(invoices.filter(invoice => invoice.id !== invoiceToDelete));
+      toast.success('Invoice deleted successfully');
+    } catch (error) {
+      console.error('Error deleting invoice:', error);
+      toast.error('Failed to delete invoice');
+    } finally {
+      setLoading(false);
+      setDeleteDialogOpen(false);
+      setInvoiceToDelete(null);
+    }
   };
 
   // Quick PDF generator for the invoice list view
@@ -319,6 +366,15 @@ const InvoiceList = () => {
                       size="icon"
                       variant="outline"
                       className="h-9 w-9 text-amber-700 border-amber-200 hover:bg-amber-50"
+                      onClick={() => handleEditInvoice(invoice)}
+                      title="Edit"
+                    >
+                      <Edit className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      size="icon"
+                      variant="outline"
+                      className="h-9 w-9 text-amber-700 border-amber-200 hover:bg-amber-50"
                       onClick={() => handlePrintInvoice(invoice)}
                       title="Print"
                     >
@@ -332,6 +388,15 @@ const InvoiceList = () => {
                       title="Download"
                     >
                       <Download className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      size="icon"
+                      variant="outline"
+                      className="h-9 w-9 text-rose-700 border-rose-200 hover:bg-rose-50"
+                      onClick={() => confirmDeleteInvoice(invoice.id)}
+                      title="Delete"
+                    >
+                      <Trash2 className="h-4 w-4" />
                     </Button>
                   </div>
                 </div>
@@ -351,6 +416,30 @@ const InvoiceList = () => {
           ))}
         </div>
       )}
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-2">
+              <AlertTriangle className="h-5 w-5 text-amber-500" />
+              Confirm Delete
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete this invoice? This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={handleDeleteInvoice}
+              className="bg-rose-600 text-white hover:bg-rose-700"
+            >
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };

@@ -1,8 +1,9 @@
+
 import React, { useState } from 'react';
 import { Transportation } from '@/lib/types';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Plane, Trash2, Plus, Train, Bus, Car, Ship } from 'lucide-react';
+import { Plane, Trash2, Plus, Train, Bus, Car, Ship, Clock } from 'lucide-react';
 import { formatRupiah } from './itinerary-utils';
 import { Card } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -11,8 +12,8 @@ interface DayTransportationProps {
   dayId: string;
   transportation: Transportation | null;
   transportationItems?: Transportation[];
-  onSetTransportation: (dayId: string, description: string, price: number, type?: string) => void;
-  onAddTransportationItem?: (dayId: string, type: string, description: string, price: number) => void;
+  onSetTransportation: (dayId: string, description: string, price: number, type?: string, time?: string) => void;
+  onAddTransportationItem?: (dayId: string, type: string, description: string, price: number, time?: string) => void;
   onRemoveTransportationItem?: (dayId: string, transportationId: string) => void;
 }
 
@@ -34,6 +35,7 @@ const DayTransportation = ({
 }: DayTransportationProps) => {
   const [transportDesc, setTransportDesc] = useState('');
   const [transportPrice, setTransportPrice] = useState('');
+  const [transportTime, setTransportTime] = useState('');
   const [transportType, setTransportType] = useState<'flight' | 'train' | 'bus' | 'car' | 'ferry'>('flight');
   
   // Function to handle adding a transportation item
@@ -43,14 +45,15 @@ const DayTransportation = ({
     }
     
     if (onAddTransportationItem) {
-      onAddTransportationItem(dayId, transportType, transportDesc, Number(transportPrice));
+      onAddTransportationItem(dayId, transportType, transportDesc, Number(transportPrice), transportTime);
     } else {
-      onSetTransportation(dayId, transportDesc, Number(transportPrice), transportType);
+      onSetTransportation(dayId, transportDesc, Number(transportPrice), transportType, transportTime);
     }
     
     // Clear inputs after setting
     setTransportDesc('');
     setTransportPrice('');
+    setTransportTime('');
   };
 
   // Get icon based on transportation type
@@ -72,7 +75,14 @@ const DayTransportation = ({
             <div className="flex items-center gap-2">
               {getTransportIcon(transportation.type)}
               <div>
-                <p className="font-medium text-gray-900">{transportation.description}</p>
+                <div className="flex items-center gap-2">
+                  <p className="font-medium text-gray-900">{transportation.description}</p>
+                  {transportation.time && (
+                    <span className="text-xs bg-amber-100 text-amber-800 px-2 py-1 rounded flex items-center gap-1">
+                      <Clock className="h-3 w-3" /> {transportation.time}
+                    </span>
+                  )}
+                </div>
                 <p className="text-sm text-gray-900">{formatRupiah(transportation.pricePerPerson)} (per day)</p>
               </div>
             </div>
@@ -97,7 +107,14 @@ const DayTransportation = ({
                 <div className="flex items-center gap-2">
                   {getTransportIcon(item.type)}
                   <div>
-                    <p className="font-medium text-gray-900">{item.description}</p>
+                    <div className="flex items-center gap-2">
+                      <p className="font-medium text-gray-900">{item.description}</p>
+                      {item.time && (
+                        <span className="text-xs bg-amber-100 text-amber-800 px-2 py-1 rounded flex items-center gap-1">
+                          <Clock className="h-3 w-3" /> {item.time}
+                        </span>
+                      )}
+                    </div>
                     <p className="text-sm text-gray-900">{formatRupiah(item.pricePerPerson)} (per day)</p>
                   </div>
                 </div>
@@ -119,7 +136,7 @@ const DayTransportation = ({
       
       {/* Add new transportation form */}
       <div className="space-y-3">
-        <div className="grid grid-cols-1 sm:grid-cols-4 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-5 gap-3">
           <Select 
             value={transportType} 
             onValueChange={(value) => setTransportType(value as any)}
@@ -148,6 +165,13 @@ const DayTransportation = ({
             onChange={(e) => setTransportPrice(e.target.value)}
             type="number" 
             placeholder="200000" 
+            className="bg-gray-50 border-gray-200 text-gray-900 focus:ring-amber-400/50" 
+          />
+          <Input 
+            value={transportTime}
+            onChange={(e) => setTransportTime(e.target.value)}
+            type="time" 
+            placeholder="09:00" 
             className="bg-gray-50 border-gray-200 text-gray-900 focus:ring-amber-400/50" 
           />
         </div>
