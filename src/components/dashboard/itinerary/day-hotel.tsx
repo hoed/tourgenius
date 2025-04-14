@@ -3,13 +3,13 @@ import React from 'react';
 import { Hotel } from '@/lib/types';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { HotelIcon, Trash2, Plus } from 'lucide-react';
+import { HotelIcon, Trash2, Plus, Clock } from 'lucide-react';
 import { formatRupiah } from './itinerary-utils';
 
 interface DayHotelProps {
   dayId: string;
   hotel: Hotel | null;
-  onSetHotel: (dayId: string, name: string, location: string, stars: number, price: number, roomAmount: number) => void;
+  onSetHotel: (dayId: string, name: string, location: string, stars: number, price: number, roomAmount: number, time?: string) => void;
 }
 
 const DayHotel = ({ dayId, hotel, onSetHotel }: DayHotelProps) => {
@@ -19,8 +19,9 @@ const DayHotel = ({ dayId, hotel, onSetHotel }: DayHotelProps) => {
     const stars = Number((document.getElementById(`hotel-stars-${dayId}`) as HTMLInputElement).value);
     const price = Number((document.getElementById(`hotel-price-${dayId}`) as HTMLInputElement).value);
     const roomAmount = Number((document.getElementById(`hotel-rooms-${dayId}`) as HTMLInputElement).value);
+    const time = (document.getElementById(`hotel-time-${dayId}`) as HTMLInputElement).value;
     
-    onSetHotel(dayId, name, location, stars, price, roomAmount);
+    onSetHotel(dayId, name, location, stars, price, roomAmount, time);
     
     // Clear inputs after setting
     if (name.trim()) {
@@ -29,6 +30,7 @@ const DayHotel = ({ dayId, hotel, onSetHotel }: DayHotelProps) => {
       (document.getElementById(`hotel-stars-${dayId}`) as HTMLInputElement).value = '';
       (document.getElementById(`hotel-price-${dayId}`) as HTMLInputElement).value = '';
       (document.getElementById(`hotel-rooms-${dayId}`) as HTMLInputElement).value = '';
+      (document.getElementById(`hotel-time-${dayId}`) as HTMLInputElement).value = '';
     }
   };
 
@@ -40,11 +42,17 @@ const DayHotel = ({ dayId, hotel, onSetHotel }: DayHotelProps) => {
       </h3>
       {hotel && (
         <div className="flex items-center p-3 bg-gray-50 rounded-lg border border-gray-200 mb-4 hover:bg-gray-100 transition-all duration-300">
-          <div>
+          <div className="flex-1">
             <p className="font-medium text-gray-900">{hotel.name}</p>
             <p className="text-sm text-gray-600">{hotel.location} - {hotel.stars} Stars</p>
             <p className="text-sm text-gray-700">{hotel.roomAmount || 1} rooms at {formatRupiah(hotel.pricePerNight)}/night</p>
             <p className="text-sm text-gray-900">Total: {formatRupiah(hotel.pricePerNight * (hotel.roomAmount || 1))}</p>
+            {hotel.time && (
+              <p className="text-sm text-gray-600 flex items-center mt-1">
+                <Clock className="h-3 w-3 mr-1" />
+                {hotel.time}
+              </p>
+            )}
           </div>
           <Button 
             variant="ghost" 
@@ -56,12 +64,29 @@ const DayHotel = ({ dayId, hotel, onSetHotel }: DayHotelProps) => {
           </Button>
         </div>
       )}
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-3">
-        <Input id={`hotel-name-${dayId}`} placeholder="Hotel name" className="bg-gray-50 border-gray-200 text-gray-900 focus:ring-amber-400/50" />
-        <Input id={`hotel-location-${dayId}`} placeholder="Location" className="bg-gray-50 border-gray-200 text-gray-900 focus:ring-amber-400/50" />
-        <Input id={`hotel-stars-${dayId}`} type="number" min="1" max="5" placeholder="3" className="bg-gray-50 border-gray-200 text-gray-900 focus:ring-amber-400/50" />
-        <Input id={`hotel-price-${dayId}`} type="number" placeholder="500000" className="bg-gray-50 border-gray-200 text-gray-900 focus:ring-amber-400/50" />
-        <Input id={`hotel-rooms-${dayId}`} type="number" min="1" placeholder="Rooms" className="bg-gray-50 border-gray-200 text-gray-900 focus:ring-amber-400/50" />
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-6 gap-3">
+        <div className="md:col-span-2">
+          <Input id={`hotel-name-${dayId}`} placeholder="Hotel name" className="bg-gray-50 border-gray-200 text-gray-900 focus:ring-amber-400/50" />
+        </div>
+        <div className="md:col-span-1">
+          <Input id={`hotel-location-${dayId}`} placeholder="Location" className="bg-gray-50 border-gray-200 text-gray-900 focus:ring-amber-400/50" />
+        </div>
+        <div className="md:col-span-1">
+          <Input id={`hotel-stars-${dayId}`} type="number" min="1" max="5" placeholder="3" className="bg-gray-50 border-gray-200 text-gray-900 focus:ring-amber-400/50" />
+        </div>
+        <div className="md:col-span-1">
+          <Input id={`hotel-price-${dayId}`} type="number" placeholder="500000" className="bg-gray-50 border-gray-200 text-gray-900 focus:ring-amber-400/50" />
+        </div>
+        <div className="md:col-span-1">
+          <Input id={`hotel-rooms-${dayId}`} type="number" min="1" placeholder="Rooms" className="bg-gray-50 border-gray-200 text-gray-900 focus:ring-amber-400/50" />
+        </div>
+      </div>
+      <div className="mt-3">
+        <Input 
+          id={`hotel-time-${dayId}`} 
+          placeholder="Check-in time (e.g. 14:00)" 
+          className="bg-gray-50 border-gray-200 text-gray-900 focus:ring-amber-400/50 w-full sm:w-1/3" 
+        />
       </div>
       <Button 
         onClick={handleSetHotel}

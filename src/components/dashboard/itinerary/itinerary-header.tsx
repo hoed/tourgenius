@@ -1,10 +1,12 @@
-import React, { useState } from 'react';
+
+import React from 'react';
 import { Button } from '@/components/ui/button';
-import { CalendarIcon, Save } from 'lucide-react';
-import { saveToGoogleCalendar, saveItineraryToSupabase } from './itinerary-utils'; // Verify this path
-import { TourItinerary } from '@/lib/types';
 import { useNavigate } from 'react-router-dom';
+import { TourItinerary } from '@/lib/types';
+import { saveItineraryToSupabase, saveToGoogleCalendar } from './itinerary-utils';
+import { exportItineraryToPdf } from '@/utils/pdf-exporter';
 import { toast } from 'sonner';
+import { Calendar, Download, FilePlus, Save } from 'lucide-react';
 
 interface ItineraryHeaderProps {
   itinerary: TourItinerary;
@@ -13,82 +15,88 @@ interface ItineraryHeaderProps {
   setIsSaving: (saving: boolean) => void;
 }
 
-const ItineraryHeader = ({ itinerary, selectedDate, isSaving, setIsSaving }: ItineraryHeaderProps) => {
+const ItineraryHeader: React.FC<ItineraryHeaderProps> = ({
+  itinerary,
+  selectedDate,
+  isSaving,
+  setIsSaving
+}) => {
   const navigate = useNavigate();
-  const [language, setLanguage] = useState<'id' | 'en'>(
-    localStorage.getItem('language') as 'id' | 'en' || 'en'
-  );
-
-  const translations = {
-    en: {
-      title: 'Tour Itinerary Builder',
-      subtitle: 'Craft your perfect journey with elegance',
-      googleCalendar: 'Google Calendar',
-      save: 'Save',
-      saving: 'Saving...',
-      saveSuccess: 'Itinerary saved successfully!',
-      saveError: 'Failed to save itinerary. Please try again.',
-      validationError: 'Please fill in all required fields (name, number of people, start date).'
-    },
-    id: {
-      title: 'Pembuat Rencana Perjalanan',
-      subtitle: 'Rancang perjalanan sempurna Anda dengan elegan',
-      googleCalendar: 'Google Calendar',
-      save: 'Simpan',
-      saving: 'Menyimpan...',
-      saveSuccess: 'Rencana perjalanan berhasil disimpan!',
-      saveError: 'Gagal menyimpan rencana perjalanan. Silakan coba lagi.',
-      validationError: 'Harap isi semua bidang yang diperlukan (nama, jumlah orang, tanggal mulai).'
-    }
-  };
-
-  const t = translations[language];
 
   const handleSave = async () => {
-    if (!itinerary.name.trim() || itinerary.numberOfPeople <= 0 || !selectedDate) {
-      toast.error(t.validationError);
-      return;
-    }
-
+    setIsSaving(true);
     try {
-      setIsSaving(true);
       await saveItineraryToSupabase(itinerary, selectedDate, navigate);
-      toast.success(t.saveSuccess);
-    } catch (error) {
-      console.error('Error in handleSave:', error);
-      toast.error(`${t.saveError} Details: ${error instanceof Error ? error.message : 'Unknown error'}`);
     } finally {
       setIsSaving(false);
     }
   };
 
-  const handleGoogleCalendar = () => {
+  const handleExportToCalendar = () => {
     saveToGoogleCalendar(itinerary);
   };
 
+  const handleExportToPdf = () => {
+    try {
+      exportItineraryToPdf(itinerary);
+      toast.success('Itinerary exported to PDF successfully');
+    } catch (error) {
+      console.error('Error exporting to PDF:', error);
+      toast.error('Failed to export itinerary to PDF');
+    }
+  };
+
   return (
-    <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-gray-100 p-6 rounded-xl border border-gray-200 shadow-md">
+    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-gradient-to-r from-amber-50 to-orange-50 p-4 sm:p-6 rounded-lg border border-amber-100 shadow-sm">
       <div>
-        <h1 className="text-3xl font-bold bg-gradient-to-r from-amber-400 via-yellow-300 to-amber-400 bg-clip-text text-transparent animate-gradient">
-          {t.title}
+        <h1 className="text-2xl sm:text-3xl font-bold text-amber-800">
+          {itinerary.id ? 'Edit Itinerary' : 'Create New Itinerary'}
         </h1>
-        <p className="text-gray-600 mt-1">{t.subtitle}</p>
+        <p className="text-amber-700 mt-1">
+          Plan your perfect travel experience
+        </p>
       </div>
-      <div className="flex gap-3">
-        <Button 
-          onClick={handleGoogleCalendar}
-          className="bg-gradient-to-r from-emerald-400 to-teal-500 hover:from-emerald-500 hover:to-teal-600 text-black transition-all duration-300 hover:scale-105 shadow-md"
+      
+      <div className="flex flex-wrap gap-3">
+        <Button
+          variant="outline" 
+          className="text-amber-600 border-amber-300 hover:bg-amber-50"
+          onClick={() => navigate('/dashboard')}
         >
-          <CalendarIcon className="h-4 w-4 mr-2" />
-          {t.googleCalendar}
+          Cancel
         </Button>
-        <Button 
+        
+        <Button
+          variant="outline"
+          className="bg-white border-amber-300 text-amber-600 hover:bg-amber-50"
+          onClick={handleExportToCalendar}
+        >
+          <Calendar className="mr-2 h-4 w-4" />
+          Google Calendar
+        </Button>
+        
+        <Button
+          variant="outline"
+          className="bg-white border-amber-300 text-amber-600 hover:bg-amber-50"
+          onClick={handleExportToPdf}
+        >
+          <Download className="mr-2 h-4 w-4" />
+          Export PDF
+        </Button>
+
+        <Button
           onClick={handleSave}
           disabled={isSaving}
-          className="bg-gradient-to-r from-amber-400 to-orange-500 hover:from-amber-500 hover:to-orange-600 text-black transition-all duration-300 hover:scale-105 shadow-md"
+          className="bg-gradient-to-r from-amber-500 to-orange-500 text-white hover:from-amber-600 hover:to-orange-600"
         >
-          <Save className="h-4 w-4 mr-2" />
-          {isSaving ? t.saving : t.save}
+          {isSaving ? (
+            <>Saving...</>
+          ) : (
+            <>
+              <Save className="mr-2 h-4 w-4" />
+              {itinerary.id ? 'Update Itinerary' : 'Save Itinerary'}
+            </>
+          )}
         </Button>
       </div>
     </div>

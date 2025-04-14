@@ -13,13 +13,13 @@ import DayTransportation from './day-transportation';
 interface DayItineraryProps {
   day: DayItinerary;
   onRemoveDay: (dayId: string) => void;
-  onAddDestination: (dayId: string, name: string, price: number) => void;
+  onAddDestination: (dayId: string, name: string, price: number, time?: string) => void;
   onRemoveDestination: (dayId: string, destinationId: string) => void;
-  onSetHotel: (dayId: string, name: string, location: string, stars: number, price: number) => void;
-  onAddMeal: (dayId: string, description: string, type: string, price: number) => void;
+  onSetHotel: (dayId: string, name: string, location: string, stars: number, price: number, time?: string) => void;
+  onAddMeal: (dayId: string, description: string, type: string, price: number, time?: string) => void;
   onRemoveMeal: (dayId: string, mealId: string) => void;
-  onSetTransportation: (dayId: string, description: string, price: number, type?: string) => void;
-  onAddTransportationItem?: (dayId: string, type: string, description: string, price: number) => void;
+  onSetTransportation: (dayId: string, description: string, price: number, type?: string, time?: string) => void;
+  onAddTransportationItem?: (dayId: string, type: string, description: string, price: number, time?: string) => void;
   onRemoveTransportationItem?: (dayId: string, transportationId: string) => void;
   totalDays: number;
 }

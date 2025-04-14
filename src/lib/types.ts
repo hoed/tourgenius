@@ -12,7 +12,7 @@ export interface TourGuide {
   languages: string[];
   pricePerDay: number;
   image?: string;
-  phoneNumber?: string; // Add phone number field
+  phoneNumber?: string;
 }
 
 export interface Destination {
@@ -21,6 +21,7 @@ export interface Destination {
   description: string;
   pricePerPerson: number;
   image?: string;
+  time?: string; // Added time field
 }
 
 export interface Hotel {
@@ -30,14 +31,16 @@ export interface Hotel {
   stars: number;
   pricePerNight: number;
   image?: string;
-  roomAmount?: number; // Number of rooms
+  roomAmount?: number;
+  time?: string; // Added time field for check-in
 }
 
 export interface Transportation {
   id: string;
   type: 'flight' | 'train' | 'bus' | 'car' | 'ferry';
   description: string;
-  pricePerPerson: number; // Price per day
+  pricePerPerson: number;
+  time?: string; // Added time field
 }
 
 export interface Meal {
@@ -45,6 +48,7 @@ export interface Meal {
   type: 'breakfast' | 'lunch' | 'dinner';
   description: string;
   pricePerPerson: number;
+  time?: string; // Added time field
 }
 
 export interface DayItinerary {
@@ -54,7 +58,6 @@ export interface DayItinerary {
   hotel: Hotel | null;
   meals: Meal[];
   transportation: Transportation | null;
-  // Adding support for multiple transportation items
   transportationItems?: Transportation[];
 }
 
@@ -65,12 +68,12 @@ export interface TourItinerary {
   tourGuides: TourGuide[];
   totalPrice: number;
   numberOfPeople: number;
-  start_date?: string; // For compatibility with Supabase structure
-  total_price?: number; // For compatibility with Supabase structure
-  number_of_people?: number; // For compatibility with Supabase structure
-  created_at?: string; // For compatibility with Supabase structure
-  updated_at?: string; // For compatibility with Supabase structure
-  user_id?: string; // For compatibility with Supabase structure
+  start_date?: string;
+  total_price?: number;
+  number_of_people?: number;
+  created_at?: string;
+  updated_at?: string;
+  user_id?: string;
 }
 
 export interface TourPlan {
@@ -82,7 +85,6 @@ export interface TourPlan {
   created_at?: string;
   updated_at?: string;
   user_id?: string;
-  // New fields to align with itinerary structure
   days?: DayItinerary[];
   tourGuides?: TourGuide[];
   numberOfPeople?: number;

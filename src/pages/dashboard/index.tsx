@@ -1,15 +1,17 @@
+
 import React, { useEffect, useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Toaster } from 'sonner';
 import { toast } from 'sonner';
 import DashboardLayout from '@/components/dashboard/layout';
-import { CalendarDays, FileText, Users, Map, ArrowRight, Clock, Plus } from 'lucide-react';
+import { CalendarDays, FileText, Users, Map, ArrowRight, Clock, Plus, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { TourItinerary, TourPlan } from '@/lib/types';
 import { Skeleton } from '@/components/ui/skeleton';
 import TourPlanCard from '@/components/dashboard/tour-plans/tour-plan-card';
+import { Pagination, PaginationContent, PaginationEllipsis, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from '@/components/ui/pagination';
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -19,6 +21,11 @@ const Dashboard = () => {
   const [tourPlans, setTourPlans] = useState<TourPlan[]>([]);
   const [tourPlansLoading, setTourPlansLoading] = useState(true);
   const [tourPlanCount, setTourPlanCount] = useState(0);
+  
+  // Pagination state
+  const [currentItineraryPage, setCurrentItineraryPage] = useState(1);
+  const [currentTourPlanPage, setCurrentTourPlanPage] = useState(1);
+  const itemsPerPage = 4;
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -104,8 +111,7 @@ const Dashboard = () => {
           .from('tour_plans')
           .select('*')
           .eq('user_id', session.user.id)
-          .order('created_at', { ascending: false })
-          .limit(4);
+          .order('created_at', { ascending: false });
           
         if (tourPlansError) {
           console.error('Error fetching tour plans:', tourPlansError);
@@ -143,6 +149,91 @@ const Dashboard = () => {
     }).format(amount);
   };
 
+  // Calculate pagination values for itineraries
+  const totalItineraryPages = Math.ceil(itineraries.length / itemsPerPage);
+  const indexOfLastItinerary = currentItineraryPage * itemsPerPage;
+  const indexOfFirstItinerary = indexOfLastItinerary - itemsPerPage;
+  const currentItineraries = itineraries.slice(indexOfFirstItinerary, indexOfLastItinerary);
+
+  // Calculate pagination values for tour plans
+  const totalTourPlanPages = Math.ceil(tourPlans.length / itemsPerPage);
+  const indexOfLastTourPlan = currentTourPlanPage * itemsPerPage;
+  const indexOfFirstTourPlan = indexOfLastTourPlan - itemsPerPage;
+  const currentTourPlans = tourPlans.slice(indexOfFirstTourPlan, indexOfLastTourPlan);
+
+  const renderPagination = (currentPage: number, totalPages: number, setPage: (page: number) => void) => {
+    if (totalPages <= 1) return null;
+
+    return (
+      <Pagination className="mt-4">
+        <PaginationContent>
+          <PaginationItem>
+            <PaginationPrevious 
+              onClick={() => setPage(Math.max(1, currentPage - 1))}
+              className={currentPage === 1 ? 'cursor-not-allowed opacity-50' : 'cursor-pointer'}
+            />
+          </PaginationItem>
+          
+          {Array.from({ length: Math.min(totalPages, 3) }).map((_, i) => {
+            const pageNumber = i + 1;
+            return (
+              <PaginationItem key={i}>
+                <PaginationLink 
+                  isActive={currentPage === pageNumber} 
+                  onClick={() => setPage(pageNumber)}
+                >
+                  {pageNumber}
+                </PaginationLink>
+              </PaginationItem>
+            );
+          })}
+          
+          {totalPages > 3 && (
+            <>
+              {currentPage > 3 && (
+                <PaginationItem>
+                  <PaginationEllipsis />
+                </PaginationItem>
+              )}
+              
+              {currentPage > 3 && currentPage <= totalPages && (
+                <PaginationItem>
+                  <PaginationLink isActive={true}>
+                    {currentPage}
+                  </PaginationLink>
+                </PaginationItem>
+              )}
+              
+              {currentPage < totalPages - 2 && (
+                <PaginationItem>
+                  <PaginationEllipsis />
+                </PaginationItem>
+              )}
+              
+              {totalPages > 3 && (
+                <PaginationItem>
+                  <PaginationLink 
+                    isActive={currentPage === totalPages} 
+                    onClick={() => setPage(totalPages)}
+                  >
+                    {totalPages}
+                  </PaginationLink>
+                </PaginationItem>
+              )}
+            </>
+          )}
+          
+          <PaginationItem>
+            <PaginationNext 
+              onClick={() => setPage(Math.min(totalPages, currentPage + 1))}
+              className={currentPage === totalPages ? 'cursor-not-allowed opacity-50' : 'cursor-pointer'}
+            />
+          </PaginationItem>
+        </PaginationContent>
+      </Pagination>
+    );
+  };
+
   const renderItineraries = () => {
     if (loading) {
       return Array(4).fill(0).map((_, i) => (
@@ -176,7 +267,7 @@ const Dashboard = () => {
       );
     }
 
-    return itineraries.map(itinerary => (
+    return currentItineraries.map(itinerary => (
       <Card key={itinerary.id} className="shadow-md hover:shadow-lg transition-all duration-300 hover:bg-gray-50">
         <CardHeader className="pb-2">
           <CardTitle className="text-lg font-semibold text-amber-700 truncate">{itinerary.name}</CardTitle>
@@ -238,7 +329,7 @@ const Dashboard = () => {
       );
     }
 
-    return tourPlans.map(tourPlan => (
+    return currentTourPlans.map(tourPlan => (
       <div key={tourPlan.id} className="h-64">
         <TourPlanCard
           tourPlan={tourPlan}
@@ -341,6 +432,8 @@ const Dashboard = () => {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
           {renderTourPlans()}
         </div>
+        
+        {renderPagination(currentTourPlanPage, totalTourPlanPages, setCurrentTourPlanPage)}
 
         <div className="flex justify-between items-center">
           <h2 className="text-2xl font-bold text-gray-800">Your Itineraries</h2>
@@ -352,6 +445,8 @@ const Dashboard = () => {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
           {renderItineraries()}
         </div>
+        
+        {renderPagination(currentItineraryPage, totalItineraryPages, setCurrentItineraryPage)}
       </div>
     </DashboardLayout>
   );

@@ -3,13 +3,13 @@ import React from 'react';
 import { Destination } from '@/lib/types';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { MapPin, Trash2, Plus } from 'lucide-react';
+import { MapPin, Trash2, Plus, Clock } from 'lucide-react';
 import { formatRupiah } from './itinerary-utils';
 
 interface DayDestinationsProps {
   dayId: string;
   destinations: Destination[];
-  onAddDestination: (dayId: string, name: string, price: number) => void;
+  onAddDestination: (dayId: string, name: string, price: number, time?: string) => void;
   onRemoveDestination: (dayId: string, destinationId: string) => void;
 }
 
@@ -22,14 +22,16 @@ const DayDestinations = ({
   const handleAddDestination = () => {
     const name = (document.getElementById(`destination-name-${dayId}`) as HTMLInputElement).value;
     const price = Number((document.getElementById(`destination-price-${dayId}`) as HTMLInputElement).value);
+    const time = (document.getElementById(`destination-time-${dayId}`) as HTMLInputElement).value;
     
     if (!name.trim()) return;
     
-    onAddDestination(dayId, name, price);
+    onAddDestination(dayId, name, price, time);
     
     // Clear inputs after adding
     (document.getElementById(`destination-name-${dayId}`) as HTMLInputElement).value = '';
     (document.getElementById(`destination-price-${dayId}`) as HTMLInputElement).value = '';
+    (document.getElementById(`destination-time-${dayId}`) as HTMLInputElement).value = '';
   };
 
   return (
@@ -41,9 +43,15 @@ const DayDestinations = ({
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
         {destinations.map((destination) => (
           <div key={destination.id} className="flex items-center p-3 bg-gray-50 rounded-lg border border-gray-200 hover:bg-gray-100 transition-all duration-300">
-            <div>
+            <div className="flex-1">
               <p className="font-medium text-gray-900">{destination.name}</p>
               <p className="text-sm text-gray-900">{formatRupiah(destination.pricePerPerson)}/person</p>
+              {destination.time && (
+                <p className="text-sm text-gray-600 flex items-center mt-1">
+                  <Clock className="h-3 w-3 mr-1" />
+                  {destination.time}
+                </p>
+              )}
             </div>
             <Button 
               variant="ghost" 
@@ -56,9 +64,14 @@ const DayDestinations = ({
           </div>
         ))}
       </div>
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
         <Input id={`destination-name-${dayId}`} placeholder="Destination name" className="bg-gray-50 border-gray-200 text-gray-900 focus:ring-amber-400/50" />
         <Input id={`destination-price-${dayId}`} type="number" placeholder="100000" className="bg-gray-50 border-gray-200 text-gray-900 focus:ring-amber-400/50" />
+        <Input 
+          id={`destination-time-${dayId}`} 
+          placeholder="e.g. 09:00 AM" 
+          className="bg-gray-50 border-gray-200 text-gray-900 focus:ring-amber-400/50" 
+        />
       </div>
       <Button 
         onClick={handleAddDestination}
