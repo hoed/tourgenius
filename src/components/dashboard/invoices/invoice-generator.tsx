@@ -109,10 +109,7 @@ const InvoiceGenerator = ({ source = 'manual', existingInvoice = null }: Invoice
         const parsedDays = typeof data.days === 'string' ? JSON.parse(data.days) : data.days;
         const parsedGuides = typeof data.tour_guides === 'string' ? JSON.parse(data.tour_guides) : data.tour_guides;
         
-        // Get customer information if available
-        // This depends on your data structure, you may need to adjust
-        
-        // Generate invoice items based on itinerary
+        // Initialize invoice items array
         const newItems: InvoiceItem[] = [];
         
         // Add main tour package
@@ -120,26 +117,101 @@ const InvoiceGenerator = ({ source = 'manual', existingInvoice = null }: Invoice
           id: uuidv4(),
           description: `Tour Package: ${data.name}`,
           quantity: data.number_of_people || 1,
-          unitPrice: data.total_price / (data.number_of_people || 1),
+          unitPrice: Math.round(data.total_price / (data.number_of_people || 1)),
           total: data.total_price
         });
         
-        // Add guides with phone numbers if available
+        // Add destinations from each day
+        if (parsedDays && parsedDays.length > 0) {
+          parsedDays.forEach((day: any, index: number) => {
+            // Add destinations for this day
+            if (day.destinations && day.destinations.length > 0) {
+              day.destinations.forEach((dest: any) => {
+                newItems.push({
+                  id: uuidv4(),
+                  description: `Day ${index + 1} - Destination: ${dest.name}`,
+                  quantity: data.number_of_people || 1,
+                  unitPrice: dest.pricePerPerson || 0,
+                  total: (dest.pricePerPerson || 0) * (data.number_of_people || 1)
+                });
+              });
+            }
+            
+            // Add hotel for this day
+            if (day.hotel) {
+              const roomsNeeded = day.hotel.roomAmount || Math.ceil((data.number_of_people || 1) / 2);
+              newItems.push({
+                id: uuidv4(),
+                description: `Day ${index + 1} - Accommodation: ${day.hotel.name} (${day.hotel.stars}★)`,
+                quantity: roomsNeeded,
+                unitPrice: day.hotel.pricePerNight || 0,
+                total: (day.hotel.pricePerNight || 0) * roomsNeeded
+              });
+            }
+            
+            // Add meals for this day
+            if (day.meals && day.meals.length > 0) {
+              day.meals.forEach((meal: any) => {
+                const mealType = meal.type.charAt(0).toUpperCase() + meal.type.slice(1);
+                newItems.push({
+                  id: uuidv4(),
+                  description: `Day ${index + 1} - ${mealType}: ${meal.description}`,
+                  quantity: data.number_of_people || 1,
+                  unitPrice: meal.pricePerPerson || 0,
+                  total: (meal.pricePerPerson || 0) * (data.number_of_people || 1)
+                });
+              });
+            }
+            
+            // Add transportation for this day
+            if (day.transportation) {
+              newItems.push({
+                id: uuidv4(),
+                description: `Day ${index + 1} - Transportation: ${day.transportation.type} - ${day.transportation.description}`,
+                quantity: 1, // Transportation is a flat fee
+                unitPrice: day.transportation.pricePerPerson || 0,
+                total: day.transportation.pricePerPerson || 0
+              });
+            }
+            
+            // Add additional transportation items
+            if (day.transportationItems && day.transportationItems.length > 0) {
+              day.transportationItems.forEach((item: any) => {
+                newItems.push({
+                  id: uuidv4(),
+                  description: `Day ${index + 1} - Additional ${item.type}: ${item.description}`,
+                  quantity: 1, // Transportation is a flat fee
+                  unitPrice: item.pricePerPerson || 0,
+                  total: item.pricePerPerson || 0
+                });
+              });
+            }
+          });
+        }
+        
+        // Add tour guides information with phone numbers, but not their price
         if (parsedGuides && parsedGuides.length > 0) {
           parsedGuides.forEach((guide: any) => {
-            const phoneInfo = guide.phoneNumber ? ` (${guide.phoneNumber})` : '';
+            const phoneInfo = guide.phoneNumber ? ` (Contact: ${guide.phoneNumber})` : '';
+            const languages = guide.languages && guide.languages.length > 0 
+              ? ` - Languages: ${guide.languages.join(', ')}` 
+              : '';
+            
             newItems.push({
               id: uuidv4(),
-              description: `Tour Guide: ${guide.name} - ${guide.expertise}${phoneInfo}`,
+              description: `Tour Guide: ${guide.name} - ${guide.expertise}${phoneInfo}${languages}`,
               quantity: 1,
-              unitPrice: guide.pricePerDay,
-              total: guide.pricePerDay
+              unitPrice: 0, // Not showing the price in the invoice
+              total: 0
             });
           });
         }
         
         setItems(newItems);
-        setCustomerName(`Customer for ${data.name}`); // You may want to improve this
+        
+        // Try to get customer name from the itinerary if available
+        const itineraryName = data.name || 'Tour Itinerary';
+        setCustomerName(`Customer for ${itineraryName}`);
         setSelectedItineraryId(itineraryId);
         
         // Calculate totals based on new items

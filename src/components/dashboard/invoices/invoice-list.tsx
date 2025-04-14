@@ -1,17 +1,40 @@
 
 import React, { useState, useEffect } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Skeleton } from '@/components/ui/skeleton';
+import { DataTable } from '@/components/ui/data-table';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Eye, Download, FileText, Printer, Trash2, Edit, AlertTriangle } from 'lucide-react';
-import { formatRupiah } from '@/lib/utils';
-import { supabase } from '@/integrations/supabase/client';
-import { toast } from 'sonner';
-import { useNavigate } from 'react-router-dom';
-import jsPDF from 'jspdf';
-import { Invoice, InvoiceItem } from '@/lib/types';
+import { Button } from '@/components/ui/button';
 import { 
+  FileText, 
+  FilePlus, 
+  FileEdit, 
+  Trash2, 
+  Send, 
+  Check, 
+  Clock, 
+  CircleDollarSign,
+  FileDown,
+  Loader2
+} from 'lucide-react';
+import { format } from 'date-fns';
+import { useNavigate } from 'react-router-dom';
+import { toast } from 'sonner';
+import { supabase } from '@/integrations/supabase/client';
+import { 
+  Table, 
+  TableHeader, 
+  TableRow, 
+  TableHead, 
+  TableBody, 
+  TableCell 
+} from '@/components/ui/table';
+import { 
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger
+} from '@/components/ui/dropdown-menu';
+import {
   AlertDialog,
   AlertDialogAction,
   AlertDialogCancel,
@@ -19,116 +42,82 @@ import {
   AlertDialogDescription,
   AlertDialogFooter,
   AlertDialogHeader,
-  AlertDialogTitle
+  AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
+import { Skeleton } from '@/components/ui/skeleton';
+import { Invoice } from '@/lib/types';
+import { exportInvoiceToPdf } from '@/utils/invoice-pdf-exporter';
 
 const InvoiceList = () => {
   const [invoices, setInvoices] = useState<Invoice[]>([]);
   const [loading, setLoading] = useState(true);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [invoiceToDelete, setInvoiceToDelete] = useState<string | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    fetchInvoices();
+  }, []);
 
   const fetchInvoices = async () => {
     try {
+      setLoading(true);
       const { data, error } = await supabase
         .from('invoices')
         .select('*')
         .order('created_at', { ascending: false });
 
-      if (error) throw error;
-      
-      // Transform the data to match our Invoice type
-      if (data) {
-        const transformedInvoices: Invoice[] = data.map(item => {
-          // Parse items if they're a string, or process them if they're already an array
-          let parsedItems: InvoiceItem[] = [];
-          
-          if (typeof item.items === 'string') {
-            // If items is a JSON string
-            try {
-              parsedItems = JSON.parse(item.items) as InvoiceItem[];
-            } catch (e) {
-              console.error('Error parsing JSON items:', e);
-            }
-          } else if (Array.isArray(item.items)) {
-            // If items is already an array (possibly of Json objects)
-            parsedItems = item.items.map(itemData => {
-              // Safely access object properties with type checking
-              const itemObj = itemData as Record<string, any>;
-              return {
-                id: typeof itemObj.id === 'string' ? itemObj.id : String(itemObj.id || ''),
-                description: String(itemObj.description || ''),
-                quantity: Number(itemObj.quantity || 0),
-                unitPrice: Number(itemObj.unitPrice || itemObj.unit_price || 0),
-                total: Number(itemObj.total || 0)
-              };
-            });
-          }
-          
-          return {
-            id: item.id,
-            itineraryId: item.itinerary_id || undefined,
-            customerName: item.customer_name,
-            customerEmail: item.customer_email,
-            date: item.date,
-            dueDate: item.due_date,
-            items: parsedItems,
-            subtotal: item.subtotal,
-            tax: item.tax,
-            total: item.total,
-            status: item.status as 'draft' | 'sent' | 'paid' | 'unpaid',
-            created_at: item.created_at,
-            updated_at: item.updated_at,
-            user_id: item.user_id
-          };
-        });
-        
-        setInvoices(transformedInvoices);
+      if (error) {
+        throw error;
       }
+
+      // Transform data to match Invoice type
+      const transformedInvoices: Invoice[] = (data || []).map(item => {
+        let parsedItems: any[] = [];
+        
+        // Parse items if needed
+        if (typeof item.items === 'string') {
+          try {
+            parsedItems = JSON.parse(item.items);
+          } catch (e) {
+            console.error('Error parsing invoice items:', e);
+            parsedItems = [];
+          }
+        } else if (Array.isArray(item.items)) {
+          parsedItems = item.items;
+        }
+        
+        // Ensure correct status
+        const validStatus = ['draft', 'sent', 'paid', 'unpaid'].includes(item.status) 
+          ? item.status as 'draft' | 'sent' | 'paid' | 'unpaid'
+          : 'draft';
+          
+        return {
+          id: item.id,
+          itineraryId: item.itinerary_id,
+          customerName: item.customer_name,
+          customerEmail: item.customer_email,
+          date: item.date,
+          dueDate: item.due_date,
+          items: parsedItems,
+          subtotal: item.subtotal,
+          tax: item.tax,
+          total: item.total,
+          status: validStatus,
+          created_at: item.created_at,
+          updated_at: item.updated_at,
+          user_id: item.user_id
+        };
+      });
+
+      setInvoices(transformedInvoices);
     } catch (error) {
       console.error('Error fetching invoices:', error);
       toast.error('Failed to load invoices');
     } finally {
       setLoading(false);
     }
-  };
-
-  useEffect(() => {
-    fetchInvoices();
-  }, []);
-
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'paid':
-        return 'bg-green-100 text-green-800 border-green-200';
-      case 'sent':
-        return 'bg-blue-100 text-blue-800 border-blue-200';
-      case 'unpaid':
-        return 'bg-amber-100 text-amber-800 border-amber-200';
-      case 'draft':
-      default:
-        return 'bg-gray-100 text-gray-800 border-gray-200';
-    }
-  };
-
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric'
-    });
-  };
-
-  const handleViewInvoice = (invoice: Invoice) => {
-    // Navigate to a detailed view of the invoice
-    navigate(`/dashboard/invoices/${invoice.id}`);
-  };
-
-  const handleEditInvoice = (invoice: Invoice) => {
-    // Navigate to edit page with this invoice
-    navigate(`/dashboard/invoices?edit=${invoice.id}`);
   };
 
   const confirmDeleteInvoice = (invoiceId: string) => {
@@ -139,8 +128,9 @@ const InvoiceList = () => {
   const handleDeleteInvoice = async () => {
     if (!invoiceToDelete) return;
     
+    setIsDeleting(true);
+    
     try {
-      setLoading(true);
       const { error } = await supabase
         .from('invoices')
         .delete()
@@ -148,293 +138,215 @@ const InvoiceList = () => {
         
       if (error) throw error;
       
-      // Update local state after successful deletion
-      setInvoices(invoices.filter(invoice => invoice.id !== invoiceToDelete));
+      // Remove from local state
+      setInvoices(prev => prev.filter(inv => inv.id !== invoiceToDelete));
       toast.success('Invoice deleted successfully');
     } catch (error) {
       console.error('Error deleting invoice:', error);
       toast.error('Failed to delete invoice');
     } finally {
-      setLoading(false);
+      setIsDeleting(false);
       setDeleteDialogOpen(false);
       setInvoiceToDelete(null);
     }
   };
 
-  // Quick PDF generator for the invoice list view
-  const generateQuickPDF = (invoice: Invoice) => {
+  const handleEditInvoice = (invoiceId: string) => {
+    navigate(`/dashboard/invoices?edit=${invoiceId}`);
+  };
+  
+  const handleExportToPdf = (invoice: Invoice) => {
     try {
-      const doc = new jsPDF();
-      
-      // Define colors (simplified for quick generation)
-      const amber600 = [217, 119, 6];
-      const gray700 = [55, 65, 81];
-      
-      // Header
-      doc.setFontSize(24);
-      doc.setTextColor(amber600[0], amber600[1], amber600[2]);
-      doc.text('Invoice', 20, 20);
-      doc.setFontSize(12);
-      doc.setTextColor(gray700[0], gray700[1], gray700[2]);
-      doc.text(`#INV-${invoice.id.substring(0, 8)}`, 20, 30);
-      
-      // Customer info
-      doc.text('Bill To:', 20, 45);
-      doc.text(invoice.customerName, 20, 55);
-      doc.text(invoice.customerEmail, 20, 65);
-      
-      // Invoice details
-      doc.text('Invoice Details:', 150, 45, { align: 'right' });
-      doc.text(`Date: ${formatDate(invoice.date)}`, 150, 55, { align: 'right' });
-      doc.text(`Due Date: ${formatDate(invoice.dueDate)}`, 150, 65, { align: 'right' });
-      doc.text(`Status: ${invoice.status}`, 150, 75, { align: 'right' });
-      
-      // Items table header
-      let y = 90;
-      doc.setFontSize(14);
-      doc.text('Items', 20, y);
-      y += 10;
-      
-      doc.setFontSize(10);
-      doc.text('Description', 20, y);
-      doc.text('Qty', 130, y, { align: 'right' });
-      doc.text('Price', 160, y, { align: 'right' });
-      doc.text('Total', 190, y, { align: 'right' });
-      y += 5;
-      
-      doc.setDrawColor(200, 200, 200);
-      doc.line(20, y, 190, y);
-      y += 10;
-      
-      // Items rows (simplified for quick PDF)
-      invoice.items.forEach(item => {
-        if (y > 250) {
-          doc.addPage();
-          y = 30;
-        }
-        
-        const description = item.description.length > 60 
-          ? item.description.substring(0, 57) + '...' 
-          : item.description;
-          
-        doc.text(description, 20, y);
-        doc.text(String(item.quantity), 130, y, { align: 'right' });
-        doc.text(formatRupiah(item.unitPrice), 160, y, { align: 'right' });
-        doc.text(formatRupiah(item.total), 190, y, { align: 'right' });
-        y += 10;
-      });
-      
-      // Totals
-      y += 10;
-      doc.text('Subtotal:', 150, y, { align: 'right' });
-      doc.text(formatRupiah(invoice.subtotal), 190, y, { align: 'right' });
-      y += 10;
-      
-      doc.text('Tax:', 150, y, { align: 'right' });
-      doc.text(formatRupiah(invoice.tax), 190, y, { align: 'right' });
-      y += 10;
-      
-      doc.setFontSize(12);
-      doc.text('Total:', 150, y, { align: 'right' });
-      doc.text(formatRupiah(invoice.total), 190, y, { align: 'right' });
-      
-      // Footer
-      doc.setFontSize(10);
-      doc.text('Thank you for your business!', 105, 280, { align: 'center' });
-      
-      return doc;
+      exportInvoiceToPdf(invoice);
+      toast.success('Invoice exported to PDF');
     } catch (error) {
-      console.error('Error generating PDF:', error);
-      toast.error('Failed to generate PDF');
-      return null;
+      console.error('Error exporting invoice to PDF:', error);
+      toast.error('Failed to export invoice to PDF');
     }
   };
 
-  const handlePrintInvoice = (invoice: Invoice) => {
-    const doc = generateQuickPDF(invoice);
-    if (!doc) return;
-    
-    const printWindow = window.open('', '_blank');
-    if (printWindow) {
-      printWindow.document.write(`
-        <html>
-          <head>
-            <title>Invoice #${invoice.id.substring(0, 8)}</title>
-          </head>
-          <body>
-            <iframe id="pdfFrame" style="width:100%;height:100vh;border:none;"></iframe>
-            <script>
-              const pdfData = "${doc.output('datauristring')}";
-              document.getElementById('pdfFrame').src = pdfData;
-              setTimeout(() => {
-                window.print();
-                window.close();
-              }, 1000);
-            </script>
-          </body>
-        </html>
-      `);
-      printWindow.document.close();
-    } else {
-      toast.error('Failed to open print window. Please allow pop-ups.');
+  const formatCurrency = (amount: number): string => {
+    return new Intl.NumberFormat('id-ID', {
+      style: 'currency',
+      currency: 'IDR',
+      minimumFractionDigits: 0,
+    }).format(amount);
+  };
+
+  const getStatusBadge = (status: string) => {
+    switch (status) {
+      case 'paid':
+        return <Badge className="bg-green-500">Paid</Badge>;
+      case 'sent':
+        return <Badge className="bg-blue-500">Sent</Badge>;
+      case 'unpaid':
+        return <Badge className="bg-amber-500">Unpaid</Badge>;
+      case 'draft':
+      default:
+        return <Badge variant="outline">Draft</Badge>;
     }
   };
 
-  const handleDownloadInvoice = (invoice: Invoice) => {
-    const doc = generateQuickPDF(invoice);
-    if (!doc) return;
-    
-    doc.save(`invoice-${invoice.id.substring(0, 8)}.pdf`);
-    toast.success('Invoice downloaded');
+  const getStatusIcon = (status: string) => {
+    switch (status) {
+      case 'paid':
+        return <Check className="h-4 w-4 text-green-500" />;
+      case 'sent':
+        return <Send className="h-4 w-4 text-blue-500" />;
+      case 'unpaid':
+        return <CircleDollarSign className="h-4 w-4 text-amber-500" />;
+      case 'draft':
+      default:
+        return <Clock className="h-4 w-4 text-gray-500" />;
+    }
   };
+
+  if (loading) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle>Invoices</CardTitle>
+          <CardDescription>Loading your invoices...</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-4">
+            <Skeleton className="h-10 w-full" />
+            {Array.from({ length: 5 }).map((_, i) => (
+              <Skeleton key={i} className="h-16 w-full" />
+            ))}
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
-    <div className="space-y-4">
-      <h2 className="text-2xl font-bold text-amber-700 mb-4">Your Invoices</h2>
-      
-      {loading ? (
-        <div className="space-y-4">
-          {[1, 2, 3].map(i => (
-            <Card key={i} className="border border-gray-200">
-              <CardContent className="p-6">
-                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                  <div className="space-y-2">
-                    <Skeleton className="h-6 w-48" />
-                    <Skeleton className="h-4 w-32" />
-                  </div>
-                  <div className="flex gap-2 mt-4 sm:mt-0">
-                    <Skeleton className="h-10 w-10 rounded-md" />
-                    <Skeleton className="h-10 w-10 rounded-md" />
-                    <Skeleton className="h-10 w-10 rounded-md" />
-                  </div>
-                </div>
-                <div className="flex justify-between mt-6">
-                  <Skeleton className="h-5 w-24" />
-                  <Skeleton className="h-5 w-32" />
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-      ) : invoices.length === 0 ? (
-        <Card className="border border-gray-200">
-          <CardContent className="p-8 text-center">
-            <FileText className="h-12 w-12 mx-auto text-gray-400 mb-4" />
-            <h3 className="text-lg font-medium text-gray-900 mb-2">No Invoices Yet</h3>
-            <p className="text-gray-500 mb-4">You haven't created any invoices yet.</p>
-            <Button 
-              onClick={() => navigate('/dashboard/invoices')}
-              className="bg-amber-400 text-gray-900 hover:bg-amber-500"
+    <div className="space-y-6">
+      <Card>
+        <CardHeader>
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between">
+            <div>
+              <CardTitle>Your Invoices</CardTitle>
+              <CardDescription>Manage your customer invoices</CardDescription>
+            </div>
+            <Button
+              onClick={() => navigate('/dashboard/invoices/new')}
+              className="mt-4 md:mt-0 bg-amber-400 text-gray-900 hover:bg-amber-500"
             >
-              Create Your First Invoice
+              <FilePlus className="mr-2 h-4 w-4" />
+              Create New Invoice
             </Button>
-          </CardContent>
-        </Card>
-      ) : (
-        <div className="space-y-4">
-          {invoices.map((invoice) => (
-            <Card key={invoice.id} className="border border-gray-200 hover:border-amber-300 transition-colors">
-              <CardContent className="p-6">
-                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                  <div>
-                    <h3 className="text-lg font-medium text-gray-900 mb-1">
-                      Invoice #{invoice.id.substring(0, 8)}
-                    </h3>
-                    <div className="flex flex-wrap gap-3 items-center">
-                      <p className="text-sm text-gray-500">
-                        {formatDate(invoice.created_at || '')}
-                      </p>
-                      <Badge className={`${getStatusColor(invoice.status)} capitalize`}>
-                        {invoice.status}
-                      </Badge>
-                      <p className="text-sm text-gray-500">
-                        {invoice.customerName}
-                      </p>
-                    </div>
-                  </div>
-                  <div className="flex gap-2">
-                    <Button
-                      size="icon"
-                      variant="outline"
-                      className="h-9 w-9 text-amber-700 border-amber-200 hover:bg-amber-50"
-                      onClick={() => handleViewInvoice(invoice)}
-                      title="View"
-                    >
-                      <Eye className="h-4 w-4" />
-                    </Button>
-                    <Button
-                      size="icon"
-                      variant="outline"
-                      className="h-9 w-9 text-amber-700 border-amber-200 hover:bg-amber-50"
-                      onClick={() => handleEditInvoice(invoice)}
-                      title="Edit"
-                    >
-                      <Edit className="h-4 w-4" />
-                    </Button>
-                    <Button
-                      size="icon"
-                      variant="outline"
-                      className="h-9 w-9 text-amber-700 border-amber-200 hover:bg-amber-50"
-                      onClick={() => handlePrintInvoice(invoice)}
-                      title="Print"
-                    >
-                      <Printer className="h-4 w-4" />
-                    </Button>
-                    <Button
-                      size="icon"
-                      variant="outline"
-                      className="h-9 w-9 text-amber-700 border-amber-200 hover:bg-amber-50"
-                      onClick={() => handleDownloadInvoice(invoice)}
-                      title="Download"
-                    >
-                      <Download className="h-4 w-4" />
-                    </Button>
-                    <Button
-                      size="icon"
-                      variant="outline"
-                      className="h-9 w-9 text-rose-700 border-rose-200 hover:bg-rose-50"
-                      onClick={() => confirmDeleteInvoice(invoice.id)}
-                      title="Delete"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </div>
-                <div className="flex justify-between mt-4 pt-4 border-t border-gray-100">
-                  <div className="text-sm">
-                    <span className="text-gray-500">Due: </span>
-                    <span className="font-medium text-gray-700">{formatDate(invoice.dueDate)}</span>
-                  </div>
-                  <div className="text-right">
-                    <span className="text-lg font-bold text-amber-700">
-                      {formatRupiah(invoice.total)}
-                    </span>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-      )}
+          </div>
+        </CardHeader>
+        <CardContent>
+          {invoices.length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-12 text-gray-500">
+              <FileText className="h-16 w-16 mb-4 text-gray-400" />
+              <h3 className="text-lg font-medium mb-1">No invoices yet</h3>
+              <p className="text-sm text-gray-400 mb-4">
+                Create your first invoice to get started.
+              </p>
+              <Button
+                onClick={() => navigate('/dashboard/invoices/new')}
+                className="bg-amber-400 text-gray-900 hover:bg-amber-500"
+              >
+                <FilePlus className="mr-2 h-4 w-4" />
+                Create New Invoice
+              </Button>
+            </div>
+          ) : (
+            <div className="rounded-md border">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Invoice</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead>Customer</TableHead>
+                    <TableHead>Date</TableHead>
+                    <TableHead>Due Date</TableHead>
+                    <TableHead className="text-right">Amount</TableHead>
+                    <TableHead className="text-right">Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {invoices.map(invoice => (
+                    <TableRow key={invoice.id}>
+                      <TableCell className="font-medium">
+                        #{invoice.id.substring(0, 8)}
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-2">
+                          {getStatusIcon(invoice.status)}
+                          {getStatusBadge(invoice.status)}
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex flex-col">
+                          <span>{invoice.customerName}</span>
+                          <span className="text-xs text-gray-500">{invoice.customerEmail}</span>
+                        </div>
+                      </TableCell>
+                      <TableCell>{format(new Date(invoice.date), 'MMM d, yyyy')}</TableCell>
+                      <TableCell>{format(new Date(invoice.dueDate), 'MMM d, yyyy')}</TableCell>
+                      <TableCell className="text-right font-medium">
+                        {formatCurrency(invoice.total)}
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" size="sm">
+                              <span className="sr-only">Open menu</span>
+                              <span className="flex h-8 w-8 items-center justify-center rounded-full hover:bg-gray-100">...</span>
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuItem onClick={() => handleExportToPdf(invoice)}>
+                              <FileDown className="mr-2 h-4 w-4" />
+                              Export PDF
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => handleEditInvoice(invoice.id)}>
+                              <FileEdit className="mr-2 h-4 w-4" />
+                              Edit Invoice
+                            </DropdownMenuItem>
+                            <DropdownMenuItem 
+                              className="text-red-600"
+                              onClick={() => confirmDeleteInvoice(invoice.id)}
+                            >
+                              <Trash2 className="mr-2 h-4 w-4" />
+                              Delete
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          )}
+        </CardContent>
+      </Card>
 
-      {/* Delete Confirmation Dialog */}
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle className="flex items-center gap-2">
-              <AlertTriangle className="h-5 w-5 text-amber-500" />
-              Confirm Delete
-            </AlertDialogTitle>
+            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to delete this invoice? This action cannot be undone.
+              This will permanently delete this invoice. This action cannot be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction 
+            <AlertDialogCancel disabled={isDeleting}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
               onClick={handleDeleteInvoice}
-              className="bg-rose-600 text-white hover:bg-rose-700"
+              disabled={isDeleting}
+              className="bg-red-600 hover:bg-red-700 text-white"
             >
+              {isDeleting ? (
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              ) : (
+                <Trash2 className="mr-2 h-4 w-4" />
+              )}
               Delete
             </AlertDialogAction>
           </AlertDialogFooter>
