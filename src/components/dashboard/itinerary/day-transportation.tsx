@@ -83,7 +83,7 @@ const DayTransportation = ({
                     </span>
                   )}
                 </div>
-                <p className="text-sm text-gray-900">{formatRupiah(transportation.pricePerPerson)} (per day)</p>
+                <p className="text-sm text-gray-900">{formatRupiah(transportation.pricePerPerson)} (per person)</p>
               </div>
             </div>
             <Button 
@@ -115,7 +115,7 @@ const DayTransportation = ({
                         </span>
                       )}
                     </div>
-                    <p className="text-sm text-gray-900">{formatRupiah(item.pricePerPerson)} (per day)</p>
+                    <p className="text-sm text-gray-900">{formatRupiah(item.pricePerPerson)} (per person)</p>
                   </div>
                 </div>
                 {onRemoveTransportationItem && (

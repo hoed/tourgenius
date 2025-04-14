@@ -35,25 +35,25 @@ export const exportItineraryToPdf = (itinerary: TourItinerary) => {
   
   // Add title with color
   doc.setFontSize(24);
-  doc.setTextColor(...COLORS.PRIMARY);
+  doc.setTextColor(COLORS.PRIMARY[0], COLORS.PRIMARY[1], COLORS.PRIMARY[2]);
   doc.setFont('helvetica', 'bold');
   doc.text(itinerary.name, 105, 20, { align: 'center' });
   
   // Add subtitle
   doc.setFontSize(14);
-  doc.setTextColor(...COLORS.SECONDARY);
+  doc.setTextColor(COLORS.SECONDARY[0], COLORS.SECONDARY[1], COLORS.SECONDARY[2]);
   doc.setFont('helvetica', 'normal');
   doc.text(`Travel Itinerary for ${itinerary.numberOfPeople} person(s)`, 105, 30, { align: 'center' });
   doc.text(`Starting on ${format(startDate, 'MMMM d, yyyy')}`, 105, 37, { align: 'center' });
   
   // Add a decorative line
-  doc.setDrawColor(...COLORS.PRIMARY);
+  doc.setDrawColor(COLORS.PRIMARY[0], COLORS.PRIMARY[1], COLORS.PRIMARY[2]);
   doc.setLineWidth(0.5);
   doc.line(20, 42, 190, 42);
   
   // Set font for content
   doc.setFontSize(11);
-  doc.setTextColor(...COLORS.TEXT_DARK);
+  doc.setTextColor(COLORS.TEXT_DARK[0], COLORS.TEXT_DARK[1], COLORS.TEXT_DARK[2]);
   
   let yPosition = 50;
   const pageWidth = doc.internal.pageSize.width;
@@ -69,10 +69,10 @@ export const exportItineraryToPdf = (itinerary: TourItinerary) => {
     }
     
     // Day header with colored background
-    doc.setFillColor(...COLORS.PRIMARY, 0.1); // Light amber background
+    doc.setFillColor(COLORS.PRIMARY[0], COLORS.PRIMARY[1], COLORS.PRIMARY[2], 0.1); // Light amber background
     doc.rect(margin, yPosition - 6, contentWidth, 10, 'F');
     doc.setFontSize(14);
-    doc.setTextColor(...COLORS.PRIMARY);
+    doc.setTextColor(COLORS.PRIMARY[0], COLORS.PRIMARY[1], COLORS.PRIMARY[2]);
     doc.setFont('helvetica', 'bold');
     doc.text(`Day ${day.day}`, margin + 5, yPosition);
     yPosition += 10;
@@ -86,7 +86,7 @@ export const exportItineraryToPdf = (itinerary: TourItinerary) => {
     
     // Add a separator line between days (except after the last day)
     if (index < itinerary.days.length - 1) {
-      doc.setDrawColor(...COLORS.TABLE_BORDER);
+      doc.setDrawColor(COLORS.TABLE_BORDER[0], COLORS.TABLE_BORDER[1], COLORS.TABLE_BORDER[2]);
       doc.setLineDashPattern([1, 1], 0);
       doc.line(margin, yPosition - 4, pageWidth - margin, yPosition - 4);
       doc.setLineDashPattern([], 0);
@@ -101,10 +101,10 @@ export const exportItineraryToPdf = (itinerary: TourItinerary) => {
       yPosition = 20;
     }
     
-    doc.setFillColor(...COLORS.SECONDARY, 0.1); // Light pink background
+    doc.setFillColor(COLORS.SECONDARY[0], COLORS.SECONDARY[1], COLORS.SECONDARY[2], 0.1); // Light pink background
     doc.rect(margin, yPosition - 6, contentWidth, 10, 'F');
     doc.setFontSize(14);
-    doc.setTextColor(...COLORS.SECONDARY);
+    doc.setTextColor(COLORS.SECONDARY[0], COLORS.SECONDARY[1], COLORS.SECONDARY[2]);
     doc.setFont('helvetica', 'bold');
     doc.text('Tour Guides', margin + 5, yPosition);
     yPosition += 10;
@@ -114,12 +114,12 @@ export const exportItineraryToPdf = (itinerary: TourItinerary) => {
     const rowHeight = 12;
     
     // Table header
-    doc.setFillColor(...COLORS.TABLE_HEADER);
+    doc.setFillColor(COLORS.TABLE_HEADER[0], COLORS.TABLE_HEADER[1], COLORS.TABLE_HEADER[2]);
     doc.rect(margin, yPosition - 6, contentWidth, rowHeight, 'F');
     
     doc.setFont('helvetica', 'bold');
     doc.setFontSize(11);
-    doc.setTextColor(...COLORS.TEXT_DARK);
+    doc.setTextColor(COLORS.TEXT_DARK[0], COLORS.TEXT_DARK[1], COLORS.TEXT_DARK[2]);
     
     let xPos = margin + 3;
     doc.text('Name', xPos, yPosition);
@@ -131,7 +131,7 @@ export const exportItineraryToPdf = (itinerary: TourItinerary) => {
     yPosition += rowHeight;
     
     // Draw borders for header
-    doc.setDrawColor(...COLORS.TABLE_BORDER);
+    doc.setDrawColor(COLORS.TABLE_BORDER[0], COLORS.TABLE_BORDER[1], COLORS.TABLE_BORDER[2]);
     doc.rect(margin, yPosition - 18, contentWidth, rowHeight, 'S');
     doc.line(margin + colWidths[0], yPosition - 18, margin + colWidths[0], yPosition - 6);
     doc.line(margin + colWidths[0] + colWidths[1], yPosition - 18, margin + colWidths[0] + colWidths[1], yPosition - 6);
@@ -146,7 +146,7 @@ export const exportItineraryToPdf = (itinerary: TourItinerary) => {
       
       doc.setFont('helvetica', 'normal');
       doc.setFontSize(10);
-      doc.setTextColor(...COLORS.TEXT_DARK);
+      doc.setTextColor(COLORS.TEXT_DARK[0], COLORS.TEXT_DARK[1], COLORS.TEXT_DARK[2]);
       
       xPos = margin + 3;
       doc.text(guide.name, xPos, yPosition);
@@ -160,12 +160,12 @@ export const exportItineraryToPdf = (itinerary: TourItinerary) => {
       
       if (guide.languages && guide.languages.length > 0) {
         yPosition += 5;
-        doc.setTextColor(...COLORS.TEXT_MEDIUM);
+        doc.setTextColor(COLORS.TEXT_MEDIUM[0], COLORS.TEXT_MEDIUM[1], COLORS.TEXT_MEDIUM[2]);
         doc.text(`Languages: ${guide.languages.join(', ')}`, xPos, yPosition);
       }
       
       // Draw borders for rows
-      doc.setDrawColor(...COLORS.TABLE_BORDER);
+      doc.setDrawColor(COLORS.TABLE_BORDER[0], COLORS.TABLE_BORDER[1], COLORS.TABLE_BORDER[2]);
       doc.rect(margin, yPosition - (guide.languages?.length > 0 ? 11 : 6), contentWidth, guide.languages?.length > 0 ? rowHeight + 5 : rowHeight, 'S');
       doc.line(margin + colWidths[0], yPosition - (guide.languages?.length > 0 ? 11 : 6), margin + colWidths[0], yPosition + (guide.languages?.length > 0 ? -1 : 6));
       doc.line(margin + colWidths[0] + colWidths[1], yPosition - (guide.languages?.length > 0 ? 11 : 6), margin + colWidths[0] + colWidths[1], yPosition + (guide.languages?.length > 0 ? -1 : 6));
@@ -179,7 +179,7 @@ export const exportItineraryToPdf = (itinerary: TourItinerary) => {
   for (let i = 1; i <= pageCount; i++) {
     doc.setPage(i);
     doc.setFontSize(8);
-    doc.setTextColor(...COLORS.TEXT_LIGHT);
+    doc.setTextColor(COLORS.TEXT_LIGHT[0], COLORS.TEXT_LIGHT[1], COLORS.TEXT_LIGHT[2]);
     doc.text(
       `Generated by TourGenius on ${format(new Date(), 'MMMM d, yyyy')}`,
       pageWidth / 2,
@@ -201,7 +201,7 @@ const drawDayContent = (doc: jsPDF, day: DayItinerary, yPosition: number, margin
   // Destinations
   if (day.destinations && day.destinations.length > 0) {
     doc.setFontSize(12);
-    doc.setTextColor(...COLORS.SECONDARY);
+    doc.setTextColor(COLORS.SECONDARY[0], COLORS.SECONDARY[1], COLORS.SECONDARY[2]);
     doc.setFont('helvetica', 'bold');
     doc.text('Destinations:', margin, yPosition);
     yPosition += 6;
@@ -217,13 +217,13 @@ const drawDayContent = (doc: jsPDF, day: DayItinerary, yPosition: number, margin
       // Time (if available)
       if (destination.time) {
         doc.setFontSize(9);
-        doc.setTextColor(...COLORS.TEXT_MEDIUM);
+        doc.setTextColor(COLORS.TEXT_MEDIUM[0], COLORS.TEXT_MEDIUM[1], COLORS.TEXT_MEDIUM[2]);
         doc.text(destination.time, timeX, yPosition);
       }
       
       // Destination name
       doc.setFontSize(10);
-      doc.setTextColor(...COLORS.TEXT_DARK);
+      doc.setTextColor(COLORS.TEXT_DARK[0], COLORS.TEXT_DARK[1], COLORS.TEXT_DARK[2]);
       doc.setFont('helvetica', 'bold');
       doc.text(`• ${destination.name}`, textX, yPosition);
       doc.setFont('helvetica', 'normal');
@@ -232,7 +232,7 @@ const drawDayContent = (doc: jsPDF, day: DayItinerary, yPosition: number, margin
       // Description (if available and not too long)
       if (destination.description && destination.description.length < 100) {
         doc.setFontSize(9);
-        doc.setTextColor(...COLORS.TEXT_MEDIUM);
+        doc.setTextColor(COLORS.TEXT_MEDIUM[0], COLORS.TEXT_MEDIUM[1], COLORS.TEXT_MEDIUM[2]);
         doc.text(destination.description, textX + 5, yPosition);
         yPosition += 5;
       }
@@ -244,7 +244,7 @@ const drawDayContent = (doc: jsPDF, day: DayItinerary, yPosition: number, margin
   // Hotel/Accommodation
   if (day.hotel) {
     doc.setFontSize(12);
-    doc.setTextColor(...COLORS.SECONDARY);
+    doc.setTextColor(COLORS.SECONDARY[0], COLORS.SECONDARY[1], COLORS.SECONDARY[2]);
     doc.setFont('helvetica', 'bold');
     doc.text('Accommodation:', margin, yPosition);
     yPosition += 6;
@@ -252,26 +252,26 @@ const drawDayContent = (doc: jsPDF, day: DayItinerary, yPosition: number, margin
     // Background for hotel info
     doc.setFillColor(248, 250, 252); // Light blue-gray
     doc.rect(margin, yPosition - 5, contentWidth, 15, 'F');
-    doc.setDrawColor(...COLORS.TABLE_BORDER);
+    doc.setDrawColor(COLORS.TABLE_BORDER[0], COLORS.TABLE_BORDER[1], COLORS.TABLE_BORDER[2]);
     doc.rect(margin, yPosition - 5, contentWidth, 15, 'S');
     
     // Time (if available)
     if (day.hotel.time) {
       doc.setFontSize(9);
-      doc.setTextColor(...COLORS.TEXT_MEDIUM);
+      doc.setTextColor(COLORS.TEXT_MEDIUM[0], COLORS.TEXT_MEDIUM[1], COLORS.TEXT_MEDIUM[2]);
       doc.text(day.hotel.time, timeX, yPosition);
     }
     
     // Hotel name and details
     doc.setFontSize(10);
-    doc.setTextColor(...COLORS.TEXT_DARK);
+    doc.setTextColor(COLORS.TEXT_DARK[0], COLORS.TEXT_DARK[1], COLORS.TEXT_DARK[2]);
     doc.setFont('helvetica', 'bold');
     doc.text(`• ${day.hotel.name} (${day.hotel.stars}★)`, textX, yPosition);
     doc.setFont('helvetica', 'normal');
     yPosition += 5;
     
     doc.setFontSize(9);
-    doc.setTextColor(...COLORS.TEXT_MEDIUM);
+    doc.setTextColor(COLORS.TEXT_MEDIUM[0], COLORS.TEXT_MEDIUM[1], COLORS.TEXT_MEDIUM[2]);
     doc.text(`Location: ${day.hotel.location}`, textX + 5, yPosition);
     yPosition += 7;
   }
@@ -279,7 +279,7 @@ const drawDayContent = (doc: jsPDF, day: DayItinerary, yPosition: number, margin
   // Meals
   if (day.meals && day.meals.length > 0) {
     doc.setFontSize(12);
-    doc.setTextColor(...COLORS.SECONDARY);
+    doc.setTextColor(COLORS.SECONDARY[0], COLORS.SECONDARY[1], COLORS.SECONDARY[2]);
     doc.setFont('helvetica', 'bold');
     doc.text('Meals:', margin, yPosition);
     yPosition += 6;
@@ -295,13 +295,13 @@ const drawDayContent = (doc: jsPDF, day: DayItinerary, yPosition: number, margin
       // Time (if available)
       if (meal.time) {
         doc.setFontSize(9);
-        doc.setTextColor(...COLORS.TEXT_MEDIUM);
+        doc.setTextColor(COLORS.TEXT_MEDIUM[0], COLORS.TEXT_MEDIUM[1], COLORS.TEXT_MEDIUM[2]);
         doc.text(meal.time, timeX, yPosition);
       }
       
       // Meal details
       doc.setFontSize(10);
-      doc.setTextColor(...COLORS.TEXT_DARK);
+      doc.setTextColor(COLORS.TEXT_DARK[0], COLORS.TEXT_DARK[1], COLORS.TEXT_DARK[2]);
       doc.setFont('helvetica', 'bold');
       const mealType = meal.type.charAt(0).toUpperCase() + meal.type.slice(1);
       doc.text(`• ${mealType}: ${meal.description}`, textX, yPosition);
@@ -315,7 +315,7 @@ const drawDayContent = (doc: jsPDF, day: DayItinerary, yPosition: number, margin
   // Transportation
   if (day.transportation || (day.transportationItems && day.transportationItems.length > 0)) {
     doc.setFontSize(12);
-    doc.setTextColor(...COLORS.SECONDARY);
+    doc.setTextColor(COLORS.SECONDARY[0], COLORS.SECONDARY[1], COLORS.SECONDARY[2]);
     doc.setFont('helvetica', 'bold');
     doc.text('Transportation:', margin, yPosition);
     yPosition += 6;
@@ -325,19 +325,19 @@ const drawDayContent = (doc: jsPDF, day: DayItinerary, yPosition: number, margin
       // Background for transportation
       doc.setFillColor(249, 246, 240); // Light amber
       doc.rect(margin, yPosition - 5, contentWidth, 10, 'F');
-      doc.setDrawColor(...COLORS.TABLE_BORDER);
+      doc.setDrawColor(COLORS.TABLE_BORDER[0], COLORS.TABLE_BORDER[1], COLORS.TABLE_BORDER[2]);
       doc.rect(margin, yPosition - 5, contentWidth, 10, 'S');
       
       // Time (if available)
       if (day.transportation.time) {
         doc.setFontSize(9);
-        doc.setTextColor(...COLORS.TEXT_MEDIUM);
+        doc.setTextColor(COLORS.TEXT_MEDIUM[0], COLORS.TEXT_MEDIUM[1], COLORS.TEXT_MEDIUM[2]);
         doc.text(day.transportation.time, timeX, yPosition);
       }
       
       // Transportation details
       doc.setFontSize(10);
-      doc.setTextColor(...COLORS.TEXT_DARK);
+      doc.setTextColor(COLORS.TEXT_DARK[0], COLORS.TEXT_DARK[1], COLORS.TEXT_DARK[2]);
       doc.setFont('helvetica', 'bold');
       const type = day.transportation.type ? 
         (day.transportation.type.charAt(0).toUpperCase() + day.transportation.type.slice(1)) : 
@@ -359,13 +359,13 @@ const drawDayContent = (doc: jsPDF, day: DayItinerary, yPosition: number, margin
         // Time (if available)
         if (item.time) {
           doc.setFontSize(9);
-          doc.setTextColor(...COLORS.TEXT_MEDIUM);
+          doc.setTextColor(COLORS.TEXT_MEDIUM[0], COLORS.TEXT_MEDIUM[1], COLORS.TEXT_MEDIUM[2]);
           doc.text(item.time, timeX, yPosition);
         }
         
         // Transportation details
         doc.setFontSize(10);
-        doc.setTextColor(...COLORS.TEXT_DARK);
+        doc.setTextColor(COLORS.TEXT_DARK[0], COLORS.TEXT_DARK[1], COLORS.TEXT_DARK[2]);
         doc.setFont('helvetica', 'bold');
         const type = item.type ? 
           (item.type.charAt(0).toUpperCase() + item.type.slice(1)) : 

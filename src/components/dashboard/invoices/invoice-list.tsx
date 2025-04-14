@@ -1,6 +1,4 @@
-
 import React, { useState, useEffect } from 'react';
-import { DataTable } from '@/components/ui/data-table';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -72,11 +70,9 @@ const InvoiceList = () => {
         throw error;
       }
 
-      // Transform data to match Invoice type
       const transformedInvoices: Invoice[] = (data || []).map(item => {
         let parsedItems: any[] = [];
         
-        // Parse items if needed
         if (typeof item.items === 'string') {
           try {
             parsedItems = JSON.parse(item.items);
@@ -88,7 +84,6 @@ const InvoiceList = () => {
           parsedItems = item.items;
         }
         
-        // Ensure correct status
         const validStatus = ['draft', 'sent', 'paid', 'unpaid'].includes(item.status) 
           ? item.status as 'draft' | 'sent' | 'paid' | 'unpaid'
           : 'draft';
@@ -138,7 +133,6 @@ const InvoiceList = () => {
         
       if (error) throw error;
       
-      // Remove from local state
       setInvoices(prev => prev.filter(inv => inv.id !== invoiceToDelete));
       toast.success('Invoice deleted successfully');
     } catch (error) {

@@ -1,3 +1,4 @@
+
 import { format } from 'date-fns';
 import { supabase } from '@/integrations/supabase/client';
 import { TourItinerary, TourGuide } from '@/lib/types';
@@ -204,13 +205,13 @@ export const calculateTotalPrice = (itinerary: TourItinerary): number => {
       
       // Main transportation
       if (day.transportation) {
-        dayTransportationSum += day.transportation.pricePerPerson;
+        dayTransportationSum += day.transportation.pricePerPerson * numPeople;
       }
       
       // Additional transportation items
       if (day.transportationItems && day.transportationItems.length > 0) {
         dayTransportationSum += day.transportationItems.reduce(
-          (itemSum, item) => itemSum + item.pricePerPerson,
+          (itemSum, item) => itemSum + (item.pricePerPerson * numPeople),
           0
         );
       }

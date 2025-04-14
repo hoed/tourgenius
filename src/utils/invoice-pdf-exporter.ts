@@ -46,19 +46,19 @@ export const exportInvoiceToPdf = (invoice: Invoice) => {
   
   // Company name
   doc.setFontSize(20);
-  doc.setTextColor(...COLORS.PRIMARY);
+  doc.setTextColor(COLORS.PRIMARY[0], COLORS.PRIMARY[1], COLORS.PRIMARY[2]);
   doc.setFont('helvetica', 'bold');
   doc.text('TourGenius', margin + 5, 30);
   
   // Small tagline
   doc.setFontSize(10);
-  doc.setTextColor(...COLORS.TEXT_MEDIUM);
+  doc.setTextColor(COLORS.TEXT_MEDIUM[0], COLORS.TEXT_MEDIUM[1], COLORS.TEXT_MEDIUM[2]);
   doc.setFont('helvetica', 'italic');
   doc.text('Your Tour Planning Expert', margin + 5, 36);
   
   // Invoice title and number
   doc.setFontSize(16);
-  doc.setTextColor(...COLORS.SECONDARY);
+  doc.setTextColor(COLORS.SECONDARY[0], COLORS.SECONDARY[1], COLORS.SECONDARY[2]);
   doc.setFont('helvetica', 'bold');
   doc.text('INVOICE', pageWidth - margin - 40, 25);
   doc.setFontSize(11);
@@ -73,7 +73,7 @@ export const exportInvoiceToPdf = (invoice: Invoice) => {
   };
   
   const statusColor = statusColors[invoice.status] || COLORS.TEXT_MEDIUM;
-  doc.setFillColor(...statusColor);
+  doc.setFillColor(statusColor[0], statusColor[1], statusColor[2]);
   doc.rect(pageWidth - margin - 30, 35, 30, 8, 'F');
   doc.setFontSize(8);
   doc.setTextColor(255, 255, 255);
@@ -83,7 +83,7 @@ export const exportInvoiceToPdf = (invoice: Invoice) => {
   let yPos = 55;
   
   doc.setFontSize(11);
-  doc.setTextColor(...COLORS.TEXT_DARK);
+  doc.setTextColor(COLORS.TEXT_DARK[0], COLORS.TEXT_DARK[1], COLORS.TEXT_DARK[2]);
   doc.setFont('helvetica', 'bold');
   doc.text('Bill To:', margin, yPos);
   
@@ -107,7 +107,7 @@ export const exportInvoiceToPdf = (invoice: Invoice) => {
   
   // Add a separator line
   yPos = 80;
-  doc.setDrawColor(...COLORS.TABLE_BORDER);
+  doc.setDrawColor(COLORS.TABLE_BORDER[0], COLORS.TABLE_BORDER[1], COLORS.TABLE_BORDER[2]);
   doc.setLineWidth(0.5);
   doc.line(margin, yPos, pageWidth - margin, yPos);
   
@@ -116,12 +116,12 @@ export const exportInvoiceToPdf = (invoice: Invoice) => {
   const colWidths = [contentWidth * 0.5, contentWidth * 0.15, contentWidth * 0.15, contentWidth * 0.2];
   
   // Table header with colored background
-  doc.setFillColor(...COLORS.TABLE_HEADER);
+  doc.setFillColor(COLORS.TABLE_HEADER[0], COLORS.TABLE_HEADER[1], COLORS.TABLE_HEADER[2]);
   doc.rect(margin, yPos - 5, contentWidth, 10, 'F');
   
   doc.setFont('helvetica', 'bold');
   doc.setFontSize(10);
-  doc.setTextColor(...COLORS.TEXT_DARK);
+  doc.setTextColor(COLORS.TEXT_DARK[0], COLORS.TEXT_DARK[1], COLORS.TEXT_DARK[2]);
   
   let xPos = margin + 3;
   doc.text('Description', xPos, yPos);
@@ -151,10 +151,10 @@ export const exportInvoiceToPdf = (invoice: Invoice) => {
       yPos = 20;
       doc.setFontSize(10);
       doc.setFont('helvetica', 'bold');
-      doc.setTextColor(...COLORS.TEXT_DARK);
+      doc.setTextColor(COLORS.TEXT_DARK[0], COLORS.TEXT_DARK[1], COLORS.TEXT_DARK[2]);
       
       // Table header with colored background on new page
-      doc.setFillColor(...COLORS.TABLE_HEADER);
+      doc.setFillColor(COLORS.TABLE_HEADER[0], COLORS.TABLE_HEADER[1], COLORS.TABLE_HEADER[2]);
       doc.rect(margin, yPos - 5, contentWidth, 10, 'F');
       
       let xPos = margin + 3;
@@ -177,9 +177,9 @@ export const exportInvoiceToPdf = (invoice: Invoice) => {
     
     // Alternate row background colors
     if (index % 2 === 0) {
-      doc.setFillColor(...COLORS.TABLE_EVEN);
+      doc.setFillColor(COLORS.TABLE_EVEN[0], COLORS.TABLE_EVEN[1], COLORS.TABLE_EVEN[2]);
     } else {
-      doc.setFillColor(...COLORS.TABLE_ODD);
+      doc.setFillColor(COLORS.TABLE_ODD[0], COLORS.TABLE_ODD[1], COLORS.TABLE_ODD[2]);
     }
     doc.rect(margin, yPos - 5, contentWidth, 10, 'F');
     
@@ -197,7 +197,7 @@ export const exportInvoiceToPdf = (invoice: Invoice) => {
     }).format(item.total);
     
     // Description (with word wrapping if needed)
-    doc.setTextColor(...COLORS.TEXT_DARK);
+    doc.setTextColor(COLORS.TEXT_DARK[0], COLORS.TEXT_DARK[1], COLORS.TEXT_DARK[2]);
     const desc = item.description;
     
     if (desc.length > 60) {
@@ -228,7 +228,7 @@ export const exportInvoiceToPdf = (invoice: Invoice) => {
   yPos += 10;
   
   // Draw a line
-  doc.setDrawColor(...COLORS.TABLE_BORDER);
+  doc.setDrawColor(COLORS.TABLE_BORDER[0], COLORS.TABLE_BORDER[1], COLORS.TABLE_BORDER[2]);
   doc.line(margin, yPos - 5, pageWidth - margin, yPos - 5);
   
   // Subtotal
@@ -255,13 +255,13 @@ export const exportInvoiceToPdf = (invoice: Invoice) => {
   yPos += 10;
   
   // Total background
-  doc.setFillColor(...COLORS.PRIMARY, 0.1);
+  doc.setFillColor(COLORS.PRIMARY[0], COLORS.PRIMARY[1], COLORS.PRIMARY[2], 0.1);
   doc.rect(pageWidth - margin - colWidths[3] - 10, yPos - 5, colWidths[3] + 10, 10, 'F');
   
   xPos = pageWidth - margin - colWidths[3];
   doc.setFont('helvetica', 'bold');
   doc.setFontSize(11);
-  doc.setTextColor(...COLORS.PRIMARY);
+  doc.setTextColor(COLORS.PRIMARY[0], COLORS.PRIMARY[1], COLORS.PRIMARY[2]);
   doc.text('TOTAL:', xPos, yPos);
   
   xPos = pageWidth - margin - 3;
@@ -270,7 +270,7 @@ export const exportInvoiceToPdf = (invoice: Invoice) => {
   // Payment information and thank you message
   yPos += 20;
   doc.setFontSize(10);
-  doc.setTextColor(...COLORS.TEXT_DARK);
+  doc.setTextColor(COLORS.TEXT_DARK[0], COLORS.TEXT_DARK[1], COLORS.TEXT_DARK[2]);
   doc.setFont('helvetica', 'bold');
   doc.text('Payment Information:', margin, yPos);
   
@@ -285,13 +285,13 @@ export const exportInvoiceToPdf = (invoice: Invoice) => {
   // Thank you message
   yPos += 15;
   doc.setFont('helvetica', 'italic');
-  doc.setTextColor(...COLORS.SECONDARY);
+  doc.setTextColor(COLORS.SECONDARY[0], COLORS.SECONDARY[1], COLORS.SECONDARY[2]);
   doc.text('Thank you for your business!', margin, yPos);
   
   // Add footer
   doc.setFont('helvetica', 'normal');
   doc.setFontSize(8);
-  doc.setTextColor(...COLORS.TEXT_LIGHT);
+  doc.setTextColor(COLORS.TEXT_LIGHT[0], COLORS.TEXT_LIGHT[1], COLORS.TEXT_LIGHT[2]);
   doc.text(
     'Generated by TourGenius on ' + format(new Date(), 'MMMM d, yyyy'),
     pageWidth / 2,

@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { toast } from 'sonner';
 import { useNavigate } from 'react-router-dom';
@@ -92,7 +93,7 @@ export const useItinerary = ({ initialItinerary }: UseItineraryProps) => {
   };
 
   // Destination handlers
-  const addDestination = (dayId: string, name: string, price: number) => {
+  const addDestination = (dayId: string, name: string, price: number, time?: string) => {
     if (!name.trim()) return;
     setItinerary((prev) => ({
       ...prev,
@@ -107,7 +108,8 @@ export const useItinerary = ({ initialItinerary }: UseItineraryProps) => {
                 name,
                 description: name,
                 pricePerPerson: price,
-                image: undefined
+                image: undefined,
+                time
               }
             ]
           };
@@ -158,7 +160,7 @@ export const useItinerary = ({ initialItinerary }: UseItineraryProps) => {
   };
 
   // Meal handlers
-  const addMeal = (dayId: string, description: string, type: string, price: number) => {
+  const addMeal = (dayId: string, description: string, type: string, price: number, time?: string) => {
     if (!description.trim()) return;
     let mealType: 'breakfast' | 'lunch' | 'dinner' = 'lunch';
     if (type.toLowerCase() === 'breakfast') mealType = 'breakfast';
@@ -176,7 +178,8 @@ export const useItinerary = ({ initialItinerary }: UseItineraryProps) => {
                 id: Date.now().toString(),
                 description,
                 type: mealType,
-                pricePerPerson: price
+                pricePerPerson: price,
+                time
               }
             ]
           };
@@ -202,7 +205,7 @@ export const useItinerary = ({ initialItinerary }: UseItineraryProps) => {
   };
 
   // Transportation handlers
-  const setTransportation = (dayId: string, description: string, price: number, type: string = 'car') => {
+  const setTransportation = (dayId: string, description: string, price: number, type: string = 'car', time?: string) => {
     setItinerary((prev) => ({
       ...prev,
       days: prev.days.map(day => {
@@ -213,7 +216,8 @@ export const useItinerary = ({ initialItinerary }: UseItineraryProps) => {
               id: Date.now().toString(),
               description,
               pricePerPerson: price,
-              type: type as 'flight' | 'train' | 'bus' | 'car' | 'ferry'
+              type: type as 'flight' | 'train' | 'bus' | 'car' | 'ferry',
+              time
             } : null
           };
         }
@@ -223,14 +227,15 @@ export const useItinerary = ({ initialItinerary }: UseItineraryProps) => {
   };
   
   // Multiple transportation items handlers
-  const addTransportationItem = (dayId: string, type: string, description: string, price: number) => {
+  const addTransportationItem = (dayId: string, type: string, description: string, price: number, time?: string) => {
     if (!description.trim()) return;
     
     const newTransportation: Transportation = {
       id: Date.now().toString(),
       type: type as 'flight' | 'train' | 'bus' | 'car' | 'ferry',
       description,
-      pricePerPerson: price
+      pricePerPerson: price,
+      time
     };
     
     setItinerary((prev) => ({
