@@ -15,7 +15,7 @@ interface DayItineraryProps {
   onRemoveDay: (dayId: string) => void;
   onAddDestination: (dayId: string, name: string, price: number, time?: string) => void;
   onRemoveDestination: (dayId: string, destinationId: string) => void;
-  onSetHotel: (dayId: string, name: string, location: string, stars: number, price: number, time?: string) => void;
+  onSetHotel: (dayId: string, name: string, location: string, stars: number, price: number, roomAmount: number, time?: string) => void;
   onAddMeal: (dayId: string, description: string, type: string, price: number, time?: string) => void;
   onRemoveMeal: (dayId: string, mealId: string) => void;
   onSetTransportation: (dayId: string, description: string, price: number, type?: string, time?: string) => void;

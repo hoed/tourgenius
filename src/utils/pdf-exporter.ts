@@ -1,4 +1,3 @@
-
 import { jsPDF } from 'jspdf';
 import { format } from 'date-fns';
 import { TourItinerary, DayItinerary } from '@/lib/types';
@@ -96,7 +95,7 @@ export const exportItineraryToPdf = (itinerary: TourItinerary) => {
   }
   
   // Add footer
-  const pageCount = doc.internal.getNumberOfPages();
+  const pageCount = doc.getNumberOfPages();
   for (let i = 1; i <= pageCount; i++) {
     doc.setPage(i);
     doc.setFontSize(8);

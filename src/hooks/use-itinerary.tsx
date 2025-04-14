@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { toast } from 'sonner';
 import { useNavigate } from 'react-router-dom';
@@ -134,7 +133,7 @@ export const useItinerary = ({ initialItinerary }: UseItineraryProps) => {
   };
 
   // Hotel handlers
-  const setHotel = (dayId: string, name: string, location: string, stars: number, price: number, roomAmount: number = 0) => {
+  const setHotel = (dayId: string, name: string, location: string, stars: number, price: number, roomAmount: number = 0, time?: string) => {
     setItinerary((prev) => ({
       ...prev,
       days: prev.days.map(day => {
@@ -148,7 +147,8 @@ export const useItinerary = ({ initialItinerary }: UseItineraryProps) => {
               stars,
               pricePerNight: price,
               roomAmount: roomAmount || Math.ceil(prev.numberOfPeople / 2),
-              image: undefined
+              image: undefined,
+              time
             } : null
           };
         }
