@@ -54,7 +54,14 @@ const InvoicesPage = () => {
             parsedItems = [];
           }
         } else if (Array.isArray(data.items)) {
-          parsedItems = data.items as InvoiceItem[];
+          // Explicitly transform each item in the array to match InvoiceItem structure
+          parsedItems = (data.items as any[]).map((item: any) => ({
+            id: String(item.id || ''),
+            description: String(item.description || ''),
+            quantity: Number(item.quantity || 0),
+            unitPrice: Number(item.unitPrice || item.unit_price || 0),
+            total: Number(item.total || 0)
+          }));
         }
         
         // Ensure status is one of the allowed values
