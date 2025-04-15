@@ -35,35 +35,44 @@ const ItineraryBuilder = ({ initialItinerary }: ItineraryBuilderProps) => {
   } = useItinerary({ initialItinerary });
 
   return (
-    <div className="container mx-auto p-6 space-y-8">
-      <ItineraryHeader 
-        itinerary={itinerary}
-        selectedDate={selectedDate}
-        isSaving={isSaving}
-        setIsSaving={setIsSaving}
-      />
+    <div className="container mx-auto p-4 md:p-6 space-y-8 max-w-7xl">
+      {/* Gradient background header using MindTrip-like styles */}
+      <div className="relative overflow-hidden rounded-xl bg-gradient-to-r from-amber-400 via-amber-500 to-orange-500 mb-8">
+        <div className="absolute inset-0 bg-black opacity-10 z-0"></div>
+        <div className="relative z-10 p-8">
+          <ItineraryHeader 
+            itinerary={itinerary}
+            selectedDate={selectedDate}
+            isSaving={isSaving}
+            setIsSaving={setIsSaving}
+          />
+        </div>
+      </div>
 
-      <ItineraryContent 
-        itinerary={itinerary}
-        selectedDate={selectedDate}
-        setSelectedDate={setSelectedDate}
-        updateItineraryName={updateItineraryName}
-        updateNumberOfPeople={updateNumberOfPeople}
-        addDay={addDay}
-        removeDay={removeDay}
-        addDestination={addDestination}
-        removeDestination={removeDestination}
-        setHotel={setHotel}
-        addMeal={addMeal}
-        removeMeal={removeMeal}
-        setTransportation={setTransportation}
-        addTransportationItem={addTransportationItem}
-        removeTransportationItem={removeTransportationItem}
-        addTourGuide={addTourGuide}
-        removeTourGuide={removeTourGuide}
-        addActivity={addActivity}
-        removeActivity={removeActivity}
-      />
+      {/* Content with updated styling inspired by MindTrip.ai */}
+      <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-100">
+        <ItineraryContent 
+          itinerary={itinerary}
+          selectedDate={selectedDate}
+          setSelectedDate={setSelectedDate}
+          updateItineraryName={updateItineraryName}
+          updateNumberOfPeople={updateNumberOfPeople}
+          addDay={addDay}
+          removeDay={removeDay}
+          addDestination={addDestination}
+          removeDestination={removeDestination}
+          setHotel={setHotel}
+          addMeal={addMeal}
+          removeMeal={removeMeal}
+          setTransportation={setTransportation}
+          addTransportationItem={addTransportationItem}
+          removeTransportationItem={removeTransportationItem}
+          addTourGuide={addTourGuide}
+          removeTourGuide={removeTourGuide}
+          addActivity={addActivity}
+          removeActivity={removeActivity}
+        />
+      </div>
     </div>
   );
 };

@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { DayItinerary, Transportation } from '@/lib/types';
+import { DayItinerary } from '@/lib/types';
 import { CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { CalendarIcon, Trash2 } from 'lucide-react';
@@ -43,27 +43,26 @@ const DayItineraryComponent = ({
   totalDays
 }: DayItineraryProps) => {
   return (
-    <GlassCard className="bg-white border border-gray-200 shadow-md">
-      <CardHeader>
-        <div className="flex items-center justify-between">
-          <CardTitle className="flex items-center gap-2 text-amber-700">
-            <CalendarIcon className="h-5 w-5" />
-            Day {day.day}
-          </CardTitle>
-          {totalDays > 1 && (
-            <Button 
-              variant="ghost" 
-              size="sm" 
-              onClick={() => onRemoveDay(day.id)}
-              className="text-rose-600 hover:text-rose-700 hover:bg-rose-400/10"
-            >
-              <Trash2 className="h-4 w-4 mr-2" />
-              Remove
-            </Button>
-          )}
+    <div className="space-y-6">
+      <div className="bg-gradient-to-r from-amber-50 to-orange-50 p-4 rounded-lg border border-amber-100 flex items-center justify-between">
+        <div className="flex items-center gap-2 text-amber-700">
+          <CalendarIcon className="h-5 w-5" />
+          <h2 className="text-xl font-semibold">Day {day.day}</h2>
         </div>
-      </CardHeader>
-      <CardContent className="space-y-8">
+        {totalDays > 1 && (
+          <Button 
+            variant="outline" 
+            size="sm" 
+            onClick={() => onRemoveDay(day.id)}
+            className="text-rose-600 hover:text-rose-700 hover:bg-rose-50 border-rose-200"
+          >
+            <Trash2 className="h-4 w-4 mr-2" />
+            Remove Day
+          </Button>
+        )}
+      </div>
+
+      <div className="grid grid-cols-1 gap-6">
         <DayDestinations
           dayId={day.id}
           destinations={day.destinations}
@@ -99,8 +98,8 @@ const DayItineraryComponent = ({
           onAddTransportationItem={onAddTransportationItem}
           onRemoveTransportationItem={onRemoveTransportationItem}
         />
-      </CardContent>
-    </GlassCard>
+      </div>
+    </div>
   );
 };
 
