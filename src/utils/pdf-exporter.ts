@@ -241,6 +241,49 @@ const drawDayContent = (doc: jsPDF, day: DayItinerary, yPosition: number, margin
     yPosition += 2;
   }
   
+  // Activities
+  if (day.activities && day.activities.length > 0) {
+    doc.setFontSize(12);
+    doc.setTextColor(COLORS.SECONDARY[0], COLORS.SECONDARY[1], COLORS.SECONDARY[2]);
+    doc.setFont('helvetica', 'bold');
+    doc.text('Activities:', margin, yPosition);
+    yPosition += 6;
+    
+    // Create a table-like structure for activities
+    day.activities.forEach((activity, index) => {
+      // Alternate row background colors
+      if (index % 2 === 0) {
+        doc.setFillColor(250, 250, 250);
+        doc.rect(margin, yPosition - 5, contentWidth, 10, 'F');
+      }
+      
+      // Time (if available)
+      if (activity.time) {
+        doc.setFontSize(9);
+        doc.setTextColor(COLORS.TEXT_MEDIUM[0], COLORS.TEXT_MEDIUM[1], COLORS.TEXT_MEDIUM[2]);
+        doc.text(activity.time, timeX, yPosition);
+      }
+      
+      // Activity name
+      doc.setFontSize(10);
+      doc.setTextColor(COLORS.TEXT_DARK[0], COLORS.TEXT_DARK[1], COLORS.TEXT_DARK[2]);
+      doc.setFont('helvetica', 'bold');
+      doc.text(`• ${activity.name}`, textX, yPosition);
+      doc.setFont('helvetica', 'normal');
+      yPosition += 5;
+      
+      // Description (if available and not too long)
+      if (activity.description && activity.description.length < 100) {
+        doc.setFontSize(9);
+        doc.setTextColor(COLORS.TEXT_MEDIUM[0], COLORS.TEXT_MEDIUM[1], COLORS.TEXT_MEDIUM[2]);
+        doc.text(activity.description, textX + 5, yPosition);
+        yPosition += 5;
+      }
+    });
+    
+    yPosition += 2;
+  }
+  
   // Hotel/Accommodation
   if (day.hotel) {
     doc.setFontSize(12);

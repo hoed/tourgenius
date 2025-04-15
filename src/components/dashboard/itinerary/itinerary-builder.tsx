@@ -29,7 +29,9 @@ const ItineraryBuilder = ({ initialItinerary }: ItineraryBuilderProps) => {
     addTransportationItem,
     removeTransportationItem,
     addTourGuide,
-    removeTourGuide
+    removeTourGuide,
+    addActivity,
+    removeActivity
   } = useItinerary({ initialItinerary });
 
   return (
@@ -59,6 +61,8 @@ const ItineraryBuilder = ({ initialItinerary }: ItineraryBuilderProps) => {
         removeTransportationItem={removeTransportationItem}
         addTourGuide={addTourGuide}
         removeTourGuide={removeTourGuide}
+        addActivity={addActivity}
+        removeActivity={removeActivity}
       />
     </div>
   );

@@ -18,6 +18,8 @@ interface ItineraryDaysProps {
   onSetTransportation: (dayId: string, description: string, price: number, type?: string, time?: string) => void;
   onAddTransportationItem?: (dayId: string, type: string, description: string, price: number, time?: string) => void;
   onRemoveTransportationItem?: (dayId: string, transportationId: string) => void;
+  onAddActivity?: (dayId: string, name: string, description: string, price: number, time?: string) => void;
+  onRemoveActivity?: (dayId: string, activityId: string) => void;
 }
 
 const ItineraryDays = ({
@@ -31,7 +33,9 @@ const ItineraryDays = ({
   onRemoveMeal,
   onSetTransportation,
   onAddTransportationItem,
-  onRemoveTransportationItem
+  onRemoveTransportationItem,
+  onAddActivity,
+  onRemoveActivity
 }: ItineraryDaysProps) => {
   return (
     <Tabs defaultValue={days[0]?.id} className="space-y-6">
@@ -69,6 +73,8 @@ const ItineraryDays = ({
             onSetTransportation={onSetTransportation}
             onAddTransportationItem={onAddTransportationItem}
             onRemoveTransportationItem={onRemoveTransportationItem}
+            onAddActivity={onAddActivity}
+            onRemoveActivity={onRemoveActivity}
             totalDays={days.length}
           />
         </TabsContent>

@@ -24,6 +24,8 @@ interface ItineraryContentProps {
   removeTransportationItem?: (dayId: string, transportationId: string) => void;
   addTourGuide: (name: string, expertise: string, pricePerDay: number) => void;
   removeTourGuide: (guideId: string) => void;
+  addActivity?: (dayId: string, name: string, description: string, price: number, time?: string) => void;
+  removeActivity?: (dayId: string, activityId: string) => void;
 }
 
 const ItineraryContent = ({
@@ -43,7 +45,9 @@ const ItineraryContent = ({
   addTransportationItem,
   removeTransportationItem,
   addTourGuide,
-  removeTourGuide
+  removeTourGuide,
+  addActivity,
+  removeActivity
 }: ItineraryContentProps) => {
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -75,6 +79,8 @@ const ItineraryContent = ({
           onSetTransportation={setTransportation}
           onAddTransportationItem={addTransportationItem}
           onRemoveTransportationItem={removeTransportationItem}
+          onAddActivity={addActivity}
+          onRemoveActivity={removeActivity}
         />
       </div>
 

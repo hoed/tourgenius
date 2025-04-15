@@ -6,6 +6,7 @@ import { TourItinerary } from '@/lib/types';
 import { DollarSign, FileText } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import GlassCard from '@/components/ui/glass-card';
+import { formatRupiah } from '@/utils/currency-formatter';
 
 interface PriceCalculatorProps {
   itinerary: TourItinerary;
@@ -22,6 +23,14 @@ const PriceCalculator = ({ itinerary }: PriceCalculatorProps) => {
           daySum + dest.pricePerPerson * itinerary.numberOfPeople, 0);
       }, 0),
       count: itinerary.days.reduce((sum, day) => sum + day.destinations.length, 0)
+    };
+
+    const activities = {
+      total: itinerary.days.reduce((sum, day) => {
+        return sum + (day.activities || []).reduce((daySum, activity) => 
+          daySum + activity.pricePerPerson * itinerary.numberOfPeople, 0);
+      }, 0),
+      count: itinerary.days.reduce((sum, day) => sum + (day.activities?.length || 0), 0)
     };
 
     const hotels = {
@@ -59,7 +68,7 @@ const PriceCalculator = ({ itinerary }: PriceCalculatorProps) => {
     };
 
     const subtotal = destinations.total + hotels.total + meals.total + 
-                    transportation.total + guides.total;
+                    transportation.total + guides.total + activities.total;
     
     // Add 10% service fee
     const serviceFee = subtotal * 0.1;
@@ -74,6 +83,7 @@ const PriceCalculator = ({ itinerary }: PriceCalculatorProps) => {
 
     return {
       destinations,
+      activities,
       hotels,
       meals,
       transportation,
@@ -91,15 +101,6 @@ const PriceCalculator = ({ itinerary }: PriceCalculatorProps) => {
     navigate('/dashboard/invoices', { 
       state: { itinerary }
     });
-  };
-
-  // Format currency in Indonesian Rupiah
-  const formatRupiah = (amount: number) => {
-    return new Intl.NumberFormat('id-ID', {
-      style: 'currency',
-      currency: 'IDR',
-      minimumFractionDigits: 0
-    }).format(amount);
   };
 
   return (
@@ -121,6 +122,10 @@ const PriceCalculator = ({ itinerary }: PriceCalculatorProps) => {
             <div className="flex justify-between text-sm">
               <span className="text-muted-foreground">Destinations ({calculatedPrices.destinations.count})</span>
               <span>{formatRupiah(calculatedPrices.destinations.total)}</span>
+            </div>
+            <div className="flex justify-between text-sm">
+              <span className="text-muted-foreground">Activities ({calculatedPrices.activities.count})</span>
+              <span>{formatRupiah(calculatedPrices.activities.total)}</span>
             </div>
             <div className="flex justify-between text-sm">
               <span className="text-muted-foreground">Accommodations ({calculatedPrices.hotels.count})</span>
@@ -182,6 +187,7 @@ const PriceCalculator = ({ itinerary }: PriceCalculatorProps) => {
           <h3 className="font-medium mb-2">Pro Tips</h3>
           <ul className="text-sm space-y-2 text-muted-foreground">
             <li>Add at least one destination for each day</li>
+            <li>Include activities for additional experiences</li>
             <li>Include meals for a complete experience</li>
             <li>Choose appropriate transportation options</li>
             <li>Select tour guides with relevant expertise</li>

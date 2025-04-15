@@ -52,6 +52,12 @@ const ItineraryPage = () => {
             
             try {
               parsedDays = typeof data.days === 'string' ? JSON.parse(data.days) : data.days;
+              
+              // Ensure each day has an activities array
+              parsedDays = parsedDays.map((day: any) => ({
+                ...day,
+                activities: day.activities || []
+              }));
             } catch (e) {
               console.error('Error parsing days:', e);
               parsedDays = [];

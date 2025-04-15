@@ -1,8 +1,7 @@
-
 import { useState, useEffect } from 'react';
 import { toast } from 'sonner';
 import { useNavigate } from 'react-router-dom';
-import { TourItinerary, DayItinerary, Transportation } from '@/lib/types';
+import { TourItinerary, DayItinerary, Transportation, Activity } from '@/lib/types';
 import { supabase } from '@/integrations/supabase/client';
 
 interface UseItineraryProps {
@@ -27,7 +26,8 @@ export const useItinerary = ({ initialItinerary }: UseItineraryProps) => {
         hotel: null,
         meals: [],
         transportation: null,
-        transportationItems: []
+        transportationItems: [],
+        activities: []
       }],
       tourGuides: [],
       totalPrice: 0,
@@ -61,7 +61,6 @@ export const useItinerary = ({ initialItinerary }: UseItineraryProps) => {
     checkAuth();
   }, [navigate]);
 
-  // Itinerary info handlers
   const updateItineraryName = (name: string) => {
     setItinerary((prev) => ({ ...prev, name }));
   };
@@ -70,7 +69,6 @@ export const useItinerary = ({ initialItinerary }: UseItineraryProps) => {
     setItinerary((prev) => ({ ...prev, numberOfPeople: people }));
   };
 
-  // Day management handlers
   const addDay = () => {
     const newDay: DayItinerary = {
       id: Date.now().toString(),
@@ -79,7 +77,8 @@ export const useItinerary = ({ initialItinerary }: UseItineraryProps) => {
       hotel: null,
       meals: [],
       transportation: null,
-      transportationItems: []
+      transportationItems: [],
+      activities: []
     };
     setItinerary((prev) => ({ ...prev, days: [...prev.days, newDay] }));
   };
@@ -92,7 +91,6 @@ export const useItinerary = ({ initialItinerary }: UseItineraryProps) => {
     setItinerary((prev) => ({ ...prev, days: updatedDays }));
   };
 
-  // Destination handlers
   const addDestination = (dayId: string, name: string, price: number, time?: string) => {
     if (!name.trim()) return;
     setItinerary((prev) => ({
@@ -134,7 +132,6 @@ export const useItinerary = ({ initialItinerary }: UseItineraryProps) => {
     }));
   };
 
-  // Hotel handlers
   const setHotel = (dayId: string, name: string, location: string, stars: number, price: number, roomAmount: number = 0, time?: string) => {
     setItinerary((prev) => ({
       ...prev,
@@ -159,7 +156,6 @@ export const useItinerary = ({ initialItinerary }: UseItineraryProps) => {
     }));
   };
 
-  // Meal handlers
   const addMeal = (dayId: string, description: string, type: string, price: number, time?: string) => {
     if (!description.trim()) return;
     let mealType: 'breakfast' | 'lunch' | 'dinner' = 'lunch';
@@ -204,7 +200,6 @@ export const useItinerary = ({ initialItinerary }: UseItineraryProps) => {
     }));
   };
 
-  // Transportation handlers
   const setTransportation = (dayId: string, description: string, price: number, type: string = 'car', time?: string) => {
     setItinerary((prev) => ({
       ...prev,
@@ -225,8 +220,7 @@ export const useItinerary = ({ initialItinerary }: UseItineraryProps) => {
       })
     }));
   };
-  
-  // Multiple transportation items handlers
+
   const addTransportationItem = (dayId: string, type: string, description: string, price: number, time?: string) => {
     if (!description.trim()) return;
     
@@ -251,7 +245,7 @@ export const useItinerary = ({ initialItinerary }: UseItineraryProps) => {
       })
     }));
   };
-  
+
   const removeTransportationItem = (dayId: string, transportationId: string) => {
     setItinerary((prev) => ({
       ...prev,
@@ -267,7 +261,6 @@ export const useItinerary = ({ initialItinerary }: UseItineraryProps) => {
     }));
   };
 
-  // Tour guide handlers
   const addTourGuide = (name: string, expertise: string, pricePerDay: number) => {
     if (!name.trim()) return;
     if (itinerary.tourGuides.some(g => g.name.toLowerCase() === name.toLowerCase())) {
@@ -297,6 +290,46 @@ export const useItinerary = ({ initialItinerary }: UseItineraryProps) => {
     }));
   };
 
+  const addActivity = (dayId: string, name: string, description: string, price: number, time?: string) => {
+    if (!name.trim()) return;
+    setItinerary((prev) => ({
+      ...prev,
+      days: prev.days.map(day => {
+        if (day.id === dayId) {
+          return {
+            ...day,
+            activities: [
+              ...day.activities,
+              {
+                id: Date.now().toString(),
+                name,
+                description,
+                pricePerPerson: price,
+                time
+              }
+            ]
+          };
+        }
+        return day;
+      })
+    }));
+  };
+
+  const removeActivity = (dayId: string, activityId: string) => {
+    setItinerary((prev) => ({
+      ...prev,
+      days: prev.days.map(day => {
+        if (day.id === dayId) {
+          return {
+            ...day,
+            activities: day.activities.filter(a => a.id !== activityId)
+          };
+        }
+        return day;
+      })
+    }));
+  };
+
   return {
     itinerary,
     selectedDate,
@@ -316,6 +349,8 @@ export const useItinerary = ({ initialItinerary }: UseItineraryProps) => {
     addTransportationItem,
     removeTransportationItem,
     addTourGuide,
-    removeTourGuide
+    removeTourGuide,
+    addActivity,
+    removeActivity
   };
 };

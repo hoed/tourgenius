@@ -9,6 +9,7 @@ import DayDestinations from './day-destinations';
 import DayHotel from './day-hotel';
 import DayMeals from './day-meals';
 import DayTransportation from './day-transportation';
+import DayActivities from './day-activities';
 
 interface DayItineraryProps {
   day: DayItinerary;
@@ -21,6 +22,8 @@ interface DayItineraryProps {
   onSetTransportation: (dayId: string, description: string, price: number, type?: string, time?: string) => void;
   onAddTransportationItem?: (dayId: string, type: string, description: string, price: number, time?: string) => void;
   onRemoveTransportationItem?: (dayId: string, transportationId: string) => void;
+  onAddActivity?: (dayId: string, name: string, description: string, price: number, time?: string) => void;
+  onRemoveActivity?: (dayId: string, activityId: string) => void;
   totalDays: number;
 }
 
@@ -35,6 +38,8 @@ const DayItineraryComponent = ({
   onSetTransportation,
   onAddTransportationItem,
   onRemoveTransportationItem,
+  onAddActivity,
+  onRemoveActivity,
   totalDays
 }: DayItineraryProps) => {
   return (
@@ -64,6 +69,13 @@ const DayItineraryComponent = ({
           destinations={day.destinations}
           onAddDestination={onAddDestination}
           onRemoveDestination={onRemoveDestination}
+        />
+        
+        <DayActivities
+          dayId={day.id}
+          activities={day.activities}
+          onAddActivity={onAddActivity || (() => {})}
+          onRemoveActivity={onRemoveActivity || (() => {})}
         />
         
         <DayHotel

@@ -51,6 +51,14 @@ export interface Meal {
   time?: string; // Added time field
 }
 
+export interface Activity {
+  id: string;
+  name: string;
+  description: string;
+  pricePerPerson: number;
+  time?: string;
+}
+
 export interface DayItinerary {
   id: string;
   day: number;
@@ -59,6 +67,7 @@ export interface DayItinerary {
   meals: Meal[];
   transportation: Transportation | null;
   transportationItems?: Transportation[];
+  activities: Activity[]; // Added activities array
 }
 
 export interface TourItinerary {
