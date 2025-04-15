@@ -85,6 +85,67 @@
     --sidebar-border: 260 15% 15%;
     --sidebar-ring: 35 80% 50%;
   }
+
+  /* High Contrast Mode */
+  .high-contrast {
+    --background: 0 0% 0%;
+    --foreground: 0 0% 100%;
+
+    --card: 0 0% 0%;
+    --card-foreground: 0 0% 100%;
+
+    --popover: 0 0% 0%;
+    --popover-foreground: 0 0% 100%;
+
+    --primary: 35 100% 60%;
+    --primary-foreground: 0 0% 0%;
+
+    --secondary: 0 0% 15%;
+    --secondary-foreground: 0 0% 100%;
+
+    --muted: 0 0% 15%;
+    --muted-foreground: 0 0% 80%;
+
+    --accent: 35 100% 50%;
+    --accent-foreground: 0 0% 0%;
+
+    --destructive: 0 100% 50%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 0 0% 40%;
+    --input: 0 0% 20%;
+    --ring: 35 100% 60%;
+  }
+
+  .high-contrast.dark {
+    --background: 0 0% 0%;
+    --foreground: 0 0% 100%;
+
+    --card: 0 0% 10%;
+    --card-foreground: 0 0% 100%;
+
+    --popover: 0 0% 10%;
+    --popover-foreground: 0 0% 100%;
+
+    --primary: 50 100% 60%;
+    --primary-foreground: 0 0% 0%;
+
+    --secondary: 0 0% 15%;
+    --secondary-foreground: 0 0% 100%;
+
+    --muted: 0 0% 20%;
+    --muted-foreground: 0 0% 90%;
+
+    --accent: 50 100% 60%;
+    --accent-foreground: 0 0% 0%;
+
+    --destructive: 0 100% 60%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 0 0% 50%;
+    --input: 0 0% 20%;
+    --ring: 50 100% 60%;
+  }
 }
 
 @keyframes gradient {
@@ -146,6 +207,10 @@
   @apply bg-batik-dark/70 backdrop-blur-md border border-white/10 shadow-lg;
 }
 
+.high-contrast .glass {
+  @apply bg-black/95 border-white/50 shadow-lg;
+}
+
 /* Custom transitions */
 .page-transition-enter {
   opacity: 0;
@@ -179,6 +244,12 @@ html {
   outline: none;
 }
 
+/* High contrast mode - enhanced focus */
+.high-contrast :focus {
+  outline: 3px solid var(--primary);
+  outline-offset: 2px;
+}
+
 /* Custom scrollbar */
 ::-webkit-scrollbar {
   width: 10px;
@@ -194,6 +265,15 @@ html {
 
 ::-webkit-scrollbar-thumb:hover {
   @apply bg-secondary/70;
+}
+
+/* High contrast scrollbar */
+.high-contrast ::-webkit-scrollbar-track {
+  @apply bg-white/20 rounded-full;
+}
+
+.high-contrast ::-webkit-scrollbar-thumb {
+  @apply bg-primary rounded-full;
 }
 
 /* Indonesian batik pattern inspired overlay */
@@ -233,6 +313,12 @@ html {
   opacity: 0.7;
 }
 
+/* High contrast mode adjustments */
+.high-contrast .batik-overlay::before,
+.high-contrast .batik-overlay::after {
+  opacity: 0.2;
+}
+
 /* New dashboard card styles for black theme */
 .dashboard-card {
   @apply bg-batik-dark/40 backdrop-blur-md border border-white/5 rounded-lg shadow-lg transition-all duration-300;
@@ -240,4 +326,28 @@ html {
 
 .dashboard-card:hover {
   @apply bg-batik-dark/60 border-primary/20;
+}
+
+/* High contrast dashboard cards */
+.high-contrast .dashboard-card {
+  @apply bg-black border-white/50 shadow-xl;
+}
+
+.high-contrast .dashboard-card:hover {
+  @apply border-primary;
+}
+
+/* Responsive settings for mobile */
+@media (max-width: 640px) {
+  .tabs-content {
+    padding: 1rem 0;
+  }
+  
+  .settings-card {
+    padding: 1rem;
+  }
+  
+  .settings-form {
+    grid-template-columns: 1fr;
+  }
 }

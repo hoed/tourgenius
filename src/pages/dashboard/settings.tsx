@@ -13,19 +13,63 @@ import GlassCard from '@/components/ui/glass-card';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { UserCircle, Bell, Shield, LogOut, LockKeyhole } from 'lucide-react';
 
+// Theme handling hook
+const useThemeSettings = () => {
+  const [isDarkMode, setIsDarkMode] = useState(() => {
+    // Check localStorage first, then system preference
+    const savedTheme = localStorage.getItem('theme');
+    if (savedTheme) {
+      return savedTheme === 'dark';
+    }
+    return window.matchMedia('(prefers-color-scheme: dark)').matches;
+  });
+
+  const [isHighContrast, setIsHighContrast] = useState(() => {
+    return localStorage.getItem('highContrast') === 'true';
+  });
+
+  useEffect(() => {
+    const root = document.documentElement;
+    if (isDarkMode) {
+      root.classList.add('dark');
+      localStorage.setItem('theme', 'dark');
+    } else {
+      root.classList.remove('dark');
+      localStorage.setItem('theme', 'light');
+    }
+  }, [isDarkMode]);
+
+  useEffect(() => {
+    const root = document.documentElement;
+    if (isHighContrast) {
+      root.classList.add('high-contrast');
+      localStorage.setItem('highContrast', 'true');
+    } else {
+      root.classList.remove('high-contrast');
+      localStorage.setItem('highContrast', 'false');
+    }
+  }, [isHighContrast]);
+
+  return {
+    isDarkMode,
+    setIsDarkMode,
+    isHighContrast,
+    setIsHighContrast
+  };
+};
+
 const SettingsPage = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [userData, setUserData] = useState<any>(null);
+  const { isDarkMode, setIsDarkMode, isHighContrast, setIsHighContrast } = useThemeSettings();
   const [settings, setSettings] = useState({
     name: '',
     email: '',
     newPassword: '',
     confirmPassword: '',
     emailNotifications: true,
-    marketingEmails: false,
-    darkMode: true,
-    highContrast: false
+    marketingEmails: false
   });
   const [passwordError, setPasswordError] = useState('');
 
@@ -114,29 +158,29 @@ const SettingsPage = () => {
 
   return (
     <DashboardLayout>
-      <div className="space-y-6">
+      <div className="space-y-6 max-w-4xl mx-auto">
         <div>
           <h1 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-gray-100">Settings</h1>
           <p className="text-muted-foreground">Manage your account settings and preferences</p>
         </div>
 
         <Tabs defaultValue="account" className="space-y-6">
-          <TabsList className="bg-batik-dark/40 border border-white/10">
+          <TabsList className="bg-batik-dark/40 border border-white/10 w-full flex flex-wrap justify-start overflow-x-auto">
             <TabsTrigger value="account" className="data-[state=active]:bg-batik-gold/20">
               <UserCircle className="h-4 w-4 mr-2" />
-              Account
+              <span className="whitespace-nowrap">Account</span>
             </TabsTrigger>
             <TabsTrigger value="security" className="data-[state=active]:bg-batik-gold/20">
               <LockKeyhole className="h-4 w-4 mr-2" />
-              Security
+              <span className="whitespace-nowrap">Security</span>
             </TabsTrigger>
             <TabsTrigger value="notifications" className="data-[state=active]:bg-batik-gold/20">
               <Bell className="h-4 w-4 mr-2" />
-              Notifications
+              <span className="whitespace-nowrap">Notifications</span>
             </TabsTrigger>
             <TabsTrigger value="appearance" className="data-[state=active]:bg-batik-gold/20">
               <Shield className="h-4 w-4 mr-2" />
-              Appearance
+              <span className="whitespace-nowrap">Appearance</span>
             </TabsTrigger>
           </TabsList>
 
@@ -257,14 +301,22 @@ const SettingsPage = () => {
                       <Label htmlFor="notifications">Email Notifications</Label>
                       <p className="text-sm text-muted-foreground">Receive emails about your account activity</p>
                     </div>
-                    <Switch id="notifications" checked={settings.emailNotifications} onCheckedChange={(checked) => setSettings({...settings, emailNotifications: checked})} />
+                    <Switch 
+                      id="notifications" 
+                      checked={settings.emailNotifications} 
+                      onCheckedChange={(checked) => setSettings({...settings, emailNotifications: checked})} 
+                    />
                   </div>
                   <div className="flex items-center justify-between">
                     <div className="space-y-0.5">
                       <Label htmlFor="marketing">Marketing Emails</Label>
                       <p className="text-sm text-muted-foreground">Receive emails about new features and offers</p>
                     </div>
-                    <Switch id="marketing" checked={settings.marketingEmails} onCheckedChange={(checked) => setSettings({...settings, marketingEmails: checked})} />
+                    <Switch 
+                      id="marketing" 
+                      checked={settings.marketingEmails} 
+                      onCheckedChange={(checked) => setSettings({...settings, marketingEmails: checked})} 
+                    />
                   </div>
                   <Button onClick={handleSaveSettings} className="bg-batik-gold text-batik-dark hover:bg-batik-gold/90">
                     Save Changes
@@ -288,14 +340,22 @@ const SettingsPage = () => {
                       <Label htmlFor="darkMode">Dark Mode</Label>
                       <p className="text-sm text-muted-foreground">Use dark theme for the application</p>
                     </div>
-                    <Switch id="darkMode" checked={settings.darkMode} onCheckedChange={(checked) => setSettings({...settings, darkMode: checked})} />
+                    <Switch 
+                      id="darkMode" 
+                      checked={isDarkMode} 
+                      onCheckedChange={setIsDarkMode} 
+                    />
                   </div>
                   <div className="flex items-center justify-between">
                     <div className="space-y-0.5">
                       <Label htmlFor="highContrast">High Contrast</Label>
                       <p className="text-sm text-muted-foreground">Increase contrast for better readability</p>
                     </div>
-                    <Switch id="highContrast" checked={settings.highContrast} onCheckedChange={(checked) => setSettings({...settings, highContrast: checked})} />
+                    <Switch 
+                      id="highContrast" 
+                      checked={isHighContrast} 
+                      onCheckedChange={setIsHighContrast} 
+                    />
                   </div>
                   <Button onClick={handleSaveSettings} className="bg-batik-gold text-batik-dark hover:bg-batik-gold/90">
                     Save Changes

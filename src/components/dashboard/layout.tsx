@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate, Link } from 'react-router-dom';
 import { Menu, X, Users, Calendar, Receipt, Map, FileText, Settings, LogOut, User } from 'lucide-react';
@@ -6,6 +7,7 @@ import Chatbot from '@/components/chatbot/Chatbot';
 import { supabase } from '@/integrations/supabase/client';
 import { Toaster, toast } from 'sonner';
 import type { User as SupabaseUser } from '@supabase/supabase-js';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -16,6 +18,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   const [currentUser, setCurrentUser] = useState<SupabaseUser | null>(null);
   const location = useLocation();
   const navigate = useNavigate();
+  const isMobile = useIsMobile();
 
   // Fetch user data on mount and listen for auth changes
   useEffect(() => {
@@ -34,6 +37,26 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       subscription.unsubscribe();
     };
   }, []);
+
+  // Close sidebar when clicking outside on mobile
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (isMobile && isSidebarOpen) {
+        const sidebar = document.getElementById('mobile-sidebar');
+        const mobileToggle = document.getElementById('mobile-sidebar-toggle');
+        
+        if (sidebar && !sidebar.contains(event.target as Node) && 
+            mobileToggle && !mobileToggle.contains(event.target as Node)) {
+          setIsSidebarOpen(false);
+        }
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [isMobile, isSidebarOpen]);
 
   const toggleSidebar = (): void => {
     setIsSidebarOpen((prev) => !prev);
@@ -64,19 +87,20 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-gray-50">
+    <div className="min-h-screen flex flex-col bg-gray-50 dark:bg-batik-dark">
       <Toaster position="top-center" richColors />
       {/* Header */}
-      <header className="fixed top-0 left-0 right-0 z-40 bg-white shadow-md h-16 flex items-center justify-between px-6">
+      <header className="fixed top-0 left-0 right-0 z-40 bg-white dark:bg-batik-dark/95 shadow-md h-16 flex items-center justify-between px-6">
         <div className="flex items-center">
           <button
+            id="mobile-sidebar-toggle"
             onClick={toggleSidebar}
-            className="md:hidden text-gray-700 focus:outline-none focus:shadow-outline"
+            className="md:hidden text-gray-700 dark:text-gray-200 focus:outline-none focus:shadow-outline"
             aria-label={isSidebarOpen ? 'Close sidebar' : 'Open sidebar'}
           >
             {isSidebarOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
           </button>
-          <Link to="/dashboard" className="ml-4 text-lg font-semibold text-gray-800">
+          <Link to="/dashboard" className="ml-4 text-lg font-semibold text-gray-800 dark:text-white">
             TourGenius Dashboard
           </Link>
         </div>
@@ -88,11 +112,12 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       <div className="flex flex-1 pt-16">
         {/* Sidebar */}
         <div
+          id="mobile-sidebar"
           className={`fixed inset-y-0 z-30 transition-all duration-300 transform bg-gray-900 text-white w-64 
                     pt-16 md:translate-x-0 ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}
         >
           <nav className="flex flex-col h-full">
-            <ul className="space-y-2 p-4">
+            <ul className="space-y-2 p-4 overflow-y-auto flex-grow">
               <li>
                 <Link
                   to="/dashboard"
@@ -177,24 +202,22 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                   <span>Manual</span>
                 </Link>
               </li>
-              {/* User Info */}
-              <li className="border-t border-gray-700 mt-4 pt-4">
-                <div className="flex items-center space-x-3 p-3 text-gray-300">
-                  <User className="h-5 w-5" />
-                  <span>{currentUser?.email || 'User'}</span>
-                </div>
-              </li>
-              {/* Logout */}
-              <li>
-                <button
-                  onClick={handleLogout}
-                  className="flex w-full items-center space-x-3 p-3 rounded-md hover:bg-gray-800 transition-colors text-left"
-                >
-                  <LogOut className="h-5 w-5" />
-                  <span>Logout</span>
-                </button>
-              </li>
             </ul>
+            
+            {/* User Info and Logout - Fixed at bottom */}
+            <div className="border-t border-gray-700 mt-2 p-4">
+              <div className="flex items-center space-x-3 p-2 text-gray-300 mb-2">
+                <User className="h-5 w-5" />
+                <span className="truncate">{currentUser?.email || 'User'}</span>
+              </div>
+              <button
+                onClick={handleLogout}
+                className="flex w-full items-center space-x-3 p-3 rounded-md hover:bg-gray-800 transition-colors text-left"
+              >
+                <LogOut className="h-5 w-5" />
+                <span>Logout</span>
+              </button>
+            </div>
           </nav>
         </div>
 
