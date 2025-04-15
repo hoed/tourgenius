@@ -17,6 +17,9 @@ const Navbar = () => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
+  // Define text color classes based on scroll state
+  const textColorClass = isScrolled ? 'text-blue-600' : 'text-white';
+
   return (
     <header
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
@@ -35,33 +38,25 @@ const Navbar = () => {
         <nav className="hidden md:flex items-center space-x-8">
           <Link 
             to="/" 
-            className={`font-medium hover:text-primary transition-colors ${
-              isScrolled ? 'text-blue-600' : 'text-white'
-            }`}
+            className={`font-medium hover:text-primary transition-colors ${textColorClass}`}
           >
             Home
           </Link>
           <Link 
             to="/features" 
-            className={`font-medium hover:text-primary transition-colors ${
-              isScrolled ? 'text-blue-600' : 'text-white'
-            }`}
+            className={`font-medium hover:text-primary transition-colors ${textColorClass}`}
           >
             Features
           </Link>
           <Link 
             to="/testimonials" 
-            className={`font-medium hover:text-primary transition-colors ${
-              isScrolled ? 'text-blue-600' : 'text-white'
-            }`}
+            className={`font-medium hover:text-primary transition-colors ${textColorClass}`}
           >
             Testimonials
           </Link>
           <Link 
             to="/pricing" 
-            className={`font-medium hover:text-primary transition-colors ${
-              isScrolled ? 'text-blue-600' : 'text-white'
-            }`}
+            className={`font-medium hover:text-primary transition-colors ${textColorClass}`}
           >
             Pricing
           </Link>
@@ -82,7 +77,10 @@ const Navbar = () => {
           className="md:hidden text-foreground"
           onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
         >
-          {isMobileMenuOpen ? <X size={24} className="text-white" /> : <Menu size={24} className="text-white" />}
+          {isMobileMenuOpen ? 
+            <X size={24} className={textColorClass} /> : 
+            <Menu size={24} className={textColorClass} />
+          }
         </button>
       </div>
 
@@ -92,36 +90,28 @@ const Navbar = () => {
           <nav className="flex flex-col space-y-4">
             <Link
               to="/"
-              className={`font-medium hover:text-primary transition-colors ${
-                isScrolled ? 'text-blue-600' : 'text-white'
-              }`}
+              className={`font-medium hover:text-primary transition-colors ${textColorClass}`}
               onClick={() => setIsMobileMenuOpen(false)}
             >
               Home
             </Link>
             <Link
               to="/features"
-              className={`font-medium hover:text-primary transition-colors ${
-                isScrolled ? 'text-blue-600' : 'text-white'
-              }`}
+              className={`font-medium hover:text-primary transition-colors ${textColorClass}`}
               onClick={() => setIsMobileMenuOpen(false)}
             >
               Features
             </Link>
             <Link
               to="/testimonials"
-              className={`font-medium hover:text-primary transition-colors ${
-                isScrolled ? 'text-blue-600' : 'text-white'
-              }`}
+              className={`font-medium hover:text-primary transition-colors ${textColorClass}`}
               onClick={() => setIsMobileMenuOpen(false)}
             >
               Testimonials
             </Link>
             <Link
               to="/pricing"
-              className={`font-medium hover:text-primary transition-colors ${
-                isScrolled ? 'text-blue-600' : 'text-white'
-              }`}
+              className={`font-medium hover:text-primary transition-colors ${textColorClass}`}
               onClick={() => setIsMobileMenuOpen(false)}
             >
               Pricing
