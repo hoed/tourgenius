@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -25,6 +24,14 @@ import TermsOfService from "./pages/TermsOfService";
 import CookiePolicy from "./pages/CookiePolicy";
 import Manual from "./pages/manual";
 
+const PageWrapper = ({ children }: { children: React.ReactNode }) => {
+  return (
+    <div className="pt-24 min-h-screen">
+      {children}
+    </div>
+  );
+};
+
 const queryClient = new QueryClient();
 
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
@@ -33,24 +40,19 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Set up auth state listener FIRST before checking session
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, session) => {
         if (event === 'SIGNED_OUT') {
-          // When signed out, redirect to auth page
           navigate('/auth');
         }
         setIsAuthenticated(!!session);
-        
-        // Don't set loading to false here to avoid flashing
-        // Only set loading to false after both checks are done
+        setLoading(false);
       }
     );
 
-    // THEN check for existing session
     supabase.auth.getSession().then(({ data: { session } }) => {
       setIsAuthenticated(!!session);
-      setLoading(false); // Only set loading to false after session check
+      setLoading(false);
     });
 
     return () => subscription.unsubscribe();
@@ -80,14 +82,15 @@ const App = () => (
         <Routes>
           <Route path="/" element={<Index />} />
           <Route path="/auth" element={<Auth />} />
-          <Route path="/features" element={<Features />} />
-          <Route path="/testimonials" element={<Testimonials />} />
-          <Route path="/pricing" element={<Pricing />} />
-          <Route path="/help-center" element={<HelpCenter />} />
-          <Route path="/contact-us" element={<ContactUs />} />
-          <Route path="/privacy-policy" element={<PrivacyPolicy />} />
-          <Route path="/terms-of-service" element={<TermsOfService />} />
-          <Route path="/cookie-policy" element={<CookiePolicy />} />
+          
+          <Route path="/features" element={<PageWrapper><Features /></PageWrapper>} />
+          <Route path="/testimonials" element={<PageWrapper><Testimonials /></PageWrapper>} />
+          <Route path="/pricing" element={<PageWrapper><Pricing /></PageWrapper>} />
+          <Route path="/help-center" element={<PageWrapper><HelpCenter /></PageWrapper>} />
+          <Route path="/contact-us" element={<PageWrapper><ContactUs /></PageWrapper>} />
+          <Route path="/privacy-policy" element={<PageWrapper><PrivacyPolicy /></PageWrapper>} />
+          <Route path="/terms-of-service" element={<PageWrapper><TermsOfService /></PageWrapper>} />
+          <Route path="/cookie-policy" element={<PageWrapper><CookiePolicy /></PageWrapper>} />
           
           <Route 
             path="/dashboard" 

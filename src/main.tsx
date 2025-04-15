@@ -17,11 +17,17 @@ const darkModeEnabled =
 // Apply dark mode class to html element only on dashboard
 if (darkModeEnabled) {
   document.documentElement.classList.add('dark');
+} else if (!isDashboardPath()) {
+  // Ensure dark mode is removed for non-dashboard pages
+  document.documentElement.classList.remove('dark');
 }
 
 // Apply high contrast if enabled, but only on dashboard
 if (localStorage.getItem('highContrast') === 'true' && isDashboardPath()) {
   document.documentElement.classList.add('high-contrast');
+} else if (!isDashboardPath()) {
+  // Ensure high-contrast is removed for non-dashboard pages
+  document.documentElement.classList.remove('high-contrast');
 }
 
 // Listen for route changes to update theme when moving between dashboard and frontend
